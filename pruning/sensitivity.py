@@ -11,6 +11,9 @@ import numpy as np
 
 from models import build_model, find_prunable_blocks
 from pruning.resnet_utils import prune_resnet_blockwise
+from pruning.vgg_utils import prune_vgg_blockwise  # VGG 프루닝 유틸
+
+NUM_CLASSES = 100  # 현재 CIFAR-100 기준. 나중에 다른 데이터면 바꿀 수 있음.
 
 
 def count_parameters(model):
@@ -54,45 +57,36 @@ def compute_sensitivity_resnet18(
 ) -> Dict[str, float]:
     """
     ResNet-18에 대해 '블록별 민감도'를 자동 계산해서 dict로 반환.
-    논문에서 했던 것처럼:
       - 각 블록을 0, 20, 40, 60, 80% 프루닝
       - 각 점에서의 정확도 측정
       - [0-20], [20-40], [40-60], [60-80] 구간별 기울기(정확도 변화율) 평균 → 민감도
     """
-
     if block_ratios is None:
         block_ratios = [0.0, 0.2, 0.4, 0.6, 0.8]
 
-    # 1) 기준 모델 로드
-    model = build_model("resnet18", num_classes=100).to(device)
+    model = build_model("resnet18", num_classes=NUM_CLASSES).to(device)
     state = torch.load(base_ckpt_path, map_location=device)
     model.load_state_dict(state)
     model.eval()
 
-    # 2) 기준 정확도
     base_acc = _test(model, testloader, device)
-    print(f"[Sensitivity] Base Test Accuracy: {base_acc:.2f}%")
+    print(f"[Sensitivity-ResNet18] Base Test Accuracy: {base_acc:.2f}%")
 
-    # 3) 블록 목록
     block_modules = find_prunable_blocks(model, "resnet18")
     block_names = sorted(block_modules.keys())
 
     sensitivity_si = {}
 
     for blk_name in block_names:
-        print(f"\n[Sensitivity] Block: {blk_name}")
-        # ratio -> accuracy 저장
+        print(f"\n[Sensitivity-ResNet18] Block: {blk_name}")
         ratio_to_acc = {0.0: base_acc}
 
         for ratio in block_ratios[1:]:
-            # 블록 하나만 특정 비율로 프루닝하는 실험
             print(f"  - Pruning {blk_name} @ {int(ratio * 100)}%")
 
-            # 기준 모델 복사
-            tmp_model = build_model("resnet18", num_classes=100).to(device)
+            tmp_model = build_model("resnet18", num_classes=NUM_CLASSES).to(device)
             tmp_model.load_state_dict(state)
 
-            # 현재 블록 importance (여기서는 bn1.weight 절댓값 사용)
             blocks_for_imp = find_prunable_blocks(tmp_model, "resnet18")
             block = blocks_for_imp[blk_name]
             imp = block.bn1.weight.data.abs().cpu()
@@ -106,7 +100,6 @@ def compute_sensitivity_resnet18(
             if len(keep_idx) == 0:
                 keep_idx = [order[-1].item()]
 
-            # 나머지 블록은 full keep
             block_keep_indices = {}
             for name2, blk2 in blocks_for_imp.items():
                 if name2 == blk_name:
@@ -114,10 +107,8 @@ def compute_sensitivity_resnet18(
                 else:
                     block_keep_indices[name2] = list(range(blk2.conv1.out_channels))
 
-            # 실제 프루닝 적용
             pruned = prune_resnet_blockwise(tmp_model, block_keep_indices, device)
 
-            # 짧은 fine-tuning
             criterion = nn.CrossEntropyLoss()
             optimizer = optim.SGD(
                 pruned.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4
@@ -130,13 +121,107 @@ def compute_sensitivity_resnet18(
             print(f"      => acc={acc:.2f}%")
             ratio_to_acc[ratio] = acc
 
-        # 4) 구간별 기울기 계산 후 평균 → 민감도
         slopes = []
         for r1, r2 in zip(block_ratios[:-1], block_ratios[1:]):
             a1 = ratio_to_acc[r1]
             a2 = ratio_to_acc[r2]
-            dr = (r2 - r1) * 100.0  # 0.2 → 20 (%) 기준
-            slope = (a2 - a1) / dr  # "퍼센트 포인트 / 프루닝 %"
+            dr = (r2 - r1) * 100.0
+            slope = (a2 - a1) / dr
+            slopes.append(abs(slope))
+
+        si = float(np.mean(slopes))
+        sensitivity_si[blk_name] = si
+        print(f"  => sensitivity[{blk_name}] = {si:.6f}")
+
+    return sensitivity_si
+
+
+def compute_sensitivity_vgg16(
+    base_ckpt_path: str,
+    trainloader,
+    testloader,
+    device,
+    block_ratios: List[float] = None,
+    finetune_epochs: int = 3,
+) -> Dict[str, float]:
+    """
+    VGG16에 대해 '블록별 민감도'를 자동 계산하는 버전.
+    블록 단위 정의는 models.find_prunable_blocks("vgg16")에 따르고,
+    중요도는 Conv2d weight의 L1-norm(out_channel 기준)을 사용.
+    """
+    if block_ratios is None:
+        block_ratios = [0.0, 0.2, 0.4, 0.6, 0.8]
+
+    model = build_model("vgg16", num_classes=NUM_CLASSES).to(device)
+    state = torch.load(base_ckpt_path, map_location=device)
+    model.load_state_dict(state)
+    model.eval()
+
+    base_acc = _test(model, testloader, device)
+    print(f"[Sensitivity-VGG16] Base Test Accuracy: {base_acc:.2f}%")
+
+    block_modules = find_prunable_blocks(model, "vgg16")  # 예: conv 블록 dict
+    block_names = sorted(block_modules.keys())
+
+    sensitivity_si = {}
+
+    for blk_name in block_names:
+        print(f"\n[Sensitivity-VGG16] Block: {blk_name}")
+        ratio_to_acc = {0.0: base_acc}
+
+        for ratio in block_ratios[1:]:
+            print(f"  - Pruning {blk_name} @ {int(ratio * 100)}%")
+
+            tmp_model = build_model("vgg16", num_classes=NUM_CLASSES).to(device)
+            tmp_model.load_state_dict(state)
+
+            blocks_for_imp = find_prunable_blocks(tmp_model, "vgg16")
+            block = blocks_for_imp[blk_name]  # nn.Conv2d 라고 가정
+            conv_w = block.weight.data
+            imp = conv_w.view(conv_w.size(0), -1).abs().sum(dim=1).cpu()
+            C = imp.numel()
+
+            order = imp.argsort()  # ascending
+            k = int(C * ratio)
+            k = min(k, max(C - 1, 0))
+            prune_idx = set(order[:k].tolist())
+            keep_idx = sorted(list(set(range(C)) - prune_idx))
+            if len(keep_idx) == 0:
+                keep_idx = [order[-1].item()]
+
+            block_keep_indices = {}
+            for name2, blk2 in blocks_for_imp.items():
+                if name2 == blk_name:
+                    block_keep_indices[name2] = keep_idx
+                else:
+                    # VGG에서는 blk2가 Conv2d 모듈이라고 가정하고 out_channels 사용
+                    block_keep_indices[name2] = list(range(blk2.out_channels))
+
+            pruned = prune_vgg_blockwise(
+                tmp_model,
+                block_keep_indices,
+                device,
+                num_classes=NUM_CLASSES,
+            )
+
+            criterion = nn.CrossEntropyLoss()
+            optimizer = optim.SGD(
+                pruned.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4
+            )
+            for ep in range(1, finetune_epochs + 1):
+                loss = _train_one_epoch(pruned, trainloader, optimizer, criterion, device)
+                print(f"      epoch {ep}/{finetune_epochs}, loss={loss:.4f}")
+
+            acc = _test(pruned, testloader, device)
+            print(f"      => acc={acc:.2f}%")
+            ratio_to_acc[ratio] = acc
+
+        slopes = []
+        for r1, r2 in zip(block_ratios[:-1], block_ratios[1:]):
+            a1 = ratio_to_acc[r1]
+            a2 = ratio_to_acc[r2]
+            dr = (r2 - r1) * 100.0
+            slope = (a2 - a1) / dr
             slopes.append(abs(slope))
 
         si = float(np.mean(slopes))
@@ -171,6 +256,16 @@ def maybe_load_or_compute_sensitivity(
     if model_id == "resnet18":
         print(f"[Sensitivity] No JSON found. Compute sensitivity for {model_id}...")
         si = compute_sensitivity_resnet18(
+            base_ckpt_path=base_ckpt_path,
+            trainloader=trainloader,
+            testloader=testloader,
+            device=device,
+            block_ratios=block_ratios,
+            finetune_epochs=finetune_epochs,
+        )
+    elif model_id == "vgg16":
+        print(f"[Sensitivity] No JSON found. Compute sensitivity for {model_id}...")
+        si = compute_sensitivity_vgg16(
             base_ckpt_path=base_ckpt_path,
             trainloader=trainloader,
             testloader=testloader,

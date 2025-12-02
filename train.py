@@ -16,6 +16,7 @@ from models import (
     get_filter_counts,
 )
 from pruning.resnet_utils import prune_resnet_blockwise
+from pruning.vgg_utils import prune_vgg_blockwise
 from pruning.strategies import (
     compute_dynamic_ratios_vanilla,
     compute_dynamic_ratios_p,
@@ -230,19 +231,34 @@ def main_adaptive_iterative_pruning(
             num_to_keep = int(original_C * (1.0 - ratio_to_prune / 100.0))
             num_to_keep = max(1, num_to_keep)
 
+            # 현재 pruned_model 기준으로 중요도 계산
             all_modules_current = find_prunable_blocks(pruned_model, MODEL_ID)
             block = all_modules_current[block_name]
-            imp = block.bn1.weight.data.abs().cpu()
+
+            if MODEL_ID == "resnet18":
+                # ResNet: BN gamma 절댓값
+                imp = block.bn1.weight.data.abs().cpu()
+            elif MODEL_ID == "vgg16":
+                # VGG: conv weight의 L1-norm (out_channel 기준)
+                # block 자체가 nn.Conv2d 모듈
+                conv_w = block.weight.data
+                imp = conv_w.view(conv_w.size(0), -1).abs().sum(dim=1).cpu()
+            else:
+                raise NotImplementedError(f"importance undefined for model {MODEL_ID}")
+
             order = imp.argsort(descending=True)
             keep_idx_target = sorted(order[:num_to_keep].tolist())
             global_keep_indices[block_name] = keep_idx_target
             print(f"블록: {block_name:<15} | 원본 필터: {original_C} -> 남길 필터: {len(keep_idx_target)}")
 
-        # 5) 실제 프루닝
+        # 5) 실제 프루닝 적용
         if MODEL_ID == "resnet18":
             pruned_model = prune_resnet_blockwise(pruned_model, global_keep_indices, device)
+        elif MODEL_ID == "vgg16":
+            pruned_model = prune_vgg_blockwise(pruned_model, global_keep_indices, device, num_classes=100)
         else:
-            raise NotImplementedError("현재 프루닝은 resnet18만 구현되어 있음")
+            raise NotImplementedError(f"pruning not implemented for model {MODEL_ID}")
+
 
         # 6) 라운드별 FT
         optimizer = optim.SGD(
