@@ -2,7 +2,7 @@
 import torch.nn as nn
 import torchvision
 
-# 🔹 ResNet18에서 우리가 "블록"이라고 보는 단위별 필터 개수 (이미 쓰던 거)
+# ResNet18에서 우리가 "블록"이라고 보는 단위별 필터 개수
 RESNET18_FILTER_COUNTS = {
     'layer1.0': 64,
     'layer1.1': 64,
@@ -14,11 +14,30 @@ RESNET18_FILTER_COUNTS = {
     'layer4.1': 512,
 }
 
+# VGG16에서 "블록"으로 쓸 conv 레이어들 (features의 Conv2d들)
+# conv 위치: 0,2,5,7,10,12,14,17,19,21,24,26,28
+VGG16_FILTER_COUNTS = {
+    'features.0': 64,
+    'features.2': 64,
+    'features.5': 128,
+    'features.7': 128,
+    'features.10': 256,
+    'features.12': 256,
+    'features.14': 256,
+    'features.17': 512,
+    'features.19': 512,
+    'features.21': 512,
+    'features.24': 512,
+    'features.26': 512,
+    'features.28': 512,
+}
+
 
 def build_model(model_id: str, num_classes: int = 100):
     """
     backbone 종류에 따라 모델 생성.
-    지금은 resnet18만 구현, 나중에 vgg/efficientnet 추가.
+    - resnet18: CIFAR용으로 conv1/stride 수정
+    - vgg16: CIFAR용으로 classifier/avgpool 수정
     """
     if model_id == "resnet18":
         m = torchvision.models.resnet18(weights=None)
@@ -28,15 +47,25 @@ def build_model(model_id: str, num_classes: int = 100):
         return m
 
     elif model_id == "vgg16":
-        # TODO: 나중에 VGG 버전 추가
-        # 예시:
-        # m = torchvision.models.vgg16(weights=None)
-        # m.classifier[-1] = nn.Linear(m.classifier[-1].in_features, num_classes)
-        # return m
-        raise NotImplementedError("vgg16 아직 안 붙였음")
+        m = torchvision.models.vgg16(weights=None)
+
+        # CIFAR-100용: 마지막을 1x1로 줄이도록 avgpool 설정
+        m.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+
+        # features 출력: [N, 512, 1, 1] 기준으로 classifier 구성
+        in_feat = 512
+        m.classifier = nn.Sequential(
+            nn.Linear(in_feat, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, num_classes),
+        )
+        return m
 
     elif model_id == "efficientnet_b0":
-        # TODO: 나중에 EfficientNet 버전 추가
         raise NotImplementedError("efficientnet_b0 아직 안 붙였음")
 
     else:
@@ -56,12 +85,15 @@ def find_prunable_blocks(model, model_id: str):
         }
 
     elif model_id == "vgg16":
-        # 여기서는 예를 들어 conv layer 그룹을 block으로 묶는 식으로 구현해야 함.
-        # ex) "features.0~1"을 block1, "features.3~4"를 block2 이런 식
-        raise NotImplementedError("vgg16 블록 정의 아직 안 함")
+        # VGG16: features 내부 Conv2d 레이어를 블록으로 사용
+        blocks = {}
+        for idx, m in enumerate(model.features):
+            if isinstance(m, nn.Conv2d):
+                name = f"features.{idx}"
+                blocks[name] = m
+        return blocks
 
     elif model_id == "efficientnet_b0":
-        # 마찬가지로 MBConv 단위로 block 정의
         raise NotImplementedError("efficientnet_b0 블록 정의 아직 안 함")
 
     else:
@@ -71,14 +103,13 @@ def find_prunable_blocks(model, model_id: str):
 def get_filter_counts(model_id: str):
     """
     전략 1(vanilla)에서 쓰는 '원본 필터 개수' dict를 리턴.
-    모델별로 다르게 정의해야 함.
+    모델별로 다르게 정의.
     """
     if model_id == "resnet18":
         return RESNET18_FILTER_COUNTS
 
     elif model_id == "vgg16":
-        # TODO: VGG에서 블록을 어떻게 정의할지 정한 뒤 dict 작성
-        raise NotImplementedError("vgg16 filter count 아직 안 정의")
+        return VGG16_FILTER_COUNTS
 
     elif model_id == "efficientnet_b0":
         raise NotImplementedError("efficientnet_b0 filter count 아직 안 정의")
