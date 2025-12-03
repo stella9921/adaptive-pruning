@@ -76,7 +76,9 @@ def prune_vgg_blockwise(model, block_keep_indices, device, num_classes=100):
         parent = getattr(model, parent_name)
         parent[int(child_name)] = new_conv
 
-        prev_out_indices = list(range(len(keep_idx)))
+        #prev_out_indices = list(range(len(keep_idx)))
+        prev_out_indices = keep_idx
+
         last_conv_name = full_name
 
     # 2) 마지막 conv의 출력 채널 수에 맞춰 classifier[0] 재구성
