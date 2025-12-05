@@ -283,11 +283,11 @@ def main_adaptive_iterative_pruning(
         # 실제 프루닝 적용
         if MODEL_ID == "resnet18":
             pruned_model = prune_resnet_blockwise(
-                base_model, global_keep_indices, device
+                pruned_model, global_keep_indices, device
             )
         elif MODEL_ID == "vgg16":
             pruned_model = prune_vgg_blockwise(
-                base_model, global_keep_indices, device, num_classes=100
+                pruned_model, global_keep_indices, device, num_classes=100
             )
         else:
             raise ValueError(f"Unknown MODEL_ID: {MODEL_ID}")
