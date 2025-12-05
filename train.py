@@ -358,5 +358,5 @@ if __name__ == "__main__":
         final_finetune_epochs=10,
         alpha=0.1,
         strategy="vanilla",
-        GLOBAL_PRUNING_TARGET_RATIO=60.0,
+        GLOBAL_PRUNING_TARGET_RATIO=80.0,
     )
