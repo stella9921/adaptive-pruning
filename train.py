@@ -42,8 +42,8 @@ np.random.seed(SEED)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device:", device)
 
-# "resnet18" 또는 "vgg16"
-MODEL_ID = "vgg16"
+# "resnet18", "resnet152", "vgg16" 중 하나
+MODEL_ID = "resnet152"
 
 from google.colab import drive
 drive.mount("/content/drive")
@@ -264,10 +264,17 @@ def main_adaptive_iterative_pruning(
             if MODEL_ID == "resnet18":
                 # BasicBlock: bn1 기준
                 importance = block.bn1.weight.data.abs().cpu()
+
+            elif MODEL_ID == "resnet152":
+                # Bottleneck: conv2(3x3) weight L1-norm 기반 중요도
+                w = block.conv2.weight.data  # [C_mid, C_in, k, k]
+                importance = w.view(w.size(0), -1).abs().sum(dim=1).cpu()
+
             elif MODEL_ID == "vgg16":
                 # Conv2d: weight L1-norm (out_channel별)
                 w = block.weight.data  # [C_out, C_in, k, k]
                 importance = w.abs().mean(dim=(1, 2, 3)).cpu()
+
             else:
                 raise ValueError(f"Unknown MODEL_ID: {MODEL_ID}")
 
@@ -281,7 +288,7 @@ def main_adaptive_iterative_pruning(
             )
 
         # 실제 프루닝 적용
-        if MODEL_ID == "resnet18":
+        if MODEL_ID in ["resnet18", "resnet152"]:
             pruned_model = prune_resnet_blockwise(
                 pruned_model, global_keep_indices, device
             )
