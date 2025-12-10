@@ -27,6 +27,7 @@ from models import build_model, find_prunable_blocks, get_filter_counts
 # 프루닝 유틸
 from pruning.resnet_utils import prune_resnet_blockwise
 from pruning.vgg_utils import prune_vgg_blockwise
+from pruning.efficientnet_utils import prune_efficientnet_blockwise   # ★ 추가됨
 
 # 민감도 로드/계산
 from pruning.sensitivity import maybe_load_or_compute_sensitivity
@@ -42,8 +43,11 @@ np.random.seed(SEED)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device:", device)
 
-# "resnet18", "resnet152", "vgg16" 중 하나
-MODEL_ID = "resnet152"
+# 사용할 모델 설정
+# MODEL_ID = "resnet18"
+# MODEL_ID = "resnet152"
+# MODEL_ID = "vgg16"
+MODEL_ID = "efficientnet_b0"   # ★ EfficientNet 지원됨
 
 from google.colab import drive
 drive.mount("/content/drive")
@@ -165,7 +169,7 @@ def main_adaptive_iterative_pruning(
     finetune_epochs_per_round: int = 5,
     final_finetune_epochs: int = 10,
     alpha: float = 0.1,
-    strategy: str = "vanilla",  # "vanilla", "p", "beta"
+    strategy: str = "vanilla",
     p: float = 2.5,
     beta: float = 0.5,
     GLOBAL_PRUNING_TARGET_RATIO: float = 60.0,
@@ -246,7 +250,7 @@ def main_adaptive_iterative_pruning(
         else:
             raise ValueError(f"Unknown strategy: {strategy}")
 
-        # 현재 프루닝된 모델 기준으로 블록 모듈 가져오기
+        # 현재 프루닝된 모델 기준 블록
         blocks_current = find_prunable_blocks(pruned_model, MODEL_ID)
         global_keep_indices = {}
 
@@ -260,20 +264,21 @@ def main_adaptive_iterative_pruning(
 
             block = blocks_current[block_name]
 
-            # 중요도 계산: 모델 종류별로 다르게
+            # 중요도 계산
             if MODEL_ID == "resnet18":
-                # BasicBlock: bn1 기준
                 importance = block.bn1.weight.data.abs().cpu()
 
             elif MODEL_ID == "resnet152":
-                # Bottleneck: conv2(3x3) weight L1-norm 기반 중요도
-                w = block.conv2.weight.data  # [C_mid, C_in, k, k]
+                w = block.conv2.weight.data
                 importance = w.view(w.size(0), -1).abs().sum(dim=1).cpu()
 
             elif MODEL_ID == "vgg16":
-                # Conv2d: weight L1-norm (out_channel별)
-                w = block.weight.data  # [C_out, C_in, k, k]
-                importance = w.abs().mean(dim=(1, 2, 3)).cpu()
+                w = block.weight.data
+                importance = w.abs().mean(dim=(1,2,3)).cpu()
+
+            elif MODEL_ID == "efficientnet_b0":     # ★ 추가됨
+                w = block.weight.data
+                importance = w.view(w.size(0), -1).abs().sum(dim=1).cpu()
 
             else:
                 raise ValueError(f"Unknown MODEL_ID: {MODEL_ID}")
@@ -289,44 +294,39 @@ def main_adaptive_iterative_pruning(
 
         # 실제 프루닝 적용
         if MODEL_ID in ["resnet18", "resnet152"]:
-            pruned_model = prune_resnet_blockwise(
-                pruned_model, global_keep_indices, device
-            )
+            pruned_model = prune_resnet_blockwise(pruned_model, global_keep_indices, device)
+
         elif MODEL_ID == "vgg16":
-            pruned_model = prune_vgg_blockwise(
-                pruned_model, global_keep_indices, device, num_classes=100
-            )
+            pruned_model = prune_vgg_blockwise(pruned_model, global_keep_indices, device, num_classes=100)
+
+        elif MODEL_ID == "efficientnet_b0":    # ★ 추가됨
+            pruned_model = prune_efficientnet_blockwise(pruned_model, global_keep_indices, device)
+
         else:
             raise ValueError(f"Unknown MODEL_ID: {MODEL_ID}")
 
-        # 라운드별 파인튜닝
+        # 파인튜닝
         optimizer = optim.SGD(
             pruned_model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4
         )
         criterion = nn.CrossEntropyLoss()
 
-        print(
-            f"\nFine-tuning pruned model for "
-            f"{finetune_epochs_per_round} epochs (round {round_idx})"
-        )
+        print(f"\nFine-tuning pruned model for {finetune_epochs_per_round} epochs")
         for ep in range(1, finetune_epochs_per_round + 1):
             train_one_epoch(pruned_model, trainloader, optimizer, criterion, ep)
 
-        # 검증 정확도 측정
+        # 검증 정확도
         current_val_acc = test(pruned_model, validationloader)
         print(f"Validation Accuracy after round {round_idx}: {current_val_acc:.2f}%")
 
         accuracy_drop = max(0.0, last_accuracy - current_val_acc)
-        print(
-            f"Prev acc: {last_accuracy:.2f} -> "
-            f"current: {current_val_acc:.2f} (drop {accuracy_drop:.2f})"
-        )
+        print(f"Prev acc: {last_accuracy:.2f} -> current: {current_val_acc:.2f} (drop {accuracy_drop:.2f})")
 
         # 민감도 업데이트
         update_value = accuracy_drop * alpha
         if update_value > 0:
-            for name in sensitivity_si.keys():
-                sensitivity_si[name] += update_value
+            for key in sensitivity_si.keys():
+                sensitivity_si[key] += update_value
 
         last_accuracy = current_val_acc
 
