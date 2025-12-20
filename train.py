@@ -203,7 +203,7 @@ def main_in_training_ema_adaptive_pruning(
             else:
                 out = model(x); loss = criterion(out, y); loss.backward(); optimizer.step()
 
-            # ⭐ EMA 기반 기울기 중요도 업데이트 (학습 내력 반영)
+            #  EMA 기반 기울기 중요도 업데이트 (학습 내력 반영)
             with torch.no_grad():
                 for name, blk in blocks.items():
                     target_grad = blk.conv2.weight.grad if "152" in MODEL_ID else (blk.weight.grad if hasattr(blk, 'weight') else None)
