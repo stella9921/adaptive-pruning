@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader, random_split
 import numpy as np
 import matplotlib.pyplot as plt
 
-# 전략 함수들 (Post-training)
+# 전략 함수들 (Post-training 전용)
 from pruning.strategies import (
     compute_dynamic_ratios_vanilla,
     compute_dynamic_ratios_p,
@@ -26,7 +26,7 @@ from pruning.resnet_utils import prune_resnet_blockwise
 from pruning.vgg_utils import prune_vgg_blockwise
 from pruning.efficientnet_utils import prune_efficientnet_blockwise
 
-# 민감도 로드/계산
+# 민감도 로드/계산 (Post-training 전용)
 from pruning.sensitivity import maybe_load_or_compute_sensitivity
 
 # ------------------------------------------------
@@ -38,8 +38,8 @@ np.random.seed(SEED)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 실행할 모델 ID 설정 ("resnet152", "resnet18", "vgg16", "efficientnet_b0")
-MODEL_ID = "resnet152"
+# 모델 선택 ("vgg16", "resnet152", "efficientnet_b0")
+MODEL_ID = "efficientnet_b0"
 
 from google.colab import drive
 drive.mount("/content/drive")
@@ -51,7 +51,7 @@ USE_AMP = torch.cuda.is_available()
 BATCH_SIZE = 128
 
 # ------------------------------------------------
-# 1) 데이터 준비 (CIFAR-100)
+# 1) 데이터 준비
 # ------------------------------------------------
 transform_train = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
@@ -65,9 +65,7 @@ transform_test = transforms.Compose([
 ])
 
 full_trainset = torchvision.datasets.CIFAR100(root="./data", train=True, download=True, transform=transform_train)
-train_size = int(0.9 * len(full_trainset))
-val_size = len(full_trainset) - train_size
-trainset, validationset = random_split(full_trainset, [train_size, val_size])
+trainset, validationset = random_split(full_trainset, [45000, 5000])
 testset = torchvision.datasets.CIFAR100(root="./data", train=False, download=True, transform=transform_test)
 
 trainloader = DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
@@ -111,11 +109,11 @@ def test(model, loader) -> float:
     return 100.0 * correct / total
 
 # ------------------------------------------------
-# 3) Post-training Iterative Pruning (민감도 기반)
+# 3) 방식 A: Post-training Iterative Pruning (민감도 기반)
 # ------------------------------------------------
-def main_adaptive_iterative_pruning(
-    n_rounds=10, finetune_epochs_per_round=5, final_finetune_epochs=10,
-    alpha=0.1, strategy="vanilla", p=2.5, beta=0.5, GLOBAL_PRUNING_TARGET_RATIO=60.0,
+def main_post_training_iterative_pruning(
+    n_rounds=5, finetune_epochs_per_round=3, 
+    strategy="p", p=2.5, GLOBAL_PRUNING_TARGET_RATIO=40.0,
 ):
     print(f"\n[Mode] Post-training Iterative Pruning | Strategy: {strategy}")
     base_model = build_model(MODEL_ID, num_classes=100).to(device)
@@ -124,6 +122,7 @@ def main_adaptive_iterative_pruning(
     last_accuracy = test(base_model, testloader)
     pruned_model = copy.deepcopy(base_model)
     
+    # 미리 계산된 민감도 로드
     sensitivity_si = maybe_load_or_compute_sensitivity(
         MODEL_ID, CHECKPOINT_DIR, trainloader, testloader, device, [0.0, 0.2, 0.4, 0.6, 0.8], 3
     )
@@ -135,13 +134,10 @@ def main_adaptive_iterative_pruning(
 
     for round_idx in range(1, n_rounds + 1):
         print(f"\n===== Round {round_idx}/{n_rounds} =====")
-        if strategy == "vanilla":
-            dynamic_ratios = compute_dynamic_ratios_vanilla(round_idx, n_rounds, sensitivity_si, filter_counts_Ni_original, GLOBAL_PRUNING_TARGET_RATIO)
-        elif strategy == "p":
+        # 전략에 따른 레이어별 비율 계산
+        if strategy == "p":
             dynamic_ratios = compute_dynamic_ratios_p(round_idx, n_rounds, sensitivity_si, param_counts_Ni, total_block_params, GLOBAL_PRUNING_TARGET_RATIO, p)
-        elif strategy == "beta":
-            dynamic_ratios = compute_dynamic_ratios_beta(round_idx, n_rounds, sensitivity_si, param_counts_Ni, total_block_params, GLOBAL_PRUNING_TARGET_RATIO, beta)
-
+        
         blocks_current = find_prunable_blocks(pruned_model, MODEL_ID)
         global_keep_indices = {}
 
@@ -150,58 +146,48 @@ def main_adaptive_iterative_pruning(
             num_keep = max(1, int(original_C * (1 - ratio / 100.0)))
             block = blocks_current[block_name]
             
-            if MODEL_ID == "resnet18": importance = block.bn1.weight.data.abs().cpu()
-            elif MODEL_ID == "resnet152":
-                w = block.conv2.weight.data; importance = w.view(w.size(0), -1).abs().sum(dim=1).cpu()
-            elif MODEL_ID == "vgg16":
+            # 가중치 크기(L1-norm) 기반 중요도 판단
+            if "resnet" in MODEL_ID or "efficientnet" in MODEL_ID:
+                w = block.conv2.weight.data if hasattr(block, 'conv2') else block.weight.data
+                importance = w.view(w.size(0), -1).abs().sum(dim=1).cpu()
+            else: # VGG
                 w = block.weight.data; importance = w.abs().mean(dim=(1, 2, 3)).cpu()
-            elif "efficientnet" in MODEL_ID:
-                w = block.weight.data; importance = w.view(w.size(0), -1).abs().sum(dim=1).cpu()
 
             order = importance.argsort(descending=True)
             global_keep_indices[block_name] = sorted(order[:num_keep].tolist())
 
-        if "resnet" in MODEL_ID:
-            pruned_model = prune_resnet_blockwise(pruned_model, global_keep_indices, device)
-        elif "vgg" in MODEL_ID:
-            pruned_model = prune_vgg_blockwise(pruned_model, global_keep_indices, device, num_classes=100)
-        elif "efficientnet" in MODEL_ID:
-            pruned_model = prune_efficientnet_blockwise(pruned_model, global_keep_indices, device)
+        # 물리적 프루닝 실행
+        if "resnet" in MODEL_ID: pruned_model = prune_resnet_blockwise(pruned_model, global_keep_indices, device)
+        elif "vgg" in MODEL_ID: pruned_model = prune_vgg_blockwise(pruned_model, global_keep_indices, device, num_classes=100)
+        elif "efficientnet" in MODEL_ID: pruned_model = prune_efficientnet_blockwise(pruned_model, global_keep_indices, device)
 
-        optimizer = optim.SGD(pruned_model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
+        # 미세 조정 (Fine-tuning)
+        optimizer = optim.SGD(pruned_model.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4)
         for ep in range(1, finetune_epochs_per_round + 1):
             train_one_epoch(pruned_model, trainloader, optimizer, nn.CrossEntropyLoss(), ep)
         
-        current_val_acc = test(pruned_model, validationloader)
-        accuracy_drop = max(0.0, last_accuracy - current_val_acc)
-        update_value = accuracy_drop * alpha
-        if update_value > 0:
-            for name in sensitivity_si.keys(): sensitivity_si[name] += update_value
-        last_accuracy = current_val_acc
-        print(f"Val Acc: {current_val_acc:.2f}%")
+        print(f"Round {round_idx} Val Acc: {test(pruned_model, validationloader):.2f}%")
 
 # ------------------------------------------------
-# 4) In-training Adaptive History Pruning (Adagrad 스타일)
+# 4) 방식 B: In-training EMA Adaptive Pruning (기울기 내력 기반)
 # ------------------------------------------------
-def main_intraining_history_adaptive_pruning(
-    total_epochs=60, 
-    prune_at_epochs=[40], 
-    GLOBAL_TARGET_PRUNE_RATIO=0.6 
+def main_in_training_ema_adaptive_pruning(
+    total_epochs=50, prune_at_epochs=[30], GLOBAL_TARGET_PRUNE_RATIO=0.4, 
+    ema_decay=0.99, min_keep_ratio=0.2
 ):
-    print(f"\n[Mode] Adagrad-style Adaptive History Pruning | Global Target: {GLOBAL_TARGET_PRUNE_RATIO*100}%")
+    print(f"\n[Mode] In-training EMA Adaptive Pruning | Target: {GLOBAL_TARGET_PRUNE_RATIO*100}%")
     
     model = build_model(MODEL_ID, num_classes=100).to(device)
-    optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
+    model.load_state_dict(torch.load(BASE_MODEL_PATH, map_location=device))
+
+    blocks = find_prunable_blocks(model, MODEL_ID)
+    optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
     criterion = nn.CrossEntropyLoss()
     
-    blocks = find_prunable_blocks(model, MODEL_ID)
-    
-    # 기울기 제곱 누적 히스토리 (학습 영향력 판단)
+    # EMA 히스토리 저장소 초기화
     grad_history = {}
     for name, blk in blocks.items():
-        if "152" in MODEL_ID: n_f = blk.conv2.weight.shape[0]
-        elif "resnet" in MODEL_ID: n_f = blk.bn1.weight.shape[0]
-        else: n_f = blk.weight.shape[0] # VGG, EfficientNet
+        n_f = blk.conv2.weight.shape[0] if "152" in MODEL_ID else (blk.bn1.weight.shape[0] if "resnet" in MODEL_ID else blk.weight.shape[0])
         grad_history[name] = torch.zeros(n_f).to(device)
 
     for epoch in range(1, total_epochs + 1):
@@ -209,6 +195,7 @@ def main_intraining_history_adaptive_pruning(
         for x, y in trainloader:
             x, y = x.to(device, non_blocking=True), y.to(device, non_blocking=True)
             optimizer.zero_grad(set_to_none=True)
+            
             if USE_AMP:
                 with torch.amp.autocast(device_type=device.type):
                     out = model(x); loss = criterion(out, y)
@@ -216,36 +203,40 @@ def main_intraining_history_adaptive_pruning(
             else:
                 out = model(x); loss = criterion(out, y); loss.backward(); optimizer.step()
 
-            # 필터별 기울기 제곱(g^2) 누적
+            # ⭐ EMA 기반 기울기 중요도 업데이트 (학습 내력 반영)
             with torch.no_grad():
                 for name, blk in blocks.items():
                     target_grad = blk.conv2.weight.grad if "152" in MODEL_ID else (blk.weight.grad if hasattr(blk, 'weight') else None)
                     if target_grad is not None:
-                        g_sq = target_grad.pow(2).view(target_grad.shape[0], -1).mean(dim=1)
-                        grad_history[name] += g_sq
+                        current_g_sq = target_grad.pow(2).view(target_grad.shape[0], -1).mean(dim=1)
+                        grad_history[name] = (ema_decay * grad_history[name]) + ((1 - ema_decay) * current_g_sq)
 
         print(f"Epoch [{epoch}/{total_epochs}] Val Acc: {test(model, validationloader):.2f}%")
 
         if epoch in prune_at_epochs:
             print(f"\n>>> [Adaptive Pruning Event] Global Thresholding 적용")
-            
             all_scores = torch.cat([s for s in grad_history.values()])
             threshold = torch.sort(all_scores)[0][int(len(all_scores) * GLOBAL_TARGET_PRUNE_RATIO)].item()
             
             keep_indices = {}
             for name, score in grad_history.items():
                 keep_idx = (score > threshold).nonzero(as_tuple=True)[0].tolist()
-                if not keep_idx: keep_idx = [score.argmax().item()]
+                # 보호 장치: 최소 비율 유지
+                min_cnt = max(1, int(score.numel() * min_keep_ratio))
+                if len(keep_idx) < min_cnt:
+                    keep_idx = score.argsort(descending=True)[:min_cnt].tolist()
+                
                 keep_indices[name] = sorted(keep_idx)
-                print(f"Block: {name:20s} | Ratio: {(1 - len(keep_idx)/score.numel())*100:.1f}%")
+                print(f"Block: {name:22s} | Ratio: {(1 - len(keep_idx)/score.numel())*100:>5.1f}% | Channels: {len(keep_idx)}/{score.numel()}")
 
             if "resnet" in MODEL_ID: model = prune_resnet_blockwise(model, keep_indices, device)
             elif "vgg" in MODEL_ID: model = prune_vgg_blockwise(model, keep_indices, device, 100)
             elif "efficientnet" in MODEL_ID: model = prune_efficientnet_blockwise(model, keep_indices, device)
             
-            optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
+            optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4)
             blocks = find_prunable_blocks(model, MODEL_ID)
-            print(f"Pruning 완료. 파라미터 수: {count_parameters(model):,}\n")
+            # 히스토리 초기화 (구조 변경 대응)
+            grad_history = {n: torch.zeros(b.conv2.weight.shape[0] if "152" in MODEL_ID else (b.bn1.weight.shape[0] if "resnet" in MODEL_ID else b.weight.shape[0])).to(device) for n, b in blocks.items()}
 
     print(f"Final Test Acc: {test(model, testloader):.2f}%")
 
@@ -253,6 +244,12 @@ def main_intraining_history_adaptive_pruning(
 # 5) 실행부
 # ------------------------------------------------
 if __name__ == "__main__":
-    # main_adaptive_iterative_pruning(strategy="p", p=2.0, GLOBAL_PRUNING_TARGET_RATIO=80.0)
+    # 선택 1: 민감도 기반 Post-training 프루닝
+    # main_post_training_iterative_pruning(GLOBAL_PRUNING_TARGET_RATIO=40.0)
     
-    main_intraining_history_adaptive_pruning(total_epochs=60, prune_at_epochs=[40], GLOBAL_TARGET_PRUNE_RATIO=0.6)
+    # 선택 2: 학습 내력(EMA) 기반 In-training 적응형 프루닝 (추천)
+    main_in_training_ema_adaptive_pruning(
+        total_epochs=50, 
+        prune_at_epochs=[30], 
+        GLOBAL_TARGET_PRUNE_RATIO=0.4
+    )
