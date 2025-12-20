@@ -3,11 +3,7 @@ import torch
 import torch.nn as nn
 
 def prune_conv_efficientnet(conv: nn.Conv2d, keep_idx, in_keep_idx=None):
-    """
-    EfficientNet Conv2d용 프루닝 함수.
-    - keep_idx: 출력 채널 중 남길 인덱스 리스트
-    - in_keep_idx: 입력 채널 중 남길 인덱스
-    """
+
     if not keep_idx:
         raise ValueError("Pruning produced zero output channels.")
 
@@ -42,14 +38,11 @@ def prune_conv_efficientnet(conv: nn.Conv2d, keep_idx, in_keep_idx=None):
     return new_conv
 
 def prune_efficientnet_blockwise(model, block_keep_indices, device):
-    """
-    EfficientNet-B0용 블록 단위 프루닝 함수.
-    - MBConv 블록 내의 레이어 의존성을 고려하여 프루닝을 수행합니다.
-    """
+
     model = copy.deepcopy(model).cpu()
     
     # EfficientNet-B0의 주요 프루닝 대상 레이어 (MBConv 내의 conv_pw 등)
-    # models.find_prunable_blocks에서 추출한 이름들을 기준으로 루프를 돕니다.
+
     for name, module in model.named_modules():
         if name in block_keep_indices:
             keep_idx = block_keep_indices[name]
