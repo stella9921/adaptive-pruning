@@ -1,0 +1,12 @@
+project_name: "CNN-Pruning-Research"
+seed: 42
+data_path: "./data"
+dataset: "cifar100"
+num_classes: 100
+
+# 학습 공통 설정 
+batch_size: 128
+num_workers: 2
+exp_root: "./exp"
+save_dir: "./exp/checkpoints"
+log_dir: "./exp/logs"
