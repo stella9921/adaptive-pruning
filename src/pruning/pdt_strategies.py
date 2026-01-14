@@ -23,8 +23,12 @@ class PDTPruner(BasePruner):
         self._check_buffers()
 
     def _check_buffers(self):
-        """각 레이어에 필요한 연산용 버퍼 등록"""
+        """각 레이어에 필요한 연산용 버퍼 등록 (Conv2d만 대상)"""
         for m in self.layers:
+            # Conv2d 레이어가 아니면 (예: BasicBlock 등) 스킵
+            if not isinstance(m, torch.nn.Conv2d):
+                continue
+                
             n_f = m.weight.shape[0]
             if not hasattr(m, 'mask'):
                 m.register_buffer("mask", torch.ones(n_f, device=self.device))
