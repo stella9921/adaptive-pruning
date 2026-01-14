@@ -1,0 +1,6 @@
+method: "PAT"
+type: "weighted_sum"
+target_ratio: 40.0
+beta: 0.5             # VGG16 최적 beta=0.5 반영
+n_rounds: 5
+finetune_epochs: 3
