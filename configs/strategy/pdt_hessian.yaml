@@ -1,7 +1,7 @@
 method: "PDT"        # main.py에서 인식할 수 있도록 추가
 type: "pdt_hessian"  # 전략 구분을 위해 명시
 ema_decay: 0.9       # 1차 미분(Gradient) 반영 비율
-target_ratio: 0.4    # 프루닝 목표 비율
+target_ratio: 0.7    # 프루닝 목표 비율
 
 # 실행 시점 및 주기 설정 (다른 파일들과 맞춤)
 start_epoch: 5
