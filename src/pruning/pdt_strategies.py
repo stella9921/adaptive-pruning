@@ -17,7 +17,18 @@ class PDTPruner(BasePruner):
         
         # 모델별 프루닝 대상 레이어 탐색
         prunable_dict = find_prunable_blocks(model, config['model']['name'])
-        self.layers = list(prunable_dict.values())
+        
+        # [수정] 블록(BasicBlock) 자체가 아닌, 블록 내부의 실제 Conv2d들만 self.layers에 저장
+        self.layers = []
+        for name, block in prunable_dict.items():
+            # 만약 block 자체가 Conv2d라면 바로 추가
+            if isinstance(block, nn.Conv2d):
+                self.layers.append(block)
+            else:
+                # BasicBlock, Bottleneck 등 컨테이너일 경우 내부의 Conv2d만 추출
+                for m in block.modules():
+                    if isinstance(m, nn.Conv2d):
+                        self.layers.append(m)
         
         # 필요한 버퍼(mask, grad_ema, hessian_score) 등록 확인
         self._check_buffers()
@@ -25,8 +36,8 @@ class PDTPruner(BasePruner):
     def _check_buffers(self):
         """각 레이어에 필요한 연산용 버퍼 등록 (Conv2d만 대상)"""
         for m in self.layers:
-            # Conv2d 레이어가 아니면 (예: BasicBlock 등) 스킵
-            if not isinstance(m, torch.nn.Conv2d):
+            # 안전장치: Conv2d가 아니면 스킵
+            if not isinstance(m, nn.Conv2d):
                 continue
                 
             n_f = m.weight.shape[0]
@@ -42,14 +53,14 @@ class PDTPruner(BasePruner):
         """매 배치마다 실행: 1차 미분 에너지(Gradient Energy) 업데이트"""
         with torch.no_grad():
             for m in self.layers:
-                if m.weight.grad is not None:
+                # 가중치와 그래디언트가 있는 경우만 처리
+                if hasattr(m, 'weight') and m.weight.grad is not None:
                     # 프루닝된 채널의 그래디언트 차단 (Zeroing)
                     m.weight.grad.mul_(m.mask.view(-1, 1, 1, 1))
                     if hasattr(m, 'bias') and m.bias is not None and m.bias.grad is not None:
                         m.bias.grad.mul_(m.mask)
                     
                     # Gradient Energy 계산 (제곱 평균)
-                    # g = mean(grad^2) over (output, k, k) -> input channel dimension
                     g = m.weight.grad.pow(2).view(m.weight.shape[0], -1).mean(1)
                     # EMA 업데이트: g_ema = decay * g_ema + (1-decay) * current_g
                     m.grad_ema.mul_(self.ema_decay).add_(g, alpha=1 - self.ema_decay)
@@ -58,6 +69,8 @@ class PDTPruner(BasePruner):
         """가중치와 옵티마이저 모멘텀에 마스크 강제 적용"""
         with torch.no_grad():
             for m in self.layers:
+                if not hasattr(m, 'mask'): continue
+                
                 mask = m.mask
                 m.weight.data.mul_(mask.view(-1, 1, 1, 1))
                 if hasattr(m, 'bias') and m.bias is not None:
@@ -68,20 +81,18 @@ class PDTPruner(BasePruner):
                         if p is not None and p in optimizer.state:
                             state = optimizer.state[p]
                             if "momentum_buffer" in state:
-                                state["momentum_buffer"].mul_(mask.view_as(p))
+                                # p의 모양에 맞춰 마스크 view 조정
+                                m_view = mask.view(-1, 1, 1, 1) if p.dim() == 4 else mask
+                                state["momentum_buffer"].mul_(m_view)
 
     def step_pruning(self, loss, target_ratio=None):
-        """
-        프루닝 이벤트 발생 시 실행: Hessian(2차) + Gradient(1차) 결합 스코어링
-        """
+        """프루닝 이벤트 발생 시 실행: Hessian(2차) + Gradient(1차) 결합 스코어링"""
         if target_ratio is None:
             target_ratio = self.config['strategy'].get('target_ratio', 0.4)
             
         # --- [Step A & B] SNOWS 엔진을 통한 Hessian-Vector Product 추출 ---
-        # p: 최적의 탐색 방향, hv_list: 각 파라미터별 Hessian 반응
         p, hv_list = self.engine.get_smart_direction_p(loss, self.model)
         
-        # 모델의 모든 파라미터 중 학습 가능한 것만 필터링 (HV 리스트와 매칭용)
         trainable_params = [param for param in self.model.parameters() if param.requires_grad]
 
         # --- [Step C] Hessian 정보를 각 레이어의 버퍼로 변환 및 저장 ---
@@ -90,17 +101,17 @@ class PDTPruner(BasePruner):
                 for m in self.layers:
                     if m.weight is param:
                         # Hv의 L2-Norm 제곱을 계산하여 '곡률 에너지' 산출
-                        # 4D 텐서를 (채널, 나머지)로 펼쳐서 연산
                         h_energy = hv.pow(2).view(hv.shape[0], -1).mean(1)
                         m.hessian_score.copy_(h_energy)
 
         # --- 최종 결합 지표 산출 및 전역 임계값(Quantile) 프루닝 ---
         all_combined_scores = []
         for m in self.layers:
-            # Score = 1차 미분(EMA) + lambda * 2차 미분(Hessian)
             combined = m.grad_ema + (self.lambda_h * m.hessian_score)
             all_combined_scores.append(combined)
             
+        if not all_combined_scores: return
+        
         all_scores = torch.cat(all_combined_scores)
         threshold = torch.quantile(all_scores, target_ratio)
 
@@ -122,6 +133,7 @@ class PDTPruner(BasePruner):
                 nelem = m.weight.nelement()
                 total_params += nelem
                 if hasattr(m, 'mask'):
+                    # 채널 마스크를 전체 가중치 개수로 환산
                     active_params += int(m.mask.sum().item()) * (nelem // m.weight.shape[0])
                 else:
                     active_params += nelem
