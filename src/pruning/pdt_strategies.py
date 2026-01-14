@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from .base import BasePruner
 from src.models import find_prunable_blocks
-# 앞서 작성한 Hessian 엔진 임포트
+# Hessian 엔진 임포트
 from .engine.hessian_free import SNOWSEngine
 
 class PDTPruner(BasePruner):

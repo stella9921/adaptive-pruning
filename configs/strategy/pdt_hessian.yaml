@@ -1,0 +1,9 @@
+# configs/strategy/pdt_hessian.yaml
+
+name: "pdt"
+ema_decay: 0.9      # 1차 미분(Gradient) 반영 비율
+target_ratio: 0.4    # 프루닝 목표 비율 (예: 40%)
+
+# [Ver.3 Hessian 추가 설정]
+lambda_h: 0.5        # Hessian 점수 반영 비중 (0.0이면 기존 EMA와 동일)
+hessian_iter: 5      # CG 알고리즘 반복 횟수 (Step A의 정교함 결정)
