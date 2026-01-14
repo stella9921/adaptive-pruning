@@ -61,7 +61,7 @@ class PDTPruner(BasePruner):
                         m.bias.grad.mul_(m.mask)
                     
                     # Gradient Energy 계산 (제곱 평균)
-                    g = m.weight.grad.pow(2).view(m.weight.shape[0], -1).mean(1)
+                    g = m.weight.grad.pow(2).reshape(m.weight.shape[0], -1).mean(1)
                     # EMA 업데이트: g_ema = decay * g_ema + (1-decay) * current_g
                     m.grad_ema.mul_(self.ema_decay).add_(g, alpha=1 - self.ema_decay)
 
@@ -101,7 +101,7 @@ class PDTPruner(BasePruner):
                 for m in self.layers:
                     if m.weight is param:
                         # Hv의 L2-Norm 제곱을 계산하여 '곡률 에너지' 산출
-                        h_energy = hv.pow(2).view(hv.shape[0], -1).mean(1)
+                        h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
                         m.hessian_score.copy_(h_energy)
 
         # --- 최종 결합 지표 산출 및 전역 임계값(Quantile) 프루닝 ---
