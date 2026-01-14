@@ -90,24 +90,27 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             
             output = model(x)
             loss = criterion(output, y)
-            loss.backward() # 1차 미분(Gradient) 생성
+            
+            # [수정 포인트] Hessian을 업데이트해야 하는 배치인지 먼저 확인
+            is_hessian_step = (epoch >= start_epoch and epoch % prune_every == 0 and batch_idx == 0)
+            
+            if is_hessian_step:
+                # 1. Hessian 연산을 위해 retain_graph=True로 설정하여 그래프 유지
+                loss.backward(retain_graph=True) 
+                
+                print(f"\n>>> [SNOWS Update] Epoch {epoch}: Computing Hessian-Vector Products...")
+                # 2. 이제 그래프가 살아있으므로 Hessian 연산 가능
+                pdt_engine.step_pruning(loss=loss)
+                
+                # 3. 업데이트된 점수로 마스크 적용 및 모멘텀 초기화
+                pdt_engine.apply_mask_to_weights(optimizer=optimizer)
+                print(f">>> Current Sparsity: {pdt_engine.get_current_sparsity():.2f}%")
+            else:
+                # 일반적인 상황에서는 그래프를 유지할 필요가 없음 (메모리 절약)
+                loss.backward()
             
             # [Step 1] 매 배치마다 Gradient EMA 업데이트
             pdt_engine.update_ema_and_mask_grad()
-            
-            # [Step 2] 특정 주기(prune_every)의 첫 번째 배치에서 Hessian 업데이트
-            # Hessian 연산은 무거우므로 에폭당 한 번만 수행하여 지형(Curvature) 파악
-            if epoch >= start_epoch and epoch % prune_every == 0 and batch_idx == 0:
-                print(f"\n>>> [SNOWS Update] Epoch {epoch}: Computing Hessian-Vector Products...")
-                
-                # 핵심: HVP 계산을 위해 현재 살아있는 loss를 전달
-                pdt_engine.step_pruning(loss=loss)
-                
-                # 업데이트된 결합 점수(Grad+Hessian)를 기반으로 가중치 마스킹
-                # 옵티마이저를 전달하여 잘린 채널의 모멘텀까지 초기화
-                pdt_engine.apply_mask_to_weights(optimizer=optimizer)
-                
-                print(f">>> Current Sparsity: {pdt_engine.get_current_sparsity():.2f}%")
             
             optimizer.step()
             
