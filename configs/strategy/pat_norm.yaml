@@ -1,0 +1,5 @@
+method: "PAT"
+type: "normalization"
+target_ratio: 40.0
+n_rounds: 5
+finetune_epochs: 3

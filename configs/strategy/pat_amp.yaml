@@ -1,0 +1,6 @@
+method: "PAT"
+type: "amplification"
+target_ratio: 40.0
+p: 2.5                # VGG16 최적 p=2.5, ResNet18 최적 p=1.5 반영
+n_rounds: 5
+finetune_epochs: 3
