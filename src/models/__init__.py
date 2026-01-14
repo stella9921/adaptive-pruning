@@ -20,7 +20,7 @@ def get_model(model_cfg):
     else:
         raise ValueError(f"지원하지 않는 모델 이름입니다: {name}")
 
-def get_physical_prune_fn(model_name):
+def get_prune_fn(model_name):
     """
     PAT 결과가 나온 후, 실제로 모델 채널을 자르는 함수를 반환함
     """
