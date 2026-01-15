@@ -9,5 +9,5 @@ prune_every: 20
 min_keep_ratio: 0.2
 
 # [Ver.3 Hessian 추가 설정]
-lambda_h: 0.8        # Hessian 점수 반영 비중
+lambda_h: 1.0        # Hessian 점수 반영 비중
 hessian_iter: 5      # CG 알고리즘 반복 횟수
