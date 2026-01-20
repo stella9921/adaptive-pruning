@@ -1,3 +1,5 @@
+import torch.fx as fx  # Stage 1용
+from torch.profiler import profile, record_function, ProfilerActivity # Stage 4용
 import argparse
 import os
 import torch
@@ -11,6 +13,28 @@ from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
 from src.pruning.pdt_strategies import PDTPruner
+
+def analyze_topology_and_profiling(model, device, tag="Before Pruning"):
+    print(f"\n=== [Stage 1 & 4] {tag} Analysis ===")
+    inputs = torch.randn(1, 3, 32, 32).to(device) # CIFAR-100 기준 데이터셋 크기
+
+    # [Stage 1] Topology Parsing (FX)
+    try:
+        traced = fx.symbolic_trace(model)
+        print(f"[*] Topology Parsed: {len(list(traced.graph.nodes))} nodes found.")
+    except Exception as e:
+        print(f"[*] FX Parsing Warning: {e}")
+
+    # [Stage 4] Resource Profiling
+    with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], 
+                 with_flops=True, profile_memory=True) as prof:
+        with record_function("model_inference"):
+            model(inputs)
+    
+    # 핵심 지표 출력
+    print(prof.key_averages().table(sort_by="cuda_memory_usage", row_limit=10))
+    return prof
+
 
 def main():
     # 1. 설정 및 데이터 준비
@@ -39,9 +63,6 @@ def main():
     elif config['strategy']['method'] == 'PDT':
         execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device)
 
-# -------------------------------------------------------------------------
-# [Method A] PAT: 민감도 분석 기반 반복적 프루닝 
-# -------------------------------------------------------------------------
 def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device):
     si_data = maybe_load_or_compute_sensitivity(config, train_loader, test_loader, device)
     pat_engine = PATPruner(model, config, si_data)
@@ -49,25 +70,33 @@ def execute_pat_experiment(model, config, train_loader, val_loader, test_loader,
     
     n_rounds = config['strategy'].get('n_rounds', 5)
     
+    # [최초 측정] 프루닝 전 베이스라인
+    analyze_topology_and_profiling(model, device, tag="PAT Initial Baseline")
+    
     for r in range(1, n_rounds + 1):
         print(f"\n--- PAT Round {r}/{n_rounds} ---")
+        
+        # 1. 프루닝 인덱스 계산 및 실제 모델 구조 변경 (Channel Pruning)
         target_keep_indices = pat_engine.compute_all_keep_indices(round_idx=r) 
         model = prune_fn(model, target_keep_indices, device)
         
+        # [Stage 1 & 4 측정] 프루닝 직후 리소스 변화 확인
+        # 모델이 물리적으로 줄어들었으므로, 여기서 FX Node 수와 CUDA 메모리가 확 줄어든 게 찍혀야 합니다.
+        analyze_topology_and_profiling(model, device, tag=f"PAT Round {r} - After Pruning")
+        
+        # 2. 파라미터가 변했으므로 옵티마이저 재설정
         optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9, weight_decay=5e-4)
         criterion = nn.CrossEntropyLoss()
         
+        # 3. Finetuning
         finetune_eps = config['strategy'].get('finetune_epochs', 3)
         for epoch in range(1, finetune_eps + 1):
             train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
             val_acc = evaluate(model, val_loader, device)
             print(f"FT Epoch {epoch} | Loss: {train_loss:.4f} | Val Acc: {val_acc:.2f}%")
 
-# -------------------------------------------------------------------------
-# [Method B] PDT: SNOWS Hessian 엔진 기반 동적 마스킹 
-# -------------------------------------------------------------------------
 def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device):
-    # PDT 엔진 초기화 (Hessian-free SNOWS 엔진 포함)
+    # PDT 엔진 초기화
     pdt_engine = PDTPruner(model, config)
     
     optimizer = optim.SGD(model.parameters(), 
@@ -79,6 +108,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     total_epochs = config['model']['epochs']
     prune_every = config['strategy'].get('prune_every', 10)
     start_epoch = config['strategy'].get('start_epoch', 1)
+
+    # [최초 측정] 프루닝 전 베이스라인 상태 확인
+    analyze_topology_and_profiling(model, device, tag="PDT Initial Baseline")
     
     for epoch in range(1, total_epochs + 1):
         model.train()
@@ -91,36 +123,33 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             output = model(x)
             loss = criterion(output, y)
             
-            # [수정 포인트] Hessian을 업데이트해야 하는 배치인지 먼저 확인
+            # Hessian 업데이트 및 프루닝 결정 시점
             is_hessian_step = (epoch >= start_epoch and epoch % prune_every == 0 and batch_idx == 0)
             
             if is_hessian_step:
-                # 1. Hessian 연산을 위해 retain_graph=True로 설정하여 그래프 유지
                 loss.backward(retain_graph=True) 
                 
                 print(f"\n>>> [SNOWS Update] Epoch {epoch}: Computing Hessian-Vector Products...")
-                # 2. 이제 그래프가 살아있으므로 Hessian 연산 가능
                 pdt_engine.step_pruning(loss=loss)
                 
-                # 3. 업데이트된 점수로 마스크 적용 및 모멘텀 초기화
+                # 마스크 적용 직전/직후 리소스 측정 (Stage 4)
+                # PDT는 가중치를 0으로 만드는 것이므로, 연산 속도나 메모리 변화를 여기서 관찰합니다.
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
+                
+                # [측정] 마스크 업데이트 후 분석
+                analyze_topology_and_profiling(model, device, tag=f"PDT Epoch {epoch} - After Mask Update")
+                
                 print(f">>> Current Sparsity: {pdt_engine.get_current_sparsity():.2f}%")
             else:
-                # 일반적인 상황에서는 그래프를 유지할 필요가 없음 (메모리 절약)
                 loss.backward()
             
-            # [Step 1] 매 배치마다 Gradient EMA 업데이트
             pdt_engine.update_ema_and_mask_grad()
-            
             optimizer.step()
-            
-            # [Step 3] 가중치에 마스크 강제 적용 (프루닝 상태 유지)
             pdt_engine.apply_mask_to_weights()
             total_loss += loss.item()
 
         val_acc = evaluate(model, val_loader, device)
         print(f"Epoch {epoch}/{total_epochs} | Loss: {total_loss/len(train_loader):.4f} | Val Acc: {val_acc:.2f}%")
-
 # -------------------------------------------------------------------------
 # 공통 유틸리티 함수 (기존 유지)
 # -------------------------------------------------------------------------
