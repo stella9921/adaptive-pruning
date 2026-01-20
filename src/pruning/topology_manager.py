@@ -1,3 +1,7 @@
+import torch
+import torch.nn as nn
+import torch.fx as fx
+
 def get_model_topology(model):
     print("[Stage 1] Analyzing Model Topology using PyTorch FX...")
     try:
