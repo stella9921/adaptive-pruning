@@ -1,16 +1,13 @@
-# src/models/__init__.py
+import torch.nn as nn
 from .resnet import get_resnet, prune_resnet_blockwise
 from .vgg import get_vgg16, prune_vgg_blockwise
 from .efficientnet import get_efficientnet, prune_efficientnet_blockwise
 
 def get_model(model_cfg):
-    """
-    YAML의 model 섹션 설정을 받아 모델 객체를 생성함
-    """
+    """YAML의 model 섹션 설정을 받아 모델 객체를 생성함"""
     name = model_cfg['name'].lower()
     num_classes = model_cfg.get('num_classes', 100)
     
-    # name에 'resnet18', 'resnet152' 등이 들어와도 get_resnet이 처리함
     if "resnet" in name:
         return get_resnet(name, num_classes)
     elif "vgg" in name:
@@ -21,9 +18,7 @@ def get_model(model_cfg):
         raise ValueError(f"지원하지 않는 모델 이름입니다: {name}")
 
 def get_prune_fn(model_name):
-    """
-    PAT 결과가 나온 후, 실제로 모델 채널을 자르는 함수를 반환함
-    """
+    """PAT 결과가 나온 후, 실제로 모델 채널을 자르는 함수를 반환함"""
     name = model_name.lower()
     if "resnet" in name:
         return prune_resnet_blockwise
@@ -34,32 +29,46 @@ def get_prune_fn(model_name):
     else:
         raise ValueError(f"물리적 프루닝 함수를 찾을 수 없습니다: {name}")
 
-def find_prunable_blocks(model, model_name):
+def find_prunable_blocks(model, model_name, topology_groups=None):
     """
-    모델별로 민감도 측정이나 마스킹 타겟이 되는 블록(레이어)들을 찾아줌
+    [Stage 1 반영] 모델별로 프루닝 타겟이 되는 블록들을 찾고, 
+    FX Topology 분석 결과가 있다면 이를 기반으로 그룹핑함.
     """
     name = model_name.lower()
+    all_modules = dict(model.named_modules())
     blocks = {}
     
+    # CASE 1: FX Topology Manager가 분석한 그룹 정보가 있는 경우 (Stage 1 핵심)
+    if topology_groups:
+        print(f"[*] Linking FX Topology groups to model layers...")
+        for idx, group in enumerate(topology_groups):
+            # group: ['layer1.0.conv1', 'layer1.0.conv2']
+            valid_layers = []
+            for layer_name in group:
+                if layer_name in all_modules:
+                    m = all_modules[layer_name]
+                    if isinstance(m, nn.Conv2d):
+                        valid_layers.append(m)
+            
+            if valid_layers:
+                # 그룹 내 레이어들을 리스트로 묶어서 반환
+                blocks[f"group_{idx}"] = valid_layers
+        return blocks
+
+    # CASE 2: 그룹 정보가 없을 때 (기존 방식 - Fallback)
     if "resnet" in name:
         from torchvision.models import resnet as _tv_resnet
         for n, m in model.named_modules():
-            # ResNet18(BasicBlock)과 ResNet152(Bottleneck) 모두 대응
             if isinstance(m, (_tv_resnet.BasicBlock, _tv_resnet.Bottleneck)):
                 blocks[n] = m
                 
     elif "vgg" in name:
-        import torch.nn as nn
         for n, m in model.named_modules():
-            # VGG는 features 내의 Conv2d가 프루닝 대상
             if isinstance(m, nn.Conv2d) and n.startswith("features."):
                 blocks[n] = m
                 
     elif "efficientnet" in name:
-        import torch.nn as nn
         for n, m in model.named_modules():
-            # EfficientNet은 MBConv 내부의 pointwise conv 등을 탐색
-            # 주신 로직에 따라 "conv"가 이름에 포함된 레이어를 타겟팅
             if isinstance(m, nn.Conv2d) and (".conv" in n or ".pw" in n or ".dw" in n):
                 blocks[n] = m
                 
