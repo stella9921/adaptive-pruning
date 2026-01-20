@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from .base import BasePruner
-# Hessian 엔진 및 최적화 도구 임포트
 from .engine.hessian_free import SNOWSEngine
 import numpy as np
 from .optimizer import lagrangian_optimization 
@@ -16,18 +15,15 @@ class PDTPruner(BasePruner):
         # [Stage 1] Topology Manager로부터 받은 그룹 정보 저장
         self.topology_groups = topology_groups
         
-        # 프루닝 대상 레이어 리스트업
         self.layers_dict = nn.ModuleDict()
         for name, m in model.named_modules():
             if isinstance(m, nn.Conv2d):
-                # .을 _로 바꿔서 내부 dict 키로 관리
                 self.layers_dict[name.replace('.', '_')] = m
         
         self.layers = list(self.layers_dict.values())
         self._check_buffers()
 
     def _check_buffers(self):
-        """각 레이어에 필요한 연산용 버퍼 등록"""
         for m in self.layers:
             n_f = m.weight.shape[0]
             if not hasattr(m, 'mask'):
@@ -38,7 +34,6 @@ class PDTPruner(BasePruner):
                 m.register_buffer("hessian_score", torch.zeros(n_f, device=self.device))
 
     def update_ema_and_mask_grad(self):
-        """매 배치마다 Gradient EMA 업데이트"""
         with torch.no_grad():
             for m in self.layers:
                 if hasattr(m, 'weight') and m.weight.grad is not None:
@@ -47,7 +42,6 @@ class PDTPruner(BasePruner):
                     m.grad_ema.mul_(self.ema_decay).add_(g, alpha=1 - self.ema_decay)
 
     def apply_mask_to_weights(self, optimizer=None):
-        """가중치와 옵티마이저 모멘텀에 마스크 적용"""
         with torch.no_grad():
             for m in self.layers:
                 mask = m.mask
@@ -63,12 +57,11 @@ class PDTPruner(BasePruner):
                                 state["momentum_buffer"].mul_(m_view)
 
     def step_pruning(self, loss, memory_budget=None):
-        """[Stage 2 & 3] Hessian 기반 그룹 스코어링 및 Lagrangian 최적화"""
-        # 1. Hessian-Vector Product 추출 (SNOWS)
+        """[Stage 1, 2, 3] 채널 그룹 의존성을 고려한 Lagrangian 최적화"""
+        # 1. Hessian-Vector Product 추출 (Stage 2)
         _, hv_list = self.engine.get_smart_direction_p(loss, self.model)
         trainable_params = [p for p in self.model.parameters() if p.requires_grad]
 
-        # 2. [Stage 2] 레이어별 Hessian 점수 업데이트
         with torch.no_grad():
             for param, hv in zip(trainable_params, hv_list):
                 for m in self.layers:
@@ -76,79 +69,78 @@ class PDTPruner(BasePruner):
                         h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
                         m.hessian_score.copy_(h_energy)
 
-        # 3. [Stage 1 & 2] 그룹 단위 스코어 합산 (Channel Grouping 반영)
-        group_scores, group_mem_costs, group_names = [], [], []
+        # 2. 채널 그룹 및 개별 채널 데이터 수집 (Stage 1 & 2 통합)
+        all_unit_scores = []
+        all_unit_costs = []
+        unit_metadata = [] # (레이어 리스트, 채널 인덱스)
         all_modules = dict(self.model.named_modules())
 
-        # 이름 매칭을 시도하는 내부 헬퍼 함수
         def find_layer(name):
             if name in all_modules: return all_modules[name]
-            # FX 노드 이름이 layer1_0_conv1 형태일 경우 .으로 변환 시도
             dot_name = name.replace('_', '.')
-            if dot_name in all_modules: return all_modules[dot_name]
-            return None
+            return all_modules.get(dot_name)
 
-        if self.topology_groups and len(self.topology_groups) > 0:
-            for group in self.topology_groups:
-                g_score, g_mem = 0, 0
-                valid_count = 0
-                for layer_name in group:
-                    m = find_layer(layer_name)
-                    if isinstance(m, nn.Conv2d):
-                        combined = m.grad_ema + (self.lambda_h * m.hessian_score)
-                        g_score += combined.mean().item()
-                        g_mem += m.weight.nelement()
-                        valid_count += 1
-                
-                if valid_count > 0:
-                    group_scores.append(g_score / valid_count) # 평균 점수
-                    group_mem_costs.append(g_mem)
-                    group_names.append(group)
-
-        # 그룹핑 실패 혹은 그룹이 없을 경우 레이어 단위 Fallback
-        if not group_scores:
-            print("[Warning] No valid groups matched. Falling back to layer-wise scoring.")
-            for name, m in self.layers_dict.items():
-                combined = m.grad_ema + (self.lambda_h * m.hessian_score)
-                group_scores.append(combined.mean().item())
-                group_mem_costs.append(m.weight.nelement())
-                group_names.append([name.replace('_', '.')])
-
-        # 4. [Stage 3] Lagrangian Optimization
-        total_mem = sum(group_mem_costs)
-        if memory_budget is None:
-            # target_ratio가 0.85라면 15%만 남기는 budget 설정
-            target_pruning_ratio = self.config['strategy'].get('target_ratio', 0.85)
-            memory_budget = total_mem * (1.0 - target_pruning_ratio)
-            
-            # 최소 5% 예산은 확보 (안전장치)
-            if memory_budget <= 0:
-                memory_budget = total_mem * 0.05 
-
-        print(f"[DEBUG] Total Mem: {total_mem/1e6:.2f}M | Target Budget: {memory_budget/1e6:.2f}M")
-
-        # 최적의 생존 그룹 결정
-        scores_np = np.array(group_scores)
-        optimal_mask_flags = lagrangian_optimization(
-            scores_np, 
-            np.array(group_mem_costs), 
-            memory_budget
-        )
-
-        # 안전장치: 모든 그룹이 False일 경우 Top-1 강제 생존
-        if sum(optimal_mask_flags) == 0 and len(scores_np) > 0:
-            print("[Warning] Optimizer killed all groups. Keeping top-1 group.")
-            optimal_mask_flags[np.argmax(scores_np)] = True
-
-        # 5. 마스크 실제 적용
-        with torch.no_grad():
-            for idx, is_alive in enumerate(optimal_mask_flags):
-                for layer_name in group_names[idx]:
-                    m = find_layer(layer_name)
-                    if isinstance(m, nn.Conv2d):
-                        m.mask.fill_(1.0 if is_alive else 0.0)
+        processed_layers = set()
         
-        print(f"[PDT] Optimization Complete. Groups Alive: {sum(optimal_mask_flags)}/{len(group_names)}")
+        # [Stage 1] Topology Groups 처리 (의존성 채널 묶기)
+        if self.topology_groups:
+            for group in self.topology_groups:
+                layers_in_group = []
+                for ln in group:
+                    m = find_layer(ln)
+                    if isinstance(m, nn.Conv2d):
+                        layers_in_group.append(m)
+                        processed_layers.add(m)
+                
+                if layers_in_group:
+                    num_channels = layers_in_group[0].weight.shape[0]
+                    for i in range(num_channels):
+                        # 그룹 채널 점수 합산
+                        g_score = sum((m.grad_ema[i] + self.lambda_h * m.hessian_score[i]).item() for m in layers_in_group)
+                        # 그룹 채널 파라미터 비용 합산
+                        g_cost = sum(m.weight.nelement() / m.weight.shape[0] for m in layers_in_group)
+                        
+                        all_unit_scores.append(g_score)
+                        all_unit_costs.append(g_cost)
+                        unit_metadata.append((layers_in_group, i))
+
+        # 독립 레이어 처리
+        for m in self.layers:
+            if m not in processed_layers:
+                num_channels = m.weight.shape[0]
+                unit_cost = m.weight.nelement() / num_channels
+                combined_scores = m.grad_ema + (self.lambda_h * m.hessian_score)
+                for i in range(num_channels):
+                    all_unit_scores.append(combined_scores[i].item())
+                    all_unit_costs.append(unit_cost)
+                    unit_metadata.append(([m], i))
+
+        # 3. Lagrangian Optimization 수행 (Stage 3)
+        total_mem = sum(all_unit_costs)
+        if memory_budget is None:
+            target_ratio = self.config['strategy'].get('target_ratio', 0.85)
+            memory_budget = total_mem * (1.0 - target_ratio)
+
+        print(f"[DEBUG] Total Channel Units: {len(all_unit_scores)} | Budget: {memory_budget/1e6:.2f}M")
+
+        scores_np = np.array(all_unit_scores)
+        costs_np = np.array(all_unit_costs)
+        optimal_mask_flags = lagrangian_optimization(scores_np, costs_np, memory_budget)
+
+        # 4. 마스크 업데이트 (의존성 강제 준수)
+        with torch.no_grad():
+            for m in self.layers:
+                m.mask.fill_(0.0)
+            
+            active_count = 0
+            for idx, is_alive in enumerate(optimal_mask_flags):
+                if is_alive:
+                    layers_list, channel_idx = unit_metadata[idx]
+                    for layer_obj in layers_list:
+                        layer_obj.mask[channel_idx] = 1.0
+                    active_count += 1
+
+        print(f"[PDT] Pruning Done. Active Channel Units: {active_count}/{len(all_unit_scores)}")
 
     @torch.no_grad()
     def get_current_sparsity(self):
