@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from .base import BasePruner
+# Hessian 엔진 및 최적화 도구 임포트
 from .engine.hessian_free import SNOWSEngine
 import numpy as np
 from .optimizer import lagrangian_optimization 
@@ -15,15 +16,18 @@ class PDTPruner(BasePruner):
         # [Stage 1] Topology Manager로부터 받은 그룹 정보 저장
         self.topology_groups = topology_groups
         
+        # 프루닝 대상 레이어 리스트업
         self.layers_dict = nn.ModuleDict()
         for name, m in model.named_modules():
             if isinstance(m, nn.Conv2d):
+                # .을 _로 바꿔서 내부 dict 키로 관리
                 self.layers_dict[name.replace('.', '_')] = m
         
         self.layers = list(self.layers_dict.values())
         self._check_buffers()
 
     def _check_buffers(self):
+        """각 레이어에 필요한 연산용 버퍼 등록"""
         for m in self.layers:
             n_f = m.weight.shape[0]
             if not hasattr(m, 'mask'):
@@ -34,6 +38,7 @@ class PDTPruner(BasePruner):
                 m.register_buffer("hessian_score", torch.zeros(n_f, device=self.device))
 
     def update_ema_and_mask_grad(self):
+        """매 배치마다 Gradient EMA 업데이트"""
         with torch.no_grad():
             for m in self.layers:
                 if hasattr(m, 'weight') and m.weight.grad is not None:
@@ -42,6 +47,7 @@ class PDTPruner(BasePruner):
                     m.grad_ema.mul_(self.ema_decay).add_(g, alpha=1 - self.ema_decay)
 
     def apply_mask_to_weights(self, optimizer=None):
+        """가중치와 옵티마이저 모멘텀에 마스크 적용"""
         with torch.no_grad():
             for m in self.layers:
                 mask = m.mask
@@ -116,16 +122,26 @@ class PDTPruner(BasePruner):
                     unit_metadata.append(([m], i))
 
         # 3. Lagrangian Optimization 수행 (Stage 3)
-        total_mem = sum(all_unit_costs)
+        scores_np = np.array(all_unit_scores)
+        costs_np = np.array(all_unit_costs)
+        total_mem = np.sum(costs_np)
+
         if memory_budget is None:
             target_ratio = self.config['strategy'].get('target_ratio', 0.85)
             memory_budget = total_mem * (1.0 - target_ratio)
 
         print(f"[DEBUG] Total Channel Units: {len(all_unit_scores)} | Budget: {memory_budget/1e6:.2f}M")
 
-        scores_np = np.array(all_unit_scores)
-        costs_np = np.array(all_unit_costs)
+        # 최적 마스크 결정 (엔진 호출)
         optimal_mask_flags = lagrangian_optimization(scores_np, costs_np, memory_budget)
+
+        # [안전장치] 만약 엔진이 다 죽였다면 가성비 상위 5% 강제 생존
+        if np.sum(optimal_mask_flags) == 0:
+            print("[Warning] Optimizer killed all channels. Forcing Top-5% survival.")
+            efficiency = scores_np / (costs_np + 1e-8)
+            num_keep = max(1, int(len(scores_np) * 0.05))
+            top_k_indices = np.argsort(efficiency)[-num_keep:]
+            optimal_mask_flags[top_k_indices] = True
 
         # 4. 마스크 업데이트 (의존성 강제 준수)
         with torch.no_grad():
