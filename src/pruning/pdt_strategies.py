@@ -3,6 +3,7 @@ import torch.nn as nn
 from .base import BasePruner
 # Hessian 엔진 및 최적화 도구 임포트
 from .engine.hessian_free import SNOWSEngine
+import numpy as np
 from .optimizer import lagrangian_optimization  # Stage 3 최적화 로직
 
 class PDTPruner(BasePruner):
