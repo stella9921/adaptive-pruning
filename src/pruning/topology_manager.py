@@ -10,19 +10,29 @@ def get_model_topology(model):
         
         groups = []
         for node in graph.nodes:
-            # ResNet의 Skip-connection은 보통 'add' 함수나 'torch.add'로 나타납니다.
-            if (node.op == 'call_function' and node.target in [torch.add, nn.functional.add]) or \
-               (node.op == 'call_method' and node.target == 'add'):
-                
+            # Skip-connection (Add) 노드 찾는 로직 수정
+            is_add = False
+            
+            # 1. torch.add(a, b) 형태 체크
+            if node.op == 'call_function' and node.target == torch.add:
+                is_add = True
+            # 2. a.add(b) 메서드 형태 체크
+            elif node.op == 'call_method' and node.target == 'add':
+                is_add = True
+            # 3. a + b (operator.add) 형태 체크
+            elif node.op == 'call_function' and "add" in str(node.target):
+                is_add = True
+
+            if is_add:
                 group = []
                 for arg in node.args:
                     if isinstance(arg, fx.Node):
-                        # 실제 Conv 레이어의 이름을 역추적해서 가져옵니다.
+                        # 이전 노드(보통 Conv)의 이름을 가져옴
                         group.append(arg.name)
-                if group:
+                if len(group) >= 2:
                     groups.append(group)
         
-        print(f"[*] Found {len(groups)} residual connection groups.")
+        print(f"[*] Found {len(groups)} residual connection groups via FX.")
         return groups
     except Exception as e:
         print(f"[*] Topology Analysis Error: {e}")
