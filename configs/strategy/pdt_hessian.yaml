@@ -4,7 +4,7 @@ ema_decay: 0.9       # 1차 미분(Gradient) 반영 비율
 target_ratio: 0.6    # 프루닝 목표 비율
 
 # 실행 시점 및 주기 설정 (다른 파일들과 맞춤)
-start_epoch: 50
+start_epoch: 90
 prune_every: 10
 min_keep_ratio: 0.2
 
