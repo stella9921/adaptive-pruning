@@ -1,46 +1,54 @@
 import numpy as np
 
-def lagrangian_optimization(scores, memory_costs, budget):
+def lagrangian_optimization(unit_scores, unit_costs, budget):
     """
-    scores: Hessian + Gradient 결합 에너지
-    memory_costs: 각 채널의 파라미터/메모리 비용
-    budget: 남겨야 할 목표 메모리 양
+    이 함수는 FX로 묶인 'Topology Unit(Group)' 단위로 동작
+    
+    unit_scores: 각 그룹(연계 채널 묶음)의 통합 Hessian + Gradient 에너지 합산값
+    unit_costs: 각 그룹의 통합 파라미터/메모리 비용 합산값
+    budget: 전체 네트워크에서 허용된 목표 메모리 양 (제약 조건)
     """
-    # 1. 안전장치: 점수나 비용이 비어있으면 전부 살리는 마스크 반환
-    if len(scores) == 0:
+    
+    # 1. 안전장치: 입력 데이터 확인
+    if len(unit_scores) == 0:
         return np.array([], dtype=bool)
 
-    # 2. 이진 탐색 범위 설정 (점수/비용의 비율로 정밀하게 설정)
-    # 람다(벌금)는 '단위 비용당 점수 가치'의 임계값입니다.
-    efficiencies = scores / (memory_costs + 1e-8)
+    # 2. [Topology-Aware] 가성비(Efficiency) 계산
+    # 연계 관계가 있는 유닛의 단위 비용당 정확도 기여도
+    # 목적함수 내의 수치화된 가치
+    efficiencies = unit_scores / (unit_costs + 1e-8)
+    
+    # 3. 이진 탐색 범위 설정 (라그랑주 승수 λ 후보군)
     low = 0.0
     high = float(np.max(efficiencies)) if len(efficiencies) > 0 else 1.0
     
-    # 3. 초기 마스크 설정 (최소한 하나는 살려야 하므로 전체 생존으로 시작)
-    best_mask = np.ones_like(scores, dtype=bool)
+    # 초기 마스크 설정 (최소한의 유닛은 살리기)
+    best_unit_mask = np.ones_like(unit_scores, dtype=bool)
     
-    # 4. 이진 탐색 (Lagrangian Multiplier 'lambda' 찾기)
-    # 30번 정도 돌면 매우 정밀하게 수렴합니다.
+    # 4. [Stage 3] 라그랑주 relaxation을 이용한 통합 최적화
+    # 목적 함수: Maximize Σ(Score_g * m_g) s.t. Σ(Cost_g * m_g) <= Budget
     for _ in range(30):
         lambda_val = (low + high) / 2
         
-        # [Stage 3 핵심] 비용 대비 가치가 lambda_val(벌금)보다 큰 놈들만 생존
-        mask = (scores - lambda_val * memory_costs) > 0
-        current_mem = np.sum(memory_costs[mask])
+        # [구조적 제약 조건 반영] 
+        # Score_g - λ * Cost_g > 0 인 유닛(그룹)만 생존
+        # 여기서 m_g (mask)는 그룹 전체의 운명을 결정하는 정성적/정량적 지표
+        mask = (unit_scores - lambda_val * unit_costs) > 0
+        current_total_mem = np.sum(unit_costs[mask])
         
-        if current_mem <= budget:
-            # 예산 안쪽으로 들어오면, 더 많이 살릴 수 있는지 확인하기 위해 벌금을 낮춤
-            best_mask = mask
+        if current_total_mem <= budget:
+            # 예산 내에 들어오면, 더 성능을 높일 수 있는지 확인
+            best_unit_mask = mask
             high = lambda_val
         else:
-            # 예산을 초과하면 벌금을 높여서 더 많이 죽임
+            # 예산을 초과하면 벌금(λ)을 높여서 더 많은 유닛을 탈락
             low = lambda_val
             
-    # 5. [최종 보루] 만약 너무 가혹해서 다 죽었다면, 가성비 순으로 5%는 강제로 살림
-    if np.sum(best_mask) == 0:
-        # 가성비(Efficiency) 상위 5% 선택
-        num_keep = max(1, int(len(scores) * 0.05))
+    # 5. [안정성 보장] 구조 붕괴 방지용 최소 생존 로직
+    # 만약 벌금이 너무 세서 모든 그룹이 다 죽었다면, 가성비 순으로 최소 5% 복구
+    if np.sum(best_unit_mask) == 0:
+        num_keep = max(1, int(len(unit_scores) * 0.05))
         top_indices = np.argsort(efficiencies)[-num_keep:]
-        best_mask[top_indices] = True
+        best_unit_mask[top_indices] = True
             
-    return best_mask
+    return best_unit_mask
