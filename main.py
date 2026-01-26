@@ -22,8 +22,8 @@ def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     print(f"\n=== [Stage 1 & 4] {tag} Analysis ===")
     
     # [입력 크기 대응] CIFAR-100(32) vs ImageNet(224)
-    # config/model/resnet152_imagenet.yaml에 정의된 input_size를 사용
-    input_size = config['model'].get('input_size', 224)
+    model_config = config.get('model', {})
+    input_size = model_config.get('input_size', 224)
     inputs = torch.randn(1, 3, input_size, input_size).to(device)
 
     # [Stage 1] Topology Status (FX)
@@ -50,8 +50,17 @@ def main():
     config, args = load_config()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # ImageNet은 보통 train/val만 존재하므로 유연하게 대응
+    # [에러 방지] dataset 설정이 없거나 문자열인 경우 처리
+    dataset_cfg = config.get('dataset', {})
+    if isinstance(dataset_cfg, str):
+        dataset_name = dataset_cfg
+    else:
+        dataset_name = dataset_cfg.get('name', 'cifar100')
+
+    # 데이터 로더 로드
     loaders = get_dataloaders(config)
+    
+    # ImageNet은 보통 train/val만 존재하므로 유연하게 대응
     if len(loaders) == 3:
         train_loader, val_loader, test_loader = loaders
     else:
@@ -59,9 +68,9 @@ def main():
         test_loader = val_loader # Test가 없으면 Validation으로 대체
     
     print(f"Experimental Mode: {config['strategy']['method']}")
-    print(f"Target Model: {config['model']['name']} | Dataset: {config['dataset'].get('name', 'N/A')}")
+    print(f"Target Model: {config['model']['name']} | Dataset: {dataset_name}")
 
-    # 2. 모델 초기화 (weights='IMAGENET1K_V1' 등은 get_model 내부에서 처리되어야 함)
+    # 2. 모델 초기화
     model = get_model(config['model']).to(device)
     
     # [Stage 1] Topology Parsing 수행 (실제 그룹핑용)
@@ -75,7 +84,7 @@ def main():
 
 
 # -------------------------------------------------------------------------
-# [Method A] PAT: topology_groups 반영 (기존 유지)
+# [Method A] PAT: topology_groups 반영
 # -------------------------------------------------------------------------
 def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups):
     si_data = maybe_load_or_compute_sensitivity(config, train_loader, test_loader, device)
@@ -103,21 +112,22 @@ def execute_pat_experiment(model, config, train_loader, val_loader, test_loader,
 
 
 # -------------------------------------------------------------------------
-# [Method B] PDT: ImageNet 및 ResNet-152 최적화 반영
+# [Method B] PDT: Lagrangian 최적화 반영
 # -------------------------------------------------------------------------
 def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups):
     pdt_engine = PDTPruner(model, config, topology_groups=topology_groups)
     
-    # Config에서 학습률 및 하이퍼파라미터 로드
+    model_cfg = config.get('model', {})
     optimizer = optim.SGD(model.parameters(), 
-                          lr=config['model'].get('base_lr', 0.01), 
-                          momentum=config['model'].get('momentum', 0.9), 
-                          weight_decay=config['model'].get('weight_decay', 1e-4))
+                          lr=model_cfg.get('base_lr', 0.01), 
+                          momentum=model_cfg.get('momentum', 0.9), 
+                          weight_decay=model_cfg.get('weight_decay', 1e-4))
     criterion = nn.CrossEntropyLoss()
     
-    total_epochs = config['model']['epochs']
-    prune_every = config['strategy'].get('prune_every', 10)
-    start_epoch = config['strategy'].get('start_epoch', 1)
+    total_epochs = model_cfg.get('epochs', 90)
+    strategy_cfg = config.get('strategy', {})
+    prune_every = strategy_cfg.get('prune_every', 10)
+    start_epoch = strategy_cfg.get('start_epoch', 1)
 
     analyze_topology_and_profiling(model, device, config, tag="PDT Initial Baseline")
     
@@ -132,34 +142,28 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             output = model(x)
             loss = criterion(output, y)
             
-            # Pruning 시점 결정 (Hessian 계산)
             is_hessian_step = (epoch >= start_epoch and epoch % prune_every == 0 and batch_idx == 0)
             
             if is_hessian_step:
-                # Hessian 연산 시 메모리 확보를 위해 명시적 backward 조절
                 loss.backward(retain_graph=True) 
                 print(f"\n>>> [SNOWS Update] Epoch {epoch}: Computing Hessian-Vector Products...")
                 
-                # 라그랑주 최적화 엔진 호출
                 pdt_engine.step_pruning(loss=loss)
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
                 
-                # 프루닝 직후 리소스 변화 분석
                 analyze_topology_and_profiling(model, device, config, tag=f"PDT Epoch {epoch} - After Mask Update")
                 print(f">>> Current Sparsity: {pdt_engine.get_current_sparsity():.2f}%")
                 
-                # Hessian 계산 후 불필요한 캐시 정리 (ResNet-152 OOM 방지)
+                # ImageNet-ResNet152 대응용 메모리 정리
                 torch.cuda.empty_cache()
             else:
                 loss.backward()
             
-            # 매 배치마다 Grad EMA 업데이트 및 가중치 마스킹
             pdt_engine.update_ema_and_mask_grad()
             optimizer.step()
             pdt_engine.apply_mask_to_weights()
             total_loss += loss.item()
 
-        # 에폭 종료 후 평가
         val_acc = evaluate(model, val_loader, device)
         print(f"Epoch {epoch}/{total_epochs} | Loss: {total_loss/len(train_loader):.4f} | Val Acc: {val_acc:.2f}%")
 
