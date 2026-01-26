@@ -1,0 +1,8 @@
+name: "resnet152"
+num_classes: 1000      # 100에서 1000으로 변경
+base_lr: 0.01          # Fine-tuning은 0.1보다 0.01이 안정적입니다
+momentum: 0.9
+weight_decay: 0.0001
+epochs: 90             # 이미지넷은 보통 90에폭 기준
+batch_size: 64         # 152는 무거우므로 64 유지 (메모리 부족시 32)
+scheduler: "cosine"    # 최근 트렌드인 코사인 스케줄러 추천 (혹은 multistep [30, 60])
