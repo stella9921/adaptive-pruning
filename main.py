@@ -62,7 +62,8 @@ def main():
         train_loader, val_loader = loaders
         test_loader = val_loader 
     
-    print(f"Experimental Mode: {config['strategy']['method']}")
+    # print(f"Experimental Mode: {'pdt'}")
+    print(f"Experimental Mode: {config['strategy'].get('method', 'N/A')}")
     print(f"Target Model: {config['model']['name']} | Dataset: {dataset_name}")
 
     # 2. 모델 초기화
@@ -93,10 +94,16 @@ def main():
     topology_groups = get_model_topology(model)
 
     # 3. 전략에 따른 실행 분기
-    if config['strategy']['method'] == 'PAT':
+    strategy_method = config['strategy'].get('name', 'pdt').upper()
+
+    if strategy_method == 'PAT':
         execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups)
-    elif config['strategy']['method'] == 'PDT':
+    elif strategy_method == 'PDT':
         execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups)
+    # if 'pdt' == 'PAT':
+    #     execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups)
+    # elif 'pdt' == 'PDT':
+    #     execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups)
 
 
 def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups):
@@ -151,6 +158,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 loss.backward()
             
             pdt_engine.update_ema_and_mask_grad()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             pdt_engine.apply_mask_to_weights()
             total_loss += loss.item()
