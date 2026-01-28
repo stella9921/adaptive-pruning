@@ -8,16 +8,14 @@ from .optimizer import lagrangian_optimization
 class PDTPruner(BasePruner):
     def __init__(self, model, config, topology_groups=None):
         super().__init__(model, config)
-        self.ema_decay = config['strategy'].get('ema_decay', 0.9)
+        self.ema_decay = config['strategy'].get('ema_decay', 0.95)
         self.lambda_h = config['strategy'].get('lambda_h', 0.5) 
         self.engine = SNOWSEngine(n_iter=config['strategy'].get('hessian_iter', 5))
         
-        # [Stage 1] Topology Manager로부터 받은 그룹 정보 (연계 관계 지도)
         self.topology_groups = topology_groups
-        
         self.layers_dict = nn.ModuleDict()
         for name, m in model.named_modules():
-            if isinstance(m, nn.Conv2d):
+            if isinstance(m, (nn.Conv2d, nn.Linear)):
                 self.layers_dict[name.replace('.', '_')] = m
         
         self.layers = list(self.layers_dict.values())
@@ -34,11 +32,13 @@ class PDTPruner(BasePruner):
                 m.register_buffer("hessian_score", torch.zeros(n_f, device=self.device))
 
     def update_ema_and_mask_grad(self):
+        """
+        [수식 반영] W_g^(EMA)의 기초 데이터인 레이어별 그래디언트 EMA 업데이트
+        """
         with torch.no_grad():
             for m in self.layers:
                 if hasattr(m, 'weight') and m.weight.grad is not None:
-                    # 마스크가 적용된 그래디언트만 추적
-                    m.weight.grad.mul_(m.mask.view(-1, 1, 1, 1))
+                    m.weight.grad.mul_(m.mask.view(-1, 1, 1, 1) if m.weight.dim()==4 else m.mask.view(-1, 1))
                     g = m.weight.grad.pow(2).reshape(m.weight.shape[0], -1).mean(1)
                     m.grad_ema.mul_(self.ema_decay).add_(g, alpha=1 - self.ema_decay)
 
@@ -46,7 +46,8 @@ class PDTPruner(BasePruner):
         with torch.no_grad():
             for m in self.layers:
                 mask = m.mask
-                m.weight.data.mul_(mask.view(-1, 1, 1, 1))
+                m_view = mask.view(-1, 1, 1, 1) if m.weight.dim() == 4 else mask.view(-1, 1)
+                m.weight.data.mul_(m_view)
                 if hasattr(m, 'bias') and m.bias is not None:
                     m.bias.data.mul_(mask)
                 if optimizer is not None:
@@ -54,70 +55,90 @@ class PDTPruner(BasePruner):
                         if p is not None and p in optimizer.state:
                             state = optimizer.state[p]
                             if "momentum_buffer" in state:
-                                m_view = mask.view(-1, 1, 1, 1) if p.dim() == 4 else mask
-                                state["momentum_buffer"].mul_(m_view)
+                                p_view = mask.view(-1, 1, 1, 1) if p.dim() == 4 else mask.view(-1, 1)
+                                state["momentum_buffer"].mul_(p_view)
 
     def step_pruning(self, loss, memory_budget=None):
         """
-        [Topology-Aware Lagrangian Optimization - Accuracy Guard Version]
-        정확도(Hessian), 메모리(Cost), 토폴로지(FX Group) 통합 최적화
+        [Conditional Hierarchical Optimization]
+        1. 그룹별 위상(EMA)을 먼저 구함
+        2. 위상이 낮은 하위 그룹만 헤시안(Hessian)으로 솎아냄
         """
-        # 1. Stage 2: Hessian-Vector Product 추출
-        _, hv_list = self.engine.get_smart_direction_p(loss, self.model)
-        trainable_params = [p for p in self.model.parameters() if p.requires_grad]
-
-        with torch.no_grad():
-            for param, hv in zip(trainable_params, hv_list):
-                for m in self.layers:
-                    if m.weight is param:
-                        h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
-                        # [FIX] 레이어별 Hessian 정규화: 특정 레이어 몰살 방지
-                        if h_energy.max() > 0:
-                            h_energy = h_energy / (h_energy.max() + 1e-8)
-                        m.hessian_score.copy_(h_energy)
-
-        # 2. Stage 1 & 3 연계: 토폴로지 그룹 단위 데이터 합산
-        all_unit_scores = []
-        all_unit_costs = []
-        unit_metadata = [] 
         all_modules = dict(self.model.named_modules())
-
         def find_layer(name):
             if name in all_modules: return all_modules[name]
-            dot_name = name.replace('_', '.')
-            return all_modules.get(dot_name)
+            return all_modules.get(name.replace('_', '.'))
 
+        # 1. 모든 그룹의 EMA 위상(W_g) 정보 수집
+        group_info_list = []
         processed_layers = set()
-        
-        # [Topology Awareness] FX 그룹 처리
+
         if self.topology_groups:
             for group in self.topology_groups:
-                layers_in_group = [find_layer(ln) for ln in group if isinstance(find_layer(ln), nn.Conv2d)]
-                for m in layers_in_group: processed_layers.add(m)
+                layers = [find_layer(ln) for ln in group if isinstance(find_layer(ln), (nn.Conv2d, nn.Linear))]
+                if not layers: continue
+                for m in layers: processed_layers.add(m)
                 
-                if layers_in_group:
-                    num_channels = layers_in_group[0].weight.shape[0]
-                    # 레이어 내 상대적 중요도 계산
-                    for i in range(num_channels):
-                        g_score = sum((m.grad_ema[i] + self.lambda_h * m.hessian_score[i]).item() for m in layers_in_group)
-                        g_cost = sum(m.weight.nelement() / m.weight.shape[0] for m in layers_in_group)
-                        
-                        all_unit_scores.append(g_score)
-                        all_unit_costs.append(g_cost)
-                        unit_metadata.append((layers_in_group, i))
+                # 그룹 위상 산출 (평균 EMA)
+                w_g = torch.mean(torch.stack([m.grad_ema.mean() for m in layers])).item()
+                group_info_list.append({'layers': layers, 'w_g': w_g, 'is_group': True})
 
-        # 독립 레이어 처리
+        # 독립 레이어들도 그룹으로 취급하여 추가
         for m in self.layers:
             if m not in processed_layers:
-                num_channels = m.weight.shape[0]
-                unit_cost = m.weight.nelement() / num_channels
-                combined_scores = m.grad_ema + (self.lambda_h * m.hessian_score)
-                for i in range(num_channels):
-                    all_unit_scores.append(combined_scores[i].item())
-                    all_unit_costs.append(unit_cost)
-                    unit_metadata.append(([m], i))
+                group_info_list.append({'layers': [m], 'w_g': m.grad_ema.mean().item(), 'is_group': False})
 
-        # 3. Stage 3: Lagrangian Optimization 실행
+        # 2. 위상 기준 하위 그룹 선별 (Hessian 대상)
+        group_info_list.sort(key=lambda x: x['w_g'])
+        target_ratio = self.config['strategy'].get('hessian_target_ratio', 0.5) # 하위 50%
+        num_targets = int(len(group_info_list) * target_ratio)
+        
+        target_groups = group_info_list[:num_targets]
+        protected_groups = group_info_list[num_targets:]
+
+        # 3. 선별된 타겟 그룹 파라미터만 헤시안 계산
+        target_params = []
+        for g in target_groups:
+            for m in g['layers']:
+                target_params.append(m.weight)
+
+        K = self.config['strategy'].get('k_horizon', 10)
+        # 엔진에서 특정 파라미터만 HVP 수행 (VRAM 대폭 절약)
+        hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, K)
+
+        # 4. 최종 유닛별 점수(Score)와 비용(Cost) 구성
+        all_unit_scores = []
+        all_unit_costs = []
+        unit_metadata = []
+
+        # [Case A] 타겟 그룹: W_g * s_gc (Hessian 반영)
+        hv_idx = 0
+        for g in target_groups:
+            for m in g['layers']:
+                hv = hv_list[hv_idx]
+                h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
+                if h_energy.max() > 0:
+                    h_energy /= (h_energy.max() + 1e-8)
+                m.hessian_score.copy_(h_energy)
+                hv_idx += 1
+
+            num_channels = g['layers'][0].weight.shape[0]
+            for i in range(num_channels):
+                s_gc = sum(m.hessian_score[i].item() for m in g['layers'])
+                all_unit_scores.append(g['w_g'] * s_gc) # 계층적 곱셈
+                all_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers']))
+                unit_metadata.append((g['layers'], i))
+
+        # [Case B] 보호 그룹: 헤시안 생략, 높은 보존 점수 부여
+        for g in protected_groups:
+            num_channels = g['layers'][0].weight.shape[0]
+            for i in range(num_channels):
+                # 헤시안 검사 없이 위상 점수로만 생존권 보장 (고정 가중치 1.0 적용)
+                all_unit_scores.append(g['w_g'] * 1.0) 
+                all_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers']))
+                unit_metadata.append((g['layers'], i))
+
+        # 5. Lagrangian Optimization (m* = argmax V(m))
         scores_np = np.array(all_unit_scores)
         costs_np = np.array(all_unit_costs)
 
@@ -125,16 +146,13 @@ class PDTPruner(BasePruner):
             target_ratio = self.config['strategy'].get('target_ratio', 0.6)
             memory_budget = np.sum(costs_np) * (1.0 - target_ratio)
 
-        # 라그랑주 엔진 호출
         optimal_mask_flags = lagrangian_optimization(scores_np, costs_np, memory_budget)
 
-        # 4. 결과 적용 및 정확도 방어 (Connectivity 보존)
+        # 6. 마스크 적용
         with torch.no_grad():
             for m in self.layers:
                 m.mask.fill_(0.0)
             
-            # [FIX] 각 유닛별로 강제 생존 조건 체크
-            # 점수가 상위 10% 안에 들면 optimal_mask_flags와 상관없이 살리는 로직을 적용할 수도 있음
             active_count = 0
             for idx, is_alive in enumerate(optimal_mask_flags):
                 if is_alive:
@@ -143,10 +161,5 @@ class PDTPruner(BasePruner):
                         layer_obj.mask[channel_idx] = 1.0
                     active_count += 1
 
-        print(f"[PDT] Pruning Done. Active Topology Units: {active_count}/{len(all_unit_scores)}")
-
-    @torch.no_grad()
-    def get_current_sparsity(self):
-        total_params = sum(m.weight.nelement() for m in self.layers)
-        active_params = sum(m.mask.sum().item() * (m.weight.nelement() / m.weight.shape[0]) for m in self.layers)
-        return (1 - active_params / total_params) * 100 if total_params > 0 else 0.0
+        print(f"[PDT] Conditional Pruning Done. Target Groups: {num_targets}, Active Units: {active_count}/{len(all_unit_scores)}")
+        torch.cuda.empty_cache()
