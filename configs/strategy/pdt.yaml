@@ -1,0 +1,12 @@
+strategy:
+  name: "pdt"
+  start_epoch: 50
+  method: "PDT-Blackwell-Custom"
+  ema_decay: 0.95
+  lambda_h: 0.1
+  hessian_iter: 10
+  k_horizon: 25
+  #삭제
+  hessian_target_ratio: 0.7
+  #보존 
+  target_ratio: 0.4
