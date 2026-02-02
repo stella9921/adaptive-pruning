@@ -8,7 +8,7 @@ class PATPruner(BasePruner):
     def __init__(self, model, config, sensitivity_si):
         super().__init__(model, config)
         self.sensitivity_si = sensitivity_si  # 사전 계산된 민감도 {block_name: si}
-        self.global_target = config['strategy']['target_ratio']
+        self.global_target = config['strategy']['channel_keep_ratio']
         
         # 모델별 프루닝 가능 블록 찾기
         self.prunable_blocks = find_prunable_blocks(model, config['model']['name'])
@@ -37,7 +37,7 @@ class PATPruner(BasePruner):
                 ratio = ratios.get(name, 0.0)
                 
                 # 수치가 0~100 사이일 경우 0~1 사이로 변환
-                target_ratio = min(ratio / 100.0, 0.99) if ratio > 1 else ratio
+                channel_keep_ratio = min(ratio / 100.0, 0.99) if ratio > 1 else ratio
                 
                 # 2. 중요도(L1-norm) 기반 필터 선택
                 # ResNet/VGG 등 모델 구조에 맞춰 가중치 텐서 추출
@@ -53,7 +53,7 @@ class PATPruner(BasePruner):
                 
                 # 남길 채널 개수 계산 (최소 1개는 유지)
                 num_channels = importance.numel()
-                num_keep = max(1, int(num_channels * (1 - target_ratio)))
+                num_keep = max(1, int(num_channels * (1 - channel_keep_ratio)))
                 
                 # 중요도가 높은 순서대로 인덱스 추출
                 keep_idx = importance.argsort(descending=True)[:num_keep].tolist()
