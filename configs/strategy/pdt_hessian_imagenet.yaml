@@ -1,7 +1,7 @@
 method: "PDT"
 type: "pdt_hessian"
 ema_decay: 0.99        # 데이터가 많으므로 과거 그라디언트를 더 오래 축적 (0.9 -> 0.99)
-target_ratio: 0.6      # 60% 프루닝 목표 유지
+channel_keep_ratio: 0.6      # 60% 프루닝 목표 유지
 
 # 실행 시점 전략
 # 이미지넷은 데이터가 많아 EMA가 금방 쌓이므로 0~10에폭 사이에 시작해도 됩니다.

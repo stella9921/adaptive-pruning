@@ -1,7 +1,7 @@
 method: "PDT"
 type: "grad_ema"
 ema_decay: 0.9        # 논문 α = 0.9
-target_ratio: 0.4     # 목표 압축률 40%
+channel_keep_ratio: 0.4     # 목표 압축률 40%
 start_epoch: 25
 prune_every: 15
 min_keep_ratio: 0.2
