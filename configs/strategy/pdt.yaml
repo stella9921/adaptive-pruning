@@ -1,5 +1,5 @@
 strategy:
-  name: "pdt"
+  method: "pdt"
   start_epoch: 50
   method: "PDT-Blackwell-Custom"
   ema_decay: 0.95
@@ -7,7 +7,7 @@ strategy:
   hessian_iter: 10
   k_horizon: 25
   #그룹 선정 비율
-  group_selection_ratio: 0.8
+  group_selection_ratio: 0.9
   #최종적으로 생존 채널 비율 
   channel_keep_ratio: 0.9
   min_survival_ratio: 0.3
