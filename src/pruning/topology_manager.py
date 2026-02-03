@@ -5,19 +5,21 @@ import torch.fx as fx
 def get_model_topology(model):
     """
     모델의 구조를 분석하여 의존성이 있는 레이어들을 그룹화합니다.
-    EfficientNet의 경우 MBConv 블록 단위의 16개 그룹 전략을 우선 적용합니다.
+    - EfficientNet: MBConv 블록 단위 전략
+    - VGG: Conv 채널 일치 그룹 + Classifier Linear 레이어 독립 그룹
+    - ResNet 등: FX Graph 분석 기반 Residual Topology
     """
     model_name = model.__class__.__name__.lower()
     groups = []
     
-    # 1. EfficientNet 계열 (16개 MBConv 블록 수동 매핑)
+    # 1. EfficientNet 계열
     if "efficientnet" in model_name:
         print(f"\n[Stage 1] Applying MBConv Block-wise Topology for {model_name}...")
         groups = _get_efficientnet_topology(model)
 
-    # 2. VGG 계열 (Sequential 구조)
+    # 2. VGG 계열 (Sequential + Classifier 확장)
     elif "vgg" in model_name:
-        print(f"\n[Stage 1] Analyzing VGG-style Channel Topology for {model_name}...")
+        print(f"\n[Stage 1] Analyzing VGG-style Topology (Conv + Classifier) for {model_name}...")
         groups = _get_vgg_topology(model)
     
     # 3. 기타 (ResNet 등 Residual/Add 구조) - FX 활용
@@ -27,7 +29,6 @@ def get_model_topology(model):
 
     # --- [공통 로그 출력 및 필터링 로직] ---
     final_groups = []
-    all_modules = dict(model.named_modules())
 
     if groups:
         print(f"\n{'='*20} Final Topology Groups {'='*20}")
@@ -35,15 +36,14 @@ def get_model_topology(model):
             valid_sub_group = []
             channels = "N/A"
             
-            # 각 그룹 시드(예: 'features.1.0')를 바탕으로 하위 레이어를 모두 수집
+            # 각 그룹 시드(레이어 이름)를 바탕으로 Conv, Linear, BN을 하나의 그룹으로 수집
             for seed in group_seeds:
                 for name, module in model.named_modules():
-                    # 시드 이름으로 시작하는 모든 Conv, Linear, BN을 하나의 그룹으로 묶음
-                    if name.startswith(seed):
+                    if name == seed or name.startswith(seed + "."):
                         if isinstance(module, (nn.Conv2d, nn.Linear, nn.BatchNorm2d)):
                             valid_sub_group.append(name)
                             
-                            # 채널 수 추출 (가장 먼저 발견되는 값 사용)
+                            # 채널(혹은 피처) 수 추출
                             if channels == "N/A":
                                 if hasattr(module, 'out_channels'):
                                     channels = module.out_channels
@@ -53,11 +53,10 @@ def get_model_topology(model):
                                     channels = module.num_features
 
             if valid_sub_group:
-                # 중복 제거 및 정렬
                 valid_sub_group = sorted(list(set(valid_sub_group)))
                 final_groups.append(valid_sub_group)
                 
-                # 출력 가독성을 위해 레이어 리스트 요약
+                # 가독성을 위한 출력
                 display_layers = f"{valid_sub_group[0]} ... ({len(valid_sub_group)} layers)"
                 print(f" Group {len(final_groups):2d} | Channels: {str(channels):>4} | Layers: {display_layers}")
         
@@ -69,26 +68,24 @@ def get_model_topology(model):
     return final_groups
 
 def _get_efficientnet_topology(model):
-    """
-    EfficientNet-B0의 16개 MBConv 블록 구조를 수동으로 정의합니다.
-    """
-    # MBConv 블록의 베이스 경로만 지정하면 공통 로직에서 하위 레이어(0, 1, 2, 3)를 다 긁어옵니다.
+    """EfficientNet-B0의 MBConv 블록 구조 수동 정의"""
     eb0_blocks = [
-        ['features.1.0'], # Group 1
-        ['features.2.0'], ['features.2.1'], # Group 2, 3
-        ['features.3.0'], ['features.3.1'], # Group 4, 5
-        ['features.4.0'], ['features.4.1'], ['features.4.2'], # Group 6, 7, 8
-        ['features.5.0'], ['features.5.1'], ['features.5.2'], # Group 9, 10, 11
-        ['features.6.0'], ['features.6.1'], ['features.6.2'], ['features.6.3'], # 12, 13, 14, 15
-        ['features.7.0'], # Group 16
+        ['features.1.0'], ['features.2.0'], ['features.2.1'], 
+        ['features.3.0'], ['features.3.1'], ['features.4.0'], 
+        ['features.4.1'], ['features.4.2'], ['features.5.0'], 
+        ['features.5.1'], ['features.5.2'], ['features.6.0'], 
+        ['features.6.1'], ['features.6.2'], ['features.6.3'], 
+        ['features.7.0'],
     ]
     return eb0_blocks
 
 def _get_vgg_topology(model):
+    """VGG의 Conv 레이어 그룹화 및 Classifier(Linear) 레이어 추가"""
     groups = []
     current_group = []
     last_out_channels = -1
     
+    # --- Part A: Convolutional Layers ---
     for name, m in model.named_modules():
         if isinstance(m, nn.Conv2d):
             curr_out_channels = m.out_channels
@@ -101,9 +98,28 @@ def _get_vgg_topology(model):
                 last_out_channels = curr_out_channels
     if current_group:
         groups.append(current_group)
+
+    # --- Part B: Classifier(Linear) Layers ---
+    # 파라미터 비중이 큰 Linear 층을 추가하여 전체 Sparsity를 확보합니다.
+    print("[Stage 1] Adding Classifier Linear layers to VGG groups...")
+    for name, m in model.named_modules():
+        if isinstance(m, nn.Linear):
+            # 마지막 출력층(보통 classifier.6)은 클래스 분류를 위해 보존 (프루닝 제외)
+            # 이름에 '6'이 들어있거나 'fc_out' 등 마지막을 뜻하는 키워드 필터링
+            is_last_layer = "6" in name or "fc_out" in name or "classifier.6" in name
+            
+            if is_last_layer:
+                print(f" [System] Identified final output layer (Skipping): {name}")
+                continue
+            
+            # Linear 층은 각각 독립된 그룹으로 추가
+            groups.append([name])
+            print(f" [System] Linear layer group added: {name}")
+
     return groups
 
 def _get_residual_topology(model):
+    """FX를 활용한 Residual 연결 구조 분석"""
     try:
         traced = fx.symbolic_trace(model)
         graph = traced.graph

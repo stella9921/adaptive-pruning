@@ -97,6 +97,17 @@ def main():
     # 3. 전략에 따른 실행 분기
     strategy_method = config['strategy'].get('method', 'pdt').lower()
 
+    # if strategy_method == 'pat':
+    #     import torchvision.models as tv_models
+    #     print(">>> [System] PAT Mode: Loading Torchvision Pretrained Weights for Sensitivity Analysis...")
+    #     pretrained_vgg = tv_models.vgg16(weights=tv_models.VGG16_Weights.IMAGENET1K_V1)
+    #     model.load_state_dict(pretrained_vgg.state_dict(), strict=False)
+    #     print("✅ Pretrained Weights Loaded for PAT only.")
+    # else:
+    #     print(">>> [System] PDT Mode: Starting from Scratch (No Pretrained Weights).")
+
+
+
     if strategy_method == 'pat':
         execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args)
     elif strategy_method == 'pdt':
@@ -193,8 +204,27 @@ def execute_pat_experiment(model, config, train_loader, val_loader, test_loader,
     base_ckpt_path = os.path.join(checkpoint_dir, f"{config['model']['name']}_base.pth")
     
     if not os.path.exists(base_ckpt_path):
-        print(f">>> [System] Saving base weights for sensitivity analysis to {base_ckpt_path}")
+        print(f"\n>>> [PAT Pre-train] Base weights not found. Training for 120 epochs first...")
+        optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
+        # CIFAR-100 정석 스케줄러 (Cos-Annealing)
+        scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=120)
+        criterion = nn.CrossEntropyLoss()
+
+        for epoch in range(1, 121):
+            # 기존에 main.py에 정의된 train_one_epoch와 evaluate 함수 활용
+            train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+            val_acc = evaluate(model, val_loader, device)
+            scheduler.step()
+            
+            if epoch % 10 == 0 or epoch == 1:
+                print(f" [Pre-train] Epoch {epoch}/120 | Loss: {train_loss:.4f} | Acc: {val_acc:.2f}%")
+        
+        # 학습 완료된 '똑똑한 모델' 저장
         torch.save(model.state_dict(), base_ckpt_path)
+        print(f"✅ Pre-training complete. Saved to {base_ckpt_path}")
+    else:
+        print(f">>> [System] Found existing base model at {base_ckpt_path}. Loading for PAT...")
+        model.load_state_dict(torch.load(base_ckpt_path, map_location=device))
     
     si_data = maybe_load_or_compute_sensitivity(config, train_loader, test_loader, device)
     pat_engine = PATPruner(model, config, si_data, topology_groups=topology_groups)
