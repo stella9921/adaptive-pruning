@@ -148,7 +148,7 @@ class PDTPruner(BasePruner):
                 for i in alive_indices:
                     # [핵심 수정] 현재 채널 인덱스 i가 레이어의 점수 배열 크기 안에 있을 때만 합산
                     s_gc_list = [m.hessian_score[i].item() for m in g['layers'] if i < m.hessian_score.size(0)]
-                    s_gc = sum(s_gc_list) if s_gc_list else 0.0
+                    s_gc = sum(s_gc_list)/len(s_gc_list) if s_gc_list else 0.0
                     
                     raw_score = g['w_g'] * (s_gc * self.lambda_h)
                     current_group_raw_scores.append(raw_score)

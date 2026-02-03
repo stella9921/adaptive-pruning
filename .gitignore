@@ -2,3 +2,6 @@ data/
 __pycache__/
 *.pyc
 results/logs/
+exp/checkpoints/*.pth
+exp/checkpoints/*.json
+Analyzing
