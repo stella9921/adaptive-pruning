@@ -95,7 +95,7 @@ def main():
     topology_groups = get_model_topology(model)
 
     # 3. 전략에 따른 실행 분기
-    strategy_method = config['strategy'].get('name', 'pdt').lower()
+    strategy_method = config['strategy'].get('method', 'pdt').lower()
 
     if strategy_method == 'pat':
         execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args)
@@ -186,7 +186,16 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         val_acc = evaluate(model, val_loader, device)
         print(f"Epoch {epoch}/{total_epochs} | Loss: {total_loss/len(train_loader):.4f} | Val Acc: {val_acc:.2f}%")
 
-def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups):
+def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args):
+    
+    checkpoint_dir = config.get('save_dir', './exp/checkpoints')
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    base_ckpt_path = os.path.join(checkpoint_dir, f"{config['model']['name']}_base.pth")
+    
+    if not os.path.exists(base_ckpt_path):
+        print(f">>> [System] Saving base weights for sensitivity analysis to {base_ckpt_path}")
+        torch.save(model.state_dict(), base_ckpt_path)
+    
     si_data = maybe_load_or_compute_sensitivity(config, train_loader, test_loader, device)
     pat_engine = PATPruner(model, config, si_data, topology_groups=topology_groups)
     prune_fn = get_prune_fn(config['model']['name'])
