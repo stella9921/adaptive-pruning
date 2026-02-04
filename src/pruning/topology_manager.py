@@ -80,39 +80,40 @@ def _get_efficientnet_topology(model):
     return eb0_blocks
 
 def _get_vgg_topology(model):
-    """VGG의 Conv 레이어 그룹화 및 Classifier(Linear) 레이어 추가"""
+    """
+    VGG의 Conv 레이어 그룹화 (최대 3개씩 세분화) 및 Classifier(Linear) 레이어 추가
+    """
     groups = []
     current_group = []
     last_out_channels = -1
+    max_layers_per_group = 3  # [수정] 한 그룹에 너무 많은 레이어가 묶이지 않도록 제한 (불균형 해소)
     
     # --- Part A: Convolutional Layers ---
     for name, m in model.named_modules():
         if isinstance(m, nn.Conv2d):
             curr_out_channels = m.out_channels
-            if curr_out_channels == last_out_channels:
+            
+            # 채널이 같고, 현재 그룹의 레이어 수가 3개 미만인 경우에만 같은 그룹으로 유지
+            if curr_out_channels == last_out_channels and len(current_group) < max_layers_per_group:
                 current_group.append(name)
             else:
                 if current_group:
                     groups.append(current_group)
                 current_group = [name]
                 last_out_channels = curr_out_channels
+                
     if current_group:
         groups.append(current_group)
 
     # --- Part B: Classifier(Linear) Layers ---
-    # 파라미터 비중이 큰 Linear 층을 추가하여 전체 Sparsity를 확보합니다.
     print("[Stage 1] Adding Classifier Linear layers to VGG groups...")
     for name, m in model.named_modules():
         if isinstance(m, nn.Linear):
-            # 마지막 출력층(보통 classifier.6)은 클래스 분류를 위해 보존 (프루닝 제외)
-            # 이름에 '6'이 들어있거나 'fc_out' 등 마지막을 뜻하는 키워드 필터링
             is_last_layer = "6" in name or "fc_out" in name or "classifier.6" in name
-            
             if is_last_layer:
                 print(f" [System] Identified final output layer (Skipping): {name}")
                 continue
             
-            # Linear 층은 각각 독립된 그룹으로 추가
             groups.append([name])
             print(f" [System] Linear layer group added: {name}")
 
