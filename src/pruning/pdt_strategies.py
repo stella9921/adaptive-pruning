@@ -364,3 +364,85 @@ class SNOWSPruner(PDTPruner):
             print(f" Group {g['id']:2d}      | {alive:4d}/{total:4d}      | {sparsity:>7.1f}%")
         print(f"{'='*89}\n")
         torch.cuda.empty_cache()
+
+
+
+
+    # ==============================================================================
+# ATO (AutoTrainOnce - Magnitude based) 비교 실험용 Pruner
+# ==============================================================================
+class ATOPruner(PDTPruner):
+    """
+    ATO 논문의 핵심 개념: Magnitude(L1-norm) 기반 점진적 프루닝
+    Hessian을 계산하지 않고, 가중치의 크기(L1-norm)를 중요도로 사용합니다.
+    """
+    def step_pruning(self, loss, current_epoch, total_epochs):
+        all_modules = dict(self.model.named_modules())
+        def find_layer(name):
+            if name in all_modules: return all_modules[name]
+            return all_modules.get(name.replace('_', '.'))
+
+        progress = current_epoch / total_epochs
+        total_target_keep_ratio = 1.0 - (progress * (1.0 - self.final_keep_ratio))
+        
+        group_info_list = []
+        if self.topology_groups:
+            for idx, group in enumerate(self.topology_groups):
+                score_layers = [find_layer(ln) for ln in group if isinstance(find_layer(ln), (nn.Conv2d, nn.Linear))]
+                if not score_layers: continue
+                group_info_list.append({'id': idx+1, 'layers': score_layers, 'names': group})
+
+        if not group_info_list: return
+
+        target_unit_scores = []
+        target_unit_costs = []
+        target_unit_metadata = []
+
+        # [ATO 핵심] Hessian 대신 L1-norm(Magnitude) 계산
+        for g in group_info_list:
+            mask = g['layers'][0].mask
+            alive_indices = torch.where(mask > 0.5)[0].cpu().numpy()
+            
+            # 그룹 내 모든 레이어의 Magnitude를 합산하여 중요도 판단
+            # 가중치의 절대값 평균이 낮을수록 덜 중요하다는 ATO의 논리 반영
+            magnitude_scores = []
+            for m in g['layers']:
+                # (out_channels, in_channels, k, k) -> (out_channels,)
+                m_score = m.weight.data.abs().reshape(m.weight.shape[0], -1).mean(1)
+                magnitude_scores.append(m_score)
+            
+            group_magnitude = torch.mean(torch.stack(magnitude_scores), dim=0)
+
+            if len(alive_indices) > 0:
+                for i in alive_indices:
+                    # 해당 채널의 Magnitude 점수
+                    s_gc = group_magnitude[i].item()
+                    
+                    target_unit_scores.append(s_gc) 
+                    target_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers']))
+                    target_unit_metadata.append((g, i))
+
+        # 라그랑주 최적화는 공정성을 위해 동일하게 적용
+        current_sparsity = self.get_current_sparsity() / 100.0
+        current_alive_ratio = 1.0 - current_sparsity
+        pruned_count = 0
+
+        if current_alive_ratio > total_target_keep_ratio and target_unit_scores:
+            incremental_keep_ratio = total_target_keep_ratio / current_alive_ratio
+            total_budget = np.sum(target_unit_costs) * incremental_keep_ratio
+            optimal_mask_flags = lagrangian_optimization(np.array(target_unit_scores), np.array(target_unit_costs), total_budget)
+
+            with torch.no_grad():
+                for idx, is_alive in enumerate(optimal_mask_flags):
+                    if not is_alive:
+                        group_obj, channel_idx = target_unit_metadata[idx]
+                        for ln in group_obj['names']:
+                            layer_obj = find_layer(ln)
+                            if layer_obj is not None and hasattr(layer_obj, 'mask'):
+                                if channel_idx < layer_obj.mask.size(0):
+                                    layer_obj.mask[channel_idx] = 0.0
+                        pruned_count += 1
+
+        print(f"\n{'='*30} ATO (Magnitude) Comparison: Epoch {current_epoch} {'='*30}")
+        print(f" [*] Method: ATO (L1-norm) | Pruned: {pruned_count}")
+        # ... (결과 출력 생략 - PDT와 동일)
