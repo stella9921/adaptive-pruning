@@ -136,9 +136,7 @@ class PDTPruner(BasePruner):
                     
                     # [비교 포인트] PDT 수식: Grad EMA * (Hessian Score * Lambda)
                     raw_score = g['w_g'] * (s_gc * self.lambda_h)
-                    current_group_raw_scores = [] # (위 루프 밖에서 초기화 필요) - 아래 보정됨
                     
-                    # (코드 흐름상 target_unit_scores 추가 부분)
                     target_unit_scores.append(raw_score) 
                     target_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers']))
                     target_unit_metadata.append((g, i))
@@ -179,6 +177,7 @@ class PDTPruner(BasePruner):
             total, alive = m.mask.numel(), int(m.mask.sum().item())
             sparsity = (1 - alive/total) * 100
             h_avg = g['layers'][0].hessian_score.mean().item() if g['id'] in target_group_ids else 0.0
+            
             status = "TARGET" if g['id'] in target_group_ids else "FIXED"
             if (alive/total) <= self.min_survival_ratio: status = "MIN-SURV"
             print(f" Group {g['id']:2d}      | {alive:4d}/{total:4d}      | {sparsity:>7.1f}% | {h_avg:>12.6f} | [{status}]")
@@ -197,7 +196,6 @@ class PDTPruner(BasePruner):
 class HAPPruner(PDTPruner):
     """
     HAP 논문의 핵심 로직: Sensitivity = 1 / Hessian_Trace
-    현수님의 Topology Framework 내에서 HAP의 점수 계산 수식만 적용하여 비교합니다.
     """
     def step_pruning(self, loss, current_epoch, total_epochs):
         all_modules = dict(self.model.named_modules())
@@ -217,7 +215,6 @@ class HAPPruner(PDTPruner):
 
         if not group_info_list: return
 
-        # [HAP 핵심] 모든 그룹을 대상으로 Hessian 계산
         target_params = [m.weight for g in group_info_list for m in g['layers']]
         hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, self.k_horizon)
 
@@ -230,28 +227,22 @@ class HAPPruner(PDTPruner):
             mask = g['layers'][0].mask
             alive_indices = torch.where(mask > 0.5)[0].cpu().numpy()
             
-            # HAP 방식 레이어별 스코어 (Hessian Trace의 역수 개념 적용)
             for m in g['layers']:
                 hv = hv_list[hv_idx]
-                # Hessian Energy (Trace 근사치)
                 h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
-                # [HAP 수식] Sensitivity = 1 / (Hessian + EPS)
-                # 중요도가 낮을수록(Hessian이 작을수록) 점수가 높아져서 먼저 제거됨
+                # HAP 수식: 역수 취함 (중요도 낮은걸 더 높은 점수로 만들어 자름)
                 hap_sens = 1.0 / (h_energy + 1e-8)
                 m.hessian_score.copy_(hap_sens)
                 hv_idx += 1
 
             if len(alive_indices) > 0:
                 for i in alive_indices:
-                    # 그룹 내 레이어들의 HAP 민감도 평균
                     s_gc_list = [m.hessian_score[i].item() for m in g['layers'] if i < m.hessian_score.size(0)]
                     s_gc = sum(s_gc_list)/len(s_gc_list) if s_gc_list else 0.0
-                    
                     target_unit_scores.append(s_gc) 
                     target_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers']))
                     target_unit_metadata.append((g, i))
 
-        # 이후 라그랑주 최적화 과정은 PDT와 동일 (공정한 자원 배분)
         current_sparsity = self.get_current_sparsity() / 100.0
         current_alive_ratio = 1.0 - current_sparsity
         pruned_count = 0
@@ -273,6 +264,103 @@ class HAPPruner(PDTPruner):
                         pruned_count += 1
 
         print(f"\n{'='*30} HAP Comparison Pruning: Epoch {current_epoch} {'='*30}")
-        print(f" [*] Method: HAP (1/Hessian) | Pruned: {pruned_count}")
-        # ... (결과 출력 생략 - PDT와 동일 포맷)
+        print(f" [*] Method: HAP (Inverse Hessian) | Pruned: {pruned_count}")
+        
+        group_info_list.sort(key=lambda x: x['id'])
+        for g in group_info_list:
+            m = g['layers'][0]
+            total, alive = m.mask.numel(), int(m.mask.sum().item())
+            sparsity = (1 - alive/total) * 100
+            print(f" Group {g['id']:2d}      | {alive:4d}/{total:4d}      | {sparsity:>7.1f}%")
+        print(f"{'='*89}\n")
+        torch.cuda.empty_cache()
+
+
+# ==============================================================================
+# SNOWS (Hessian Trace) 비교 실험용 Pruner
+# ==============================================================================
+class SNOWSPruner(PDTPruner):
+    """
+    SNOWS 논문의 정석 로직: 중요도 = 순수 Hessian_Trace
+    (Grad EMA 보정 없이 순수한 현재 배치의 Hessian 에너지만 사용)
+    """
+    def step_pruning(self, loss, current_epoch, total_epochs):
+        all_modules = dict(self.model.named_modules())
+        def find_layer(name):
+            if name in all_modules: return all_modules[name]
+            return all_modules.get(name.replace('_', '.'))
+
+        progress = current_epoch / total_epochs
+        total_target_keep_ratio = 1.0 - (progress * (1.0 - self.final_keep_ratio))
+        
+        group_info_list = []
+        if self.topology_groups:
+            for idx, group in enumerate(self.topology_groups):
+                score_layers = [find_layer(ln) for ln in group if isinstance(find_layer(ln), (nn.Conv2d, nn.Linear))]
+                if not score_layers: continue
+                group_info_list.append({'id': idx+1, 'layers': score_layers, 'names': group})
+
+        if not group_info_list: return
+
+        # [SNOWS 핵심] 모든 그룹을 대상으로 Hessian Trace 계산
+        target_params = [m.weight for g in group_info_list for m in g['layers']]
+        hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, self.k_horizon)
+
+        target_unit_scores = []
+        target_unit_costs = []
+        target_unit_metadata = []
+
+        hv_idx = 0
+        for g in group_info_list:
+            mask = g['layers'][0].mask
+            alive_indices = torch.where(mask > 0.5)[0].cpu().numpy()
+            
+            for m in g['layers']:
+                hv = hv_list[hv_idx]
+                # SNOWS의 핵심 지표: Hessian Trace 근사치 (H-Vector Product의 2-norm)
+                h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
+                m.hessian_score.copy_(h_energy)
+                hv_idx += 1
+
+            if len(alive_indices) > 0:
+                for i in alive_indices:
+                    # SNOWS 방식 레이어별 스코어 (Grad EMA 곱하지 않고 순수 Hessian만 합산)
+                    s_gc_list = [m.hessian_score[i].item() for m in g['layers'] if i < m.hessian_score.size(0)]
+                    s_gc = sum(s_gc_list)/len(s_gc_list) if s_gc_list else 0.0
+                    
+                    target_unit_scores.append(s_gc) 
+                    target_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers']))
+                    target_unit_metadata.append((g, i))
+
+        current_sparsity = self.get_current_sparsity() / 100.0
+        current_alive_ratio = 1.0 - current_sparsity
+        pruned_count = 0
+
+        if current_alive_ratio > total_target_keep_ratio and target_unit_scores:
+            incremental_keep_ratio = total_target_keep_ratio / current_alive_ratio
+            total_budget = np.sum(target_unit_costs) * incremental_keep_ratio
+            # 공정한 비교를 위해 동일한 최적화 엔진(Lagrangian) 사용
+            optimal_mask_flags = lagrangian_optimization(np.array(target_unit_scores), np.array(target_unit_costs), total_budget)
+
+            with torch.no_grad():
+                for idx, is_alive in enumerate(optimal_mask_flags):
+                    if not is_alive:
+                        group_obj, channel_idx = target_unit_metadata[idx]
+                        for ln in group_obj['names']:
+                            layer_obj = find_layer(ln)
+                            if layer_obj is not None and hasattr(layer_obj, 'mask'):
+                                if channel_idx < layer_obj.mask.size(0):
+                                    layer_obj.mask[channel_idx] = 0.0
+                        pruned_count += 1
+
+        print(f"\n{'='*30} SNOWS Comparison Pruning: Epoch {current_epoch} {'='*30}")
+        print(f" [*] Method: SNOWS (Pure Hessian Trace) | Pruned: {pruned_count}")
+        
+        group_info_list.sort(key=lambda x: x['id'])
+        for g in group_info_list:
+            m = g['layers'][0]
+            total, alive = m.mask.numel(), int(m.mask.sum().item())
+            sparsity = (1 - alive/total) * 100
+            print(f" Group {g['id']:2d}      | {alive:4d}/{total:4d}      | {sparsity:>7.1f}%")
+        print(f"{'='*89}\n")
         torch.cuda.empty_cache()
