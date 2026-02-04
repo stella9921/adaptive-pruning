@@ -115,6 +115,10 @@ def main():
 
 
 def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups, args):
+    # --- [0] 저장 경로 설정 (추가됨) ---
+    checkpoint_dir = config.get('save_dir', './exp/checkpoints')
+    os.makedirs(checkpoint_dir, exist_ok=True)
+
     # --- [1] CLI 인자가 YAML 설정을 덮어쓰도록 우선 적용 ---
     strat_cfg = config.get('strategy', {})
     if args.group_selection_ratio is not None:
@@ -124,9 +128,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     if args.min_survival_ratio is not None:
         strat_cfg['min_survival_ratio'] = args.min_survival_ratio
     
-    config['strategy'] = strat_cfg # 갱신된 설정 반영
+    config['strategy'] = strat_cfg 
 
-    # --- [2] Pruner 전략 분기 및 엔진 생성 (여기가 핵심!) ---
+    # --- [2] Pruner 전략 분기 및 엔진 생성 ---
     strategy_type = getattr(args, 'strategy', 'pdt').lower()
 
     if strategy_type == 'hap':
@@ -139,8 +143,6 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         pdt_engine = PDTPruner(model, config, args, topology_groups)
         print("[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)")
 
-    # ⚠️ 주의: 여기서 pdt_engine = PDTPruner(...)를 다시 호출하면 안 됩니다! ⚠️
-
     # --- [3] 학습 설정 준비 ---
     model_cfg = config.get('model', {})
     optimizer = optim.SGD(model.parameters(), 
@@ -149,7 +151,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                           weight_decay=model_cfg.get('weight_decay', 1e-4))
     criterion = nn.CrossEntropyLoss()
     
-    total_epochs = model_cfg.get('epochs', 400) # 현수님 설정에 맞춰 400 권장
+    total_epochs = model_cfg.get('epochs', 400) 
     prune_every = strat_cfg.get('prune_every', 20)
     start_epoch = strat_cfg.get('start_epoch', 120) 
 
@@ -168,27 +170,29 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             output = model(x)
             loss = criterion(output, y)
             
-            # 프루닝 시점 판정
             is_hessian_step = (epoch >= start_epoch and (epoch - start_epoch) % prune_every == 0 and batch_idx == 0)
             
             if is_hessian_step:
                 optimizer.zero_grad()
                 loss.backward(retain_graph=True) 
-                before_mem = torch.cuda.memory_allocated(device) / (1024 ** 2)
-                print(f"\n>>> [Strategy: {strategy_type.upper()}] Epoch {epoch}: Computing Hessian-Vector Products...")
                 
-                # 선택된 엔진(HAP, SNOWS, PDT 중 하나)으로 프루닝 수행
                 pdt_engine.step_pruning(loss=loss, current_epoch=epoch, total_epochs=total_epochs)
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
                 
+                # ---------------- [추가: 프루닝 시점 저장] ----------------
+                current_sp = pdt_engine.get_current_sparsity()
+                ckpt_name = f"{model_cfg['name']}_{strategy_type}_ep{epoch}_sp{current_sp:.1f}.pth"
+                save_path = os.path.join(checkpoint_dir, ckpt_name)
+                torch.save({
+                    'epoch': epoch,
+                    'model_state_dict': model.state_dict(),
+                    'sparsity': current_sp,
+                }, save_path)
+                print(f"💾 Checkpoint saved: {save_path}")
+                # -------------------------------------------------------
+
                 torch.cuda.empty_cache()
-                after_mem = torch.cuda.memory_allocated(device) / (1024 ** 2)
-                
-                print(f"[Resource Check] Memory: {before_mem:.2f}MB -> {after_mem:.2f}MB (Reduction: {before_mem - after_mem:.2f}MB)")
                 analyze_topology_and_profiling(model, device, config, tag=f"{strategy_type.upper()} Epoch {epoch} Update")
-                print(f">>>> Current Model Sparsity: {pdt_engine.get_current_sparsity():.2f}%")
-                
-                torch.cuda.empty_cache()
             else:
                 loss.backward()
             
@@ -196,12 +200,17 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             
-            # 매 스텝마다 마스크를 적용하여 죽은 채널 고정
             pdt_engine.apply_mask_to_weights()
             total_loss += loss.item()
 
         val_acc = evaluate(model, val_loader, device)
         print(f"Epoch {epoch}/{total_epochs} | Loss: {total_loss/len(train_loader):.4f} | Val Acc: {val_acc:.2f}%")
+
+    # ---------------- [추가: 최종 학습 완료 저장] ----------------
+    final_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_final.pth")
+    torch.save(model.state_dict(), final_path)
+    print(f"🏁 Final Model Saved: {final_path}")
+    # ----------------------------------------------------------
 
 def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args):
     
