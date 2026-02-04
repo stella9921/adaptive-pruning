@@ -15,7 +15,7 @@ from src.data.dataloader import get_dataloaders
 from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
-from src.pruning.pdt_strategies import PDTPruner
+from src.pruning.pdt_strategies import PDTPruner,HAPPruner
 
 def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     """Stage 1(Topology)과 Stage 4(Resource)를 동시에 분석"""
@@ -120,6 +120,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
 
     strat_cfg = config.get('strategy', {})
+    if args.strategy == 'hap':
+        pruner = HAPPruner(model, config, args, topology_groups)
+        print("[System] Using HAP (Hessian-Aware) Comparison Strategy")
+    else:
+        pruner = PDTPruner(model, config, args, topology_groups)
+        print("[System] Using PDT (Our Proposal) Strategy")
 
     # 2. [핵심] CLI 인자가 들어왔다면 YAML 설정을 무시하고 덮어쓰기
     # 이렇게 해야 Pruner 내부로 들어갈 때 CLI 값이 최우선이 됩니다.
