@@ -15,7 +15,7 @@ from src.data.dataloader import get_dataloaders
 from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
-from src.pruning.pdt_strategies import PDTPruner,HAPPruner
+from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner
 
 def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     """Stage 1(Topology)과 Stage 4(Resource)를 동시에 분석"""
@@ -115,20 +115,8 @@ def main():
 
 
 def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups, args):
-    # 1. Pruner 엔진 생성
-    # pdt_engine = PDTPruner(model, config, topology_groups=topology_groups)
-
-
+    # --- [1] CLI 인자가 YAML 설정을 덮어쓰도록 우선 적용 ---
     strat_cfg = config.get('strategy', {})
-    if args.strategy == 'hap':
-        pruner = HAPPruner(model, config, args, topology_groups)
-        print("[System] Using HAP (Hessian-Aware) Comparison Strategy")
-    else:
-        pruner = PDTPruner(model, config, args, topology_groups)
-        print("[System] Using PDT (Our Proposal) Strategy")
-
-    # 2. [핵심] CLI 인자가 들어왔다면 YAML 설정을 무시하고 덮어쓰기
-    # 이렇게 해야 Pruner 내부로 들어갈 때 CLI 값이 최우선이 됩니다.
     if args.group_selection_ratio is not None:
         strat_cfg['group_selection_ratio'] = args.group_selection_ratio
     if args.channel_keep_ratio is not None:
@@ -136,28 +124,41 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     if args.min_survival_ratio is not None:
         strat_cfg['min_survival_ratio'] = args.min_survival_ratio
     
-    # 갱신된 설정을 다시 config에 저장
-    config['strategy'] = strat_cfg
-    pdt_engine = PDTPruner(model, config, args=args, topology_groups=topology_groups)
-    
+    config['strategy'] = strat_cfg # 갱신된 설정 반영
+
+    # --- [2] Pruner 전략 분기 및 엔진 생성 (여기가 핵심!) ---
+    strategy_type = getattr(args, 'strategy', 'pdt').lower()
+
+    if strategy_type == 'hap':
+        pdt_engine = HAPPruner(model, config, args, topology_groups)
+        print("[System] Initializing HAPPruner (Hessian Inverse Strategy)")
+    elif strategy_type == 'snows':
+        pdt_engine = SNOWSPruner(model, config, args, topology_groups)
+        print("[System] Initializing SNOWSPruner (Pure Hessian Trace Strategy)")
+    else:
+        pdt_engine = PDTPruner(model, config, args, topology_groups)
+        print("[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)")
+
+    # ⚠️ 주의: 여기서 pdt_engine = PDTPruner(...)를 다시 호출하면 안 됩니다! ⚠️
+
+    # --- [3] 학습 설정 준비 ---
     model_cfg = config.get('model', {})
-    strategy_cfg = config.get('strategy', {})
-    
     optimizer = optim.SGD(model.parameters(), 
                           lr=model_cfg.get('base_lr', 0.01), 
                           momentum=model_cfg.get('momentum', 0.9), 
                           weight_decay=model_cfg.get('weight_decay', 1e-4))
     criterion = nn.CrossEntropyLoss()
     
-    total_epochs = model_cfg.get('epochs', 200)
-    prune_every = strategy_cfg.get('prune_every', 20)
-    start_epoch = strategy_cfg.get('start_epoch', 50) 
+    total_epochs = model_cfg.get('epochs', 400) # 현수님 설정에 맞춰 400 권장
+    prune_every = strat_cfg.get('prune_every', 20)
+    start_epoch = strat_cfg.get('start_epoch', 120) 
 
-    print(f"\n>>> [Pilot Check] Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
-    analyze_topology_and_profiling(model, device, config, tag="PDT Initial Baseline")
+    print(f"\n>>> [Pilot Check] Strategy: {strategy_type.upper()} | Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
+    analyze_topology_and_profiling(model, device, config, tag="Baseline Before Pruning")
     
+    # --- [4] 메인 학습 루프 ---
     for epoch in range(1, total_epochs + 1):
-        model.train() # 모델을 학습 모드로 설정
+        model.train()
         total_loss = 0.0
         
         for batch_idx, (x, y) in enumerate(train_loader):
@@ -167,25 +168,24 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             output = model(x)
             loss = criterion(output, y)
             
-            # [Stage 2] 프루닝 시점 판정
-            # 선형 스케줄링을 위해 epoch 정보를 전달하도록 수정
+            # 프루닝 시점 판정
             is_hessian_step = (epoch >= start_epoch and (epoch - start_epoch) % prune_every == 0 and batch_idx == 0)
             
             if is_hessian_step:
                 optimizer.zero_grad()
                 loss.backward(retain_graph=True) 
                 before_mem = torch.cuda.memory_allocated(device) / (1024 ** 2)
-                print(f"\n>>> [SNOWS Update] Epoch {epoch}: Computing Hessian-Vector Products...")
+                print(f"\n>>> [Strategy: {strategy_type.upper()}] Epoch {epoch}: Computing Hessian-Vector Products...")
                 
-                # [핵심 수정] 현재 에폭과 전체 에폭 정보를 Pruner에게 전달하여 스케줄링 수행
+                # 선택된 엔진(HAP, SNOWS, PDT 중 하나)으로 프루닝 수행
                 pdt_engine.step_pruning(loss=loss, current_epoch=epoch, total_epochs=total_epochs)
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
                 
-                torch.cuda.empty_cache() # 캐시 비워줘야 정확한 수치
+                torch.cuda.empty_cache()
                 after_mem = torch.cuda.memory_allocated(device) / (1024 ** 2)
                 
                 print(f"[Resource Check] Memory: {before_mem:.2f}MB -> {after_mem:.2f}MB (Reduction: {before_mem - after_mem:.2f}MB)")
-                analyze_topology_and_profiling(model, device, config, tag=f"PDT Epoch {epoch} - After Mask Update")
+                analyze_topology_and_profiling(model, device, config, tag=f"{strategy_type.upper()} Epoch {epoch} Update")
                 print(f">>>> Current Model Sparsity: {pdt_engine.get_current_sparsity():.2f}%")
                 
                 torch.cuda.empty_cache()
@@ -196,7 +196,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             
-            # 매 스텝마다 마스크를 적용하여 죽은 채널이 학습되지 않도록 고정
+            # 매 스텝마다 마스크를 적용하여 죽은 채널 고정
             pdt_engine.apply_mask_to_weights()
             total_loss += loss.item()
 
