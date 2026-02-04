@@ -603,3 +603,83 @@ class DFPCPruner(PDTPruner):
         print(f"\n{'='*30} DFPC (Similarity) Comparison: Epoch {current_epoch} {'='*30}")
         print(f" [*] Method: DFPC (L2-Distance) | Pruned: {pruned_count}")
         torch.cuda.empty_cache()
+
+# ==============================================================================
+# TPP (Towards Personalized Pruning - Weight-Activation Interaction) 비교 실험용 Pruner
+# ==============================================================================
+class TPPPruner(PDTPruner):
+    """
+    TPP 개념: 가중치의 절대값과 활성화 기여도(Gradient 활용)의 곱을 통해
+    채널별 '개인화된' 중요도를 산출합니다.
+    """
+    def step_pruning(self, loss, current_epoch, total_epochs):
+        all_modules = dict(self.model.named_modules())
+        def find_layer(name):
+            if name in all_modules: return all_modules[name]
+            return all_modules.get(name.replace('_', '.'))
+
+        progress = current_epoch / total_epochs
+        total_target_keep_ratio = 1.0 - (progress * (1.0 - self.final_keep_ratio))
+        
+        group_info_list = []
+        if self.topology_groups:
+            for idx, group in enumerate(self.topology_groups):
+                score_layers = [find_layer(ln) for ln in group if isinstance(find_layer(ln), (nn.Conv2d, nn.Linear))]
+                if not score_layers: continue
+                group_info_list.append({'id': idx+1, 'layers': score_layers, 'names': group})
+
+        if not group_info_list: return
+
+        target_unit_scores = []
+        target_unit_costs = []
+        target_unit_metadata = []
+
+        # [TPP 핵심] Weight Magnitude * Gradient Persistence (Grad-EMA)
+        for g in group_info_list:
+            mask = g['layers'][0].mask
+            alive_indices = torch.where(mask > 0.5)[0].cpu().numpy()
+            
+            tpp_scores = []
+            for m in g['layers']:
+                # 가중치 크기(W)와 학습 지속성(Grad-EMA)의 기하평균적 결합
+                # TPP 논문의 핵심인 'Weight-Activation Interaction'을 모사
+                w_abs = m.weight.data.abs().reshape(m.weight.shape[0], -1).mean(1)
+                g_ema = m.grad_ema.reshape(m.weight.shape[0], -1).mean(1)
+                
+                # 가중치와 그래디언트 영향력을 결합하여 '잠재력' 평가
+                score = w_abs * torch.sqrt(g_ema + 1e-8)
+                tpp_scores.append(score)
+            
+            group_score = torch.mean(torch.stack(tpp_scores), dim=0)
+
+            if len(alive_indices) > 0:
+                for i in alive_indices:
+                    s_gc = group_score[i].item()
+                    target_unit_scores.append(s_gc) 
+                    target_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers']))
+                    target_unit_metadata.append((g, i))
+
+        # 라그랑주 최적화 적용
+        current_sparsity = self.get_current_sparsity() / 100.0
+        current_alive_ratio = 1.0 - current_sparsity
+        pruned_count = 0
+
+        if current_alive_ratio > total_target_keep_ratio and target_unit_scores:
+            incremental_keep_ratio = total_target_keep_ratio / current_alive_ratio
+            total_budget = np.sum(target_unit_costs) * incremental_keep_ratio
+            optimal_mask_flags = lagrangian_optimization(np.array(target_unit_scores), np.array(target_unit_costs), total_budget)
+
+            with torch.no_grad():
+                for idx, is_alive in enumerate(optimal_mask_flags):
+                    if not is_alive:
+                        group_obj, channel_idx = target_unit_metadata[idx]
+                        for ln in group_obj['names']:
+                            layer_obj = find_layer(ln)
+                            if layer_obj is not None and hasattr(layer_obj, 'mask'):
+                                if channel_idx < layer_obj.mask.size(0):
+                                    layer_obj.mask[channel_idx] = 0.0
+                        pruned_count += 1
+
+        print(f"\n{'='*30} TPP (Personalized) Comparison: Epoch {current_epoch} {'='*30}")
+        print(f" [*] Method: TPP (W * sqrt(G_ema)) | Pruned: {pruned_count}")
+        torch.cuda.empty_cache()
