@@ -55,7 +55,7 @@ def prune_conv_efficientnet(conv: nn.Conv2d, keep_idx, in_keep_idx=None):
 
 def prune_efficientnet_blockwise(model, block_keep_indices, device):
     """
-    현수님의 16개 MBConv 그룹 전략을 물리적으로 반영하는 함수
+    16개 MBConv 그룹 전략을 물리적으로 반영하는 함수
     block_keep_indices: { 'features.2.0': [indices...], ... } 형태
     """
     model = copy.deepcopy(model).cpu()
