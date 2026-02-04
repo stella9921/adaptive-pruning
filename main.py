@@ -15,7 +15,7 @@ from src.data.dataloader import get_dataloaders
 from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
-from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner
+from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner,DFPCPruner
 
 def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     """Stage 1(Topology)과 Stage 4(Resource)를 동시에 분석"""
@@ -145,6 +145,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     elif strategy_type == 'st': # 추가
         pdt_engine = STPruner(model, config, args, topology_groups)
         print("[System] Initializing STPruner (SuperTickets Strategy)")
+    elif strategy_type == 'dfpc': # 추가
+        pdt_engine = DFPCPruner(model, config, args, topology_groups)
+        print("[System] Initializing DFPCPruner (Geometric Uniqueness Strategy)")
     else:
         pdt_engine = PDTPruner(model, config, args, topology_groups)
         print("[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)")
