@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+import torch_pruning as tp
 
 # 기존 모듈 임포트
 from src.pruning.topology_manager import get_model_topology
@@ -223,6 +224,41 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     torch.save(model.state_dict(), final_path)
     print(f"🏁 Final Model Saved: {final_path}")
     # ----------------------------------------------------------
+    # ==============================================================================
+    # 2. [추가] 물리적 압축 및 메모리 제약 해소 검증 (Stage 5)
+    # ==============================================================================
+    print("\n" + "="*30 + " FINAL PHYSICAL COMPRESSION " + "="*30)
+    
+    # [검증 1] 압축 전 메모리 측정
+    torch.cuda.empty_cache()
+    mem_before = torch.cuda.memory_allocated(device) / (1024**2)
+    
+    # [작업] 물리적 구조 변경 시작
+    model.cpu() 
+    example_inputs = torch.randn(1, 3, config['model'].get('input_size', 224), config['model'].get('input_size', 224))
+    DG = tp.DependencyGraph().build_graph(model, example_inputs=example_inputs)
+
+    for name, m in model.named_modules():
+        if isinstance(m, (nn.Conv2d, nn.Linear)) and hasattr(m, 'mask'):
+            prune_indices = torch.where(m.mask == 0)[0].tolist()
+            if len(prune_indices) > 0:
+                # 텐서 차원 도려내기
+                pruning_plan = DG.get_pruning_plan(m, tp.prune_conv_out_channels, idxs=prune_indices)
+                pruning_plan.exec()
+
+    # [검증 2] 압축 후 메모리 측정
+    model.to(device)
+    torch.cuda.empty_cache()
+    mem_after = torch.cuda.memory_allocated(device) / (1024**2)
+    
+    print(f"[*] Before: {mem_before:.2f} MB | After: {mem_after:.2f} MB")
+    print(f"[*] Memory Saved: {mem_before - mem_after:.2f} MB ({((mem_before-mem_after)/mem_before)*100:.1f}% reduction)")
+    
+    # [저장] 진짜 가벼워진 '물리적 압축 모델' 저장
+    compressed_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_FINAL_COMPRESSED.pth")
+    torch.save(model.state_dict(), compressed_path)
+    print(f"✅ Physically Compressed Model Saved: {compressed_path}")
+    print("="*89 + "\n")
 
 def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args):
     
