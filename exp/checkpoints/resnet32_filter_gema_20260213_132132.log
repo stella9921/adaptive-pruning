@@ -1,0 +1,11 @@
+📝 Logging started: resnet32_filter_gema_20260213_132132.log
+Files already downloaded and verified
+Files already downloaded and verified
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet32 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for cifarresnet via PyTorch FX...
+[*] Residual Analysis Error: avg_pool2d(): argument 'kernel_size' (position 2) must be tuple of ints, not Proxy
+
+[!] No dependency groups found. Layers will be treated independently.

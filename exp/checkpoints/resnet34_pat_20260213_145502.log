@@ -1,0 +1,230 @@
+📝 Logging started: resnet34_pat_20260213_145502.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: PAT
+Target Model: resnet34 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:   64 | Layers: layer1.2.bn2 ... (1 layers)
+ Group  4 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  5 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  6 | Channels:  128 | Layers: layer2.2.bn2 ... (1 layers)
+ Group  7 | Channels:  128 | Layers: layer2.3.bn2 ... (1 layers)
+ Group  8 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  9 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group 10 | Channels:  256 | Layers: layer3.2.bn2 ... (1 layers)
+ Group 11 | Channels:  256 | Layers: layer3.3.bn2 ... (1 layers)
+ Group 12 | Channels:  256 | Layers: layer3.4.bn2 ... (1 layers)
+ Group 13 | Channels:  256 | Layers: layer3.5.bn2 ... (1 layers)
+ Group 14 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group 15 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+ Group 16 | Channels:  512 | Layers: layer4.2.bn2 ... (1 layers)
+===============================================================
+[*] Total 16 groups identified.
+
+>>> [System] Loading Base Model: ./exp/checkpoints/resnet34_base.pth
+[Sensitivity] Load from ./exp/checkpoints/resnet34_sensitivity.json
+🚀 PATPruner Ready: 16 blocks identified.
+
+--- PAT One-Shot Pruning (Strategy: weighted_sum) ---
+✅ [FORCE ENABLED] Keeping 89.0% channels for all layers.
+[*] Final Synced Target Modules: 71
+[*] Physically Pruning Block: layer1.0 | Channels: 56
+[*] Physically Pruning Block: layer1.0 | Channels: 56
+[*] Physically Pruning Block: layer1.0 | Channels: 56
+[*] Physically Pruning Block: layer1.0 | Channels: 56
+[*] Physically Pruning Block: layer1.1 | Channels: 56
+[*] Physically Pruning Block: layer1.1 | Channels: 56
+[*] Physically Pruning Block: layer1.1 | Channels: 56
+[*] Physically Pruning Block: layer1.1 | Channels: 56
+[*] Physically Pruning Block: layer1.2 | Channels: 56
+[*] Physically Pruning Block: layer1.2 | Channels: 56
+[*] Physically Pruning Block: layer1.2 | Channels: 56
+[*] Physically Pruning Block: layer1.2 | Channels: 56
+[*] Physically Pruning Block: layer2.0 | Channels: 113
+[*] Physically Pruning Block: layer2.0 | Channels: 113
+[*] Physically Pruning Block: layer2.0 | Channels: 113
+[*] Physically Pruning Block: layer2.0 | Channels: 113
+[*] Physically Pruning Block: layer2.0 | Channels: 113
+[*] Physically Pruning Block: layer2.0 | Channels: 113
+[*] Physically Pruning Block: layer2.1 | Channels: 113
+[*] Physically Pruning Block: layer2.1 | Channels: 113
+[*] Physically Pruning Block: layer2.1 | Channels: 113
+[*] Physically Pruning Block: layer2.1 | Channels: 113
+[*] Physically Pruning Block: layer2.2 | Channels: 113
+[*] Physically Pruning Block: layer2.2 | Channels: 113
+[*] Physically Pruning Block: layer2.2 | Channels: 113
+[*] Physically Pruning Block: layer2.2 | Channels: 113
+[*] Physically Pruning Block: layer2.3 | Channels: 113
+[*] Physically Pruning Block: layer2.3 | Channels: 113
+[*] Physically Pruning Block: layer2.3 | Channels: 113
+[*] Physically Pruning Block: layer2.3 | Channels: 113
+[*] Physically Pruning Block: layer3.0 | Channels: 227
+[*] Physically Pruning Block: layer3.0 | Channels: 227
+[*] Physically Pruning Block: layer3.0 | Channels: 227
+[*] Physically Pruning Block: layer3.0 | Channels: 227
+[*] Physically Pruning Block: layer3.0 | Channels: 227
+[*] Physically Pruning Block: layer3.0 | Channels: 227
+[*] Physically Pruning Block: layer3.1 | Channels: 227
+[*] Physically Pruning Block: layer3.1 | Channels: 227
+[*] Physically Pruning Block: layer3.1 | Channels: 227
+[*] Physically Pruning Block: layer3.1 | Channels: 227
+[*] Physically Pruning Block: layer3.2 | Channels: 227
+[*] Physically Pruning Block: layer3.2 | Channels: 227
+[*] Physically Pruning Block: layer3.2 | Channels: 227
+[*] Physically Pruning Block: layer3.2 | Channels: 227
+[*] Physically Pruning Block: layer3.3 | Channels: 227
+[*] Physically Pruning Block: layer3.3 | Channels: 227
+[*] Physically Pruning Block: layer3.3 | Channels: 227
+[*] Physically Pruning Block: layer3.3 | Channels: 227
+[*] Physically Pruning Block: layer3.4 | Channels: 227
+[*] Physically Pruning Block: layer3.4 | Channels: 227
+[*] Physically Pruning Block: layer3.4 | Channels: 227
+[*] Physically Pruning Block: layer3.4 | Channels: 227
+[*] Physically Pruning Block: layer3.5 | Channels: 227
+[*] Physically Pruning Block: layer3.5 | Channels: 227
+[*] Physically Pruning Block: layer3.5 | Channels: 227
+[*] Physically Pruning Block: layer3.5 | Channels: 227
+[*] Physically Pruning Block: layer4.0 | Channels: 455
+[*] Physically Pruning Block: layer4.0 | Channels: 455
+[*] Physically Pruning Block: layer4.0 | Channels: 455
+[*] Physically Pruning Block: layer4.0 | Channels: 455
+[*] Physically Pruning Block: layer4.0 | Channels: 455
+[*] Physically Pruning Block: layer4.0 | Channels: 455
+[*] Physically Pruning Block: layer4.1 | Channels: 455
+[*] Physically Pruning Block: layer4.1 | Channels: 455
+[*] Physically Pruning Block: layer4.1 | Channels: 455
+[*] Physically Pruning Block: layer4.1 | Channels: 455
+[*] Physically Pruning Block: layer4.2 | Channels: 455
+[*] Physically Pruning Block: layer4.2 | Channels: 455
+[*] Physically Pruning Block: layer4.2 | Channels: 455
+[*] Physically Pruning Block: layer4.2 | Channels: 455
+[*] Final FC Synced: 512 features
+
+========================================
+📊 [Pruning Result Summary]
+ - Original Params: 21.328 M
+ - Pruned Params:   12.808 M
+ - Compression Ratio: 39.95 %
+========================================
+
+FT Epoch [1/70] | Loss: 0.6702 | Val Acc: 62.13% | LR: 0.00999
+ ⭐ Best model saved with Acc: 62.13%
+FT Epoch [2/70] | Loss: 0.4615 | Val Acc: 66.84% | LR: 0.00998
+ ⭐ Best model saved with Acc: 66.84%
+FT Epoch [3/70] | Loss: 0.3631 | Val Acc: 67.27% | LR: 0.00995
+ ⭐ Best model saved with Acc: 67.27%
+FT Epoch [4/70] | Loss: 0.2917 | Val Acc: 69.67% | LR: 0.00992
+ ⭐ Best model saved with Acc: 69.67%
+FT Epoch [5/70] | Loss: 0.2740 | Val Acc: 69.39% | LR: 0.00987
+FT Epoch [6/70] | Loss: 0.2458 | Val Acc: 70.51% | LR: 0.00982
+ ⭐ Best model saved with Acc: 70.51%
+FT Epoch [7/70] | Loss: 0.2156 | Val Acc: 70.12% | LR: 0.00976
+FT Epoch [8/70] | Loss: 0.1776 | Val Acc: 70.65% | LR: 0.00968
+ ⭐ Best model saved with Acc: 70.65%
+FT Epoch [9/70] | Loss: 0.1775 | Val Acc: 71.50% | LR: 0.00960
+ ⭐ Best model saved with Acc: 71.50%
+FT Epoch [10/70] | Loss: 0.1650 | Val Acc: 69.72% | LR: 0.00950
+FT Epoch [11/70] | Loss: 0.1453 | Val Acc: 71.75% | LR: 0.00940
+ ⭐ Best model saved with Acc: 71.75%
+FT Epoch [12/70] | Loss: 0.1376 | Val Acc: 72.70% | LR: 0.00929
+ ⭐ Best model saved with Acc: 72.70%
+FT Epoch [13/70] | Loss: 0.1252 | Val Acc: 72.23% | LR: 0.00917
+FT Epoch [14/70] | Loss: 0.1182 | Val Acc: 72.43% | LR: 0.00905
+FT Epoch [15/70] | Loss: 0.1051 | Val Acc: 71.30% | LR: 0.00891
+FT Epoch [16/70] | Loss: 0.1013 | Val Acc: 72.29% | LR: 0.00877
+FT Epoch [17/70] | Loss: 0.0860 | Val Acc: 73.07% | LR: 0.00861
+ ⭐ Best model saved with Acc: 73.07%
+FT Epoch [18/70] | Loss: 0.0751 | Val Acc: 73.77% | LR: 0.00846
+ ⭐ Best model saved with Acc: 73.77%
+FT Epoch [19/70] | Loss: 0.0740 | Val Acc: 73.31% | LR: 0.00829
+FT Epoch [20/70] | Loss: 0.0739 | Val Acc: 73.15% | LR: 0.00812
+FT Epoch [21/70] | Loss: 0.0686 | Val Acc: 73.86% | LR: 0.00794
+ ⭐ Best model saved with Acc: 73.86%
+FT Epoch [22/70] | Loss: 0.0632 | Val Acc: 72.94% | LR: 0.00775
+FT Epoch [23/70] | Loss: 0.0580 | Val Acc: 73.93% | LR: 0.00756
+ ⭐ Best model saved with Acc: 73.93%
+FT Epoch [24/70] | Loss: 0.0520 | Val Acc: 74.23% | LR: 0.00737
+ ⭐ Best model saved with Acc: 74.23%
+FT Epoch [25/70] | Loss: 0.0493 | Val Acc: 73.66% | LR: 0.00717
+FT Epoch [26/70] | Loss: 0.0427 | Val Acc: 74.52% | LR: 0.00697
+ ⭐ Best model saved with Acc: 74.52%
+FT Epoch [27/70] | Loss: 0.0382 | Val Acc: 74.90% | LR: 0.00676
+ ⭐ Best model saved with Acc: 74.90%
+FT Epoch [28/70] | Loss: 0.0314 | Val Acc: 75.34% | LR: 0.00655
+ ⭐ Best model saved with Acc: 75.34%
+FT Epoch [29/70] | Loss: 0.0267 | Val Acc: 75.41% | LR: 0.00633
+ ⭐ Best model saved with Acc: 75.41%
+FT Epoch [30/70] | Loss: 0.0225 | Val Acc: 75.63% | LR: 0.00611
+ ⭐ Best model saved with Acc: 75.63%
+FT Epoch [31/70] | Loss: 0.0222 | Val Acc: 75.89% | LR: 0.00589
+ ⭐ Best model saved with Acc: 75.89%
+FT Epoch [32/70] | Loss: 0.0163 | Val Acc: 76.07% | LR: 0.00567
+ ⭐ Best model saved with Acc: 76.07%
+FT Epoch [33/70] | Loss: 0.0157 | Val Acc: 76.77% | LR: 0.00545
+ ⭐ Best model saved with Acc: 76.77%
+FT Epoch [34/70] | Loss: 0.0144 | Val Acc: 76.06% | LR: 0.00522
+FT Epoch [35/70] | Loss: 0.0123 | Val Acc: 76.50% | LR: 0.00500
+FT Epoch [36/70] | Loss: 0.0112 | Val Acc: 76.76% | LR: 0.00478
+FT Epoch [37/70] | Loss: 0.0113 | Val Acc: 77.24% | LR: 0.00455
+ ⭐ Best model saved with Acc: 77.24%
+FT Epoch [38/70] | Loss: 0.0100 | Val Acc: 77.15% | LR: 0.00433
+FT Epoch [39/70] | Loss: 0.0077 | Val Acc: 77.48% | LR: 0.00411
+ ⭐ Best model saved with Acc: 77.48%
+FT Epoch [40/70] | Loss: 0.0081 | Val Acc: 77.32% | LR: 0.00389
+FT Epoch [41/70] | Loss: 0.0081 | Val Acc: 77.68% | LR: 0.00367
+ ⭐ Best model saved with Acc: 77.68%
+FT Epoch [42/70] | Loss: 0.0078 | Val Acc: 77.41% | LR: 0.00345
+FT Epoch [43/70] | Loss: 0.0068 | Val Acc: 77.78% | LR: 0.00324
+ ⭐ Best model saved with Acc: 77.78%
+FT Epoch [44/70] | Loss: 0.0065 | Val Acc: 77.89% | LR: 0.00303
+ ⭐ Best model saved with Acc: 77.89%
+FT Epoch [45/70] | Loss: 0.0064 | Val Acc: 77.75% | LR: 0.00283
+FT Epoch [46/70] | Loss: 0.0062 | Val Acc: 77.95% | LR: 0.00263
+ ⭐ Best model saved with Acc: 77.95%
+FT Epoch [47/70] | Loss: 0.0061 | Val Acc: 77.98% | LR: 0.00244
+ ⭐ Best model saved with Acc: 77.98%
+FT Epoch [48/70] | Loss: 0.0062 | Val Acc: 78.22% | LR: 0.00225
+ ⭐ Best model saved with Acc: 78.22%
+FT Epoch [49/70] | Loss: 0.0061 | Val Acc: 78.24% | LR: 0.00206
+ ⭐ Best model saved with Acc: 78.24%
+FT Epoch [50/70] | Loss: 0.0059 | Val Acc: 78.24% | LR: 0.00188
+FT Epoch [51/70] | Loss: 0.0059 | Val Acc: 78.22% | LR: 0.00171
+FT Epoch [52/70] | Loss: 0.0059 | Val Acc: 78.39% | LR: 0.00154
+ ⭐ Best model saved with Acc: 78.39%
+FT Epoch [53/70] | Loss: 0.0058 | Val Acc: 78.24% | LR: 0.00139
+FT Epoch [54/70] | Loss: 0.0058 | Val Acc: 78.49% | LR: 0.00123
+ ⭐ Best model saved with Acc: 78.49%
+FT Epoch [55/70] | Loss: 0.0056 | Val Acc: 78.43% | LR: 0.00109
+FT Epoch [56/70] | Loss: 0.0055 | Val Acc: 78.66% | LR: 0.00095
+ ⭐ Best model saved with Acc: 78.66%
+FT Epoch [57/70] | Loss: 0.0055 | Val Acc: 78.44% | LR: 0.00083
+FT Epoch [58/70] | Loss: 0.0056 | Val Acc: 78.53% | LR: 0.00071
+FT Epoch [59/70] | Loss: 0.0055 | Val Acc: 78.53% | LR: 0.00060
+FT Epoch [60/70] | Loss: 0.0055 | Val Acc: 78.34% | LR: 0.00050
+FT Epoch [61/70] | Loss: 0.0056 | Val Acc: 78.45% | LR: 0.00040
+FT Epoch [62/70] | Loss: 0.0055 | Val Acc: 78.40% | LR: 0.00032
+FT Epoch [63/70] | Loss: 0.0055 | Val Acc: 78.61% | LR: 0.00024
+FT Epoch [64/70] | Loss: 0.0056 | Val Acc: 78.56% | LR: 0.00018
+FT Epoch [65/70] | Loss: 0.0055 | Val Acc: 78.50% | LR: 0.00013
+FT Epoch [66/70] | Loss: 0.0054 | Val Acc: 78.53% | LR: 0.00008
+FT Epoch [67/70] | Loss: 0.0054 | Val Acc: 78.55% | LR: 0.00005
+FT Epoch [68/70] | Loss: 0.0054 | Val Acc: 78.53% | LR: 0.00002
+FT Epoch [69/70] | Loss: 0.0054 | Val Acc: 78.51% | LR: 0.00001
+FT Epoch [70/70] | Loss: 0.0054 | Val Acc: 78.33% | LR: 0.00000
+
+✅ PAT Experiment (weighted_sum) Finished.
+
+🔍 Evaluating Final Model on Test Set for Table Data...
+
+!!!!!!!!!!!!!!!!!!!!!!!!! FINAL TABLE DATA !!!!!!!!!!!!!!!!!!!!!!!!!
+ 🟢 Model: resnet34
+ 🟢 Strategy: weighted_sum (p=2.5)
+ 🟢 Params (M): 12.808 M
+ 🟢 Compression Ratio: 39.95 %
+ 🟢 Final Test Accuracy: 78.66 %
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+

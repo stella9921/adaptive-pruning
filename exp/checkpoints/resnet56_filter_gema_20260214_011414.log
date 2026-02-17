@@ -1,0 +1,369 @@
+📝 Logging started: resnet56_filter_gema_20260214_011414.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet56 | Dataset: cifar100
+[*] Note: resnet56 doesn't accept 'num_classes' argument. Loading default.
+
+[Stage 1] Analyzing Residual Topology for cifarresnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   16 | Layers: bn1 ... (2 layers)
+ Group  2 | Channels:   16 | Layers: bn1 ... (3 layers)
+ Group  3 | Channels:   16 | Layers: bn1 ... (4 layers)
+ Group  4 | Channels:   16 | Layers: bn1 ... (5 layers)
+ Group  5 | Channels:   16 | Layers: bn1 ... (6 layers)
+ Group  6 | Channels:   16 | Layers: layer1.0.bn2 ... (6 layers)
+ Group  7 | Channels:   16 | Layers: layer1.1.bn2 ... (6 layers)
+ Group  8 | Channels:   16 | Layers: layer1.2.bn2 ... (6 layers)
+ Group  9 | Channels:   16 | Layers: layer1.3.bn2 ... (6 layers)
+ Group 10 | Channels:   32 | Layers: layer2.0.bn2 ... (2 layers)
+ Group 11 | Channels:   32 | Layers: layer2.0.bn2 ... (3 layers)
+ Group 12 | Channels:   32 | Layers: layer2.0.bn2 ... (4 layers)
+ Group 13 | Channels:   32 | Layers: layer2.0.bn2 ... (5 layers)
+ Group 14 | Channels:   32 | Layers: layer2.0.bn2 ... (6 layers)
+ Group 15 | Channels:   32 | Layers: layer2.0.bn2 ... (7 layers)
+ Group 16 | Channels:   32 | Layers: layer2.1.bn2 ... (6 layers)
+ Group 17 | Channels:   32 | Layers: layer2.2.bn2 ... (6 layers)
+ Group 18 | Channels:   32 | Layers: layer2.3.bn2 ... (6 layers)
+ Group 19 | Channels:   64 | Layers: layer3.0.bn2 ... (2 layers)
+ Group 20 | Channels:   64 | Layers: layer3.0.bn2 ... (3 layers)
+ Group 21 | Channels:   64 | Layers: layer3.0.bn2 ... (4 layers)
+ Group 22 | Channels:   64 | Layers: layer3.0.bn2 ... (5 layers)
+ Group 23 | Channels:   64 | Layers: layer3.0.bn2 ... (6 layers)
+ Group 24 | Channels:   64 | Layers: layer3.0.bn2 ... (7 layers)
+ Group 25 | Channels:   64 | Layers: layer3.1.bn2 ... (6 layers)
+ Group 26 | Channels:   64 | Layers: layer3.2.bn2 ... (6 layers)
+ Group 27 | Channels:   64 | Layers: layer3.3.bn2 ... (6 layers)
+===============================================================
+[*] Total 27 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-27) will be pruned.
+[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)
+
+>>> [Pilot Check] Strategy: FILTER_GEMA | Pruning starts at Epoch 130, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 204 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::linear         0.02%      31.656us        31.49%      42.464ms      42.464ms       0.000us         0.00%       5.088us       5.088us           0 B           0 B       9.13 MB           0 B             1            --  
+                                            aten::addmm        29.18%      39.355ms        31.45%      42.406ms      42.406ms       1.696us         0.27%       5.088us       5.088us           0 B           0 B       9.13 MB       9.13 MB             1        12.800  
+                                        model_inference         1.56%       2.099ms        99.99%     134.840ms     134.840ms       0.000us         0.00%     721.276us     721.276us           0 B           0 B       9.12 MB    -114.00 KB             1            --  
+                                           aten::conv2d         0.07%     100.885us        51.97%      70.087ms       1.230ms       0.000us         0.00%     568.730us       9.978us           0 B           0 B      38.00 KB           0 B            57      3342.944  
+                                      aten::convolution         0.14%     182.757us        51.90%      69.986ms       1.228ms       0.000us         0.00%     568.730us       9.978us           0 B           0 B      38.00 KB           0 B            57            --  
+                                     aten::_convolution         0.54%     726.423us        51.76%      69.803ms       1.225ms       0.000us         0.00%     568.730us       9.978us           0 B           0 B      38.00 KB           0 B            57            --  
+                                aten::cudnn_convolution        43.01%      58.004ms        51.22%      69.077ms       1.212ms     481.719us        76.95%     568.730us       9.978us           0 B           0 B      38.00 KB      38.00 KB            57            --  
+                                       aten::batch_norm         0.06%      80.480us         2.69%       3.632ms      63.712us       0.000us         0.00%      60.131us       1.055us           0 B           0 B      38.00 KB           0 B            57            --  
+                           aten::_batch_norm_impl_index         0.08%     107.472us         2.63%       3.551ms      62.300us       0.000us         0.00%      60.131us       1.055us           0 B           0 B      38.00 KB           0 B            57            --  
+                                 aten::cudnn_batch_norm         1.89%       2.550ms         2.55%       3.444ms      60.414us      58.979us         9.42%      60.131us       1.055us           0 B           0 B      38.00 KB           0 B            57            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 134.851ms
+Self CUDA time total: 626.009us
+
+Epoch 1/300 | Loss: 4.2012 | Val Acc: 8.69%
+Epoch 2/300 | Loss: 3.6133 | Val Acc: 15.98%
+Epoch 3/300 | Loss: 3.2167 | Val Acc: 22.15%
+Epoch 4/300 | Loss: 2.8838 | Val Acc: 28.46%
+Epoch 5/300 | Loss: 2.6221 | Val Acc: 30.53%
+Epoch 6/300 | Loss: 2.4044 | Val Acc: 36.80%
+Epoch 7/300 | Loss: 2.2314 | Val Acc: 38.75%
+Epoch 8/300 | Loss: 2.0905 | Val Acc: 41.59%
+Epoch 9/300 | Loss: 1.9806 | Val Acc: 44.30%
+Epoch 10/300 | Loss: 1.8759 | Val Acc: 43.10%
+Epoch 11/300 | Loss: 1.7835 | Val Acc: 46.54%
+Epoch 12/300 | Loss: 1.7102 | Val Acc: 46.89%
+Epoch 13/300 | Loss: 1.6443 | Val Acc: 46.31%
+Epoch 14/300 | Loss: 1.5782 | Val Acc: 50.35%
+Epoch 15/300 | Loss: 1.5267 | Val Acc: 50.93%
+Epoch 16/300 | Loss: 1.4717 | Val Acc: 53.16%
+Epoch 17/300 | Loss: 1.4293 | Val Acc: 51.72%
+Epoch 18/300 | Loss: 1.3895 | Val Acc: 51.15%
+Epoch 19/300 | Loss: 1.3429 | Val Acc: 52.15%
+Epoch 20/300 | Loss: 1.3005 | Val Acc: 51.98%
+Epoch 21/300 | Loss: 1.2724 | Val Acc: 55.40%
+Epoch 22/300 | Loss: 1.2405 | Val Acc: 56.01%
+Epoch 23/300 | Loss: 1.2037 | Val Acc: 57.66%
+Epoch 24/300 | Loss: 1.1765 | Val Acc: 56.19%
+Epoch 25/300 | Loss: 1.1442 | Val Acc: 57.21%
+Epoch 26/300 | Loss: 1.1195 | Val Acc: 58.24%
+Epoch 27/300 | Loss: 1.0985 | Val Acc: 57.79%
+Epoch 28/300 | Loss: 1.0782 | Val Acc: 57.40%
+Epoch 29/300 | Loss: 1.0444 | Val Acc: 58.14%
+Epoch 30/300 | Loss: 1.0322 | Val Acc: 58.01%
+Epoch 31/300 | Loss: 0.9947 | Val Acc: 57.71%
+Epoch 32/300 | Loss: 0.9861 | Val Acc: 59.21%
+Epoch 33/300 | Loss: 0.9567 | Val Acc: 58.74%
+Epoch 34/300 | Loss: 0.9385 | Val Acc: 59.15%
+Epoch 35/300 | Loss: 0.9202 | Val Acc: 59.45%
+Epoch 36/300 | Loss: 0.9053 | Val Acc: 59.59%
+Epoch 37/300 | Loss: 0.8907 | Val Acc: 59.17%
+Epoch 38/300 | Loss: 0.8627 | Val Acc: 57.86%
+Epoch 39/300 | Loss: 0.8603 | Val Acc: 60.72%
+Epoch 40/300 | Loss: 0.8312 | Val Acc: 60.38%
+Epoch 41/300 | Loss: 0.8193 | Val Acc: 61.19%
+Epoch 42/300 | Loss: 0.8127 | Val Acc: 59.52%
+Epoch 43/300 | Loss: 0.7894 | Val Acc: 61.02%
+Epoch 44/300 | Loss: 0.7758 | Val Acc: 58.39%
+Epoch 45/300 | Loss: 0.7585 | Val Acc: 62.13%
+Epoch 46/300 | Loss: 0.7522 | Val Acc: 60.52%
+Epoch 47/300 | Loss: 0.7379 | Val Acc: 61.21%
+Epoch 48/300 | Loss: 0.7181 | Val Acc: 61.88%
+Epoch 49/300 | Loss: 0.7105 | Val Acc: 62.17%
+Epoch 50/300 | Loss: 0.6999 | Val Acc: 60.80%
+Epoch 51/300 | Loss: 0.6818 | Val Acc: 61.34%
+Epoch 52/300 | Loss: 0.6739 | Val Acc: 62.66%
+Epoch 53/300 | Loss: 0.6646 | Val Acc: 61.78%
+Epoch 54/300 | Loss: 0.6534 | Val Acc: 60.79%
+Epoch 55/300 | Loss: 0.6402 | Val Acc: 61.57%
+Epoch 56/300 | Loss: 0.6292 | Val Acc: 62.59%
+Epoch 57/300 | Loss: 0.6240 | Val Acc: 61.29%
+Epoch 58/300 | Loss: 0.6138 | Val Acc: 62.95%
+Epoch 59/300 | Loss: 0.5988 | Val Acc: 62.61%
+Epoch 60/300 | Loss: 0.5936 | Val Acc: 61.93%
+Epoch 61/300 | Loss: 0.5860 | Val Acc: 61.56%
+Epoch 62/300 | Loss: 0.5757 | Val Acc: 62.29%
+Epoch 63/300 | Loss: 0.5644 | Val Acc: 61.12%
+Epoch 64/300 | Loss: 0.5587 | Val Acc: 63.06%
+Epoch 65/300 | Loss: 0.5516 | Val Acc: 62.57%
+Epoch 66/300 | Loss: 0.5438 | Val Acc: 63.18%
+Epoch 67/300 | Loss: 0.5360 | Val Acc: 61.46%
+Epoch 68/300 | Loss: 0.5293 | Val Acc: 62.43%
+Epoch 69/300 | Loss: 0.5155 | Val Acc: 62.19%
+Epoch 70/300 | Loss: 0.5158 | Val Acc: 62.71%
+Epoch 71/300 | Loss: 0.5070 | Val Acc: 62.19%
+Epoch 72/300 | Loss: 0.5007 | Val Acc: 62.31%
+Epoch 73/300 | Loss: 0.4900 | Val Acc: 63.29%
+Epoch 74/300 | Loss: 0.4783 | Val Acc: 62.89%
+Epoch 75/300 | Loss: 0.4728 | Val Acc: 62.59%
+Epoch 76/300 | Loss: 0.4727 | Val Acc: 61.48%
+Epoch 77/300 | Loss: 0.4659 | Val Acc: 63.02%
+Epoch 78/300 | Loss: 0.4590 | Val Acc: 61.60%
+Epoch 79/300 | Loss: 0.4510 | Val Acc: 62.33%
+Epoch 80/300 | Loss: 0.4420 | Val Acc: 63.04%
+Epoch 81/300 | Loss: 0.4324 | Val Acc: 62.31%
+Epoch 82/300 | Loss: 0.4292 | Val Acc: 61.56%
+Epoch 83/300 | Loss: 0.4316 | Val Acc: 63.20%
+Epoch 84/300 | Loss: 0.4213 | Val Acc: 62.60%
+Epoch 85/300 | Loss: 0.4142 | Val Acc: 62.68%
+Epoch 86/300 | Loss: 0.4183 | Val Acc: 61.75%
+Epoch 87/300 | Loss: 0.4125 | Val Acc: 62.15%
+Epoch 88/300 | Loss: 0.4002 | Val Acc: 63.10%
+Epoch 89/300 | Loss: 0.3958 | Val Acc: 62.56%
+Epoch 90/300 | Loss: 0.4017 | Val Acc: 63.66%
+Epoch 91/300 | Loss: 0.3869 | Val Acc: 63.02%
+Epoch 92/300 | Loss: 0.3804 | Val Acc: 61.43%
+Epoch 93/300 | Loss: 0.3771 | Val Acc: 62.37%
+Epoch 94/300 | Loss: 0.3800 | Val Acc: 62.36%
+Epoch 95/300 | Loss: 0.3726 | Val Acc: 62.74%
+Epoch 96/300 | Loss: 0.3689 | Val Acc: 63.17%
+Epoch 97/300 | Loss: 0.3617 | Val Acc: 62.61%
+Epoch 98/300 | Loss: 0.3637 | Val Acc: 62.32%
+Epoch 99/300 | Loss: 0.3537 | Val Acc: 63.73%
+Epoch 100/300 | Loss: 0.3458 | Val Acc: 62.34%
+Epoch 101/300 | Loss: 0.3529 | Val Acc: 63.16%
+Epoch 102/300 | Loss: 0.3360 | Val Acc: 63.07%
+Epoch 103/300 | Loss: 0.3393 | Val Acc: 62.85%
+Epoch 104/300 | Loss: 0.3307 | Val Acc: 63.16%
+Epoch 105/300 | Loss: 0.3321 | Val Acc: 62.24%
+Epoch 106/300 | Loss: 0.3366 | Val Acc: 62.06%
+Epoch 107/300 | Loss: 0.3277 | Val Acc: 63.30%
+Epoch 108/300 | Loss: 0.3311 | Val Acc: 63.27%
+Epoch 109/300 | Loss: 0.3174 | Val Acc: 63.25%
+Epoch 110/300 | Loss: 0.3224 | Val Acc: 62.06%
+Epoch 111/300 | Loss: 0.3141 | Val Acc: 63.24%
+Epoch 112/300 | Loss: 0.3129 | Val Acc: 61.98%
+Epoch 113/300 | Loss: 0.3081 | Val Acc: 62.69%
+Epoch 114/300 | Loss: 0.3060 | Val Acc: 64.13%
+Epoch 115/300 | Loss: 0.3003 | Val Acc: 63.34%
+Epoch 116/300 | Loss: 0.2992 | Val Acc: 63.31%
+Epoch 117/300 | Loss: 0.3035 | Val Acc: 62.83%
+Epoch 118/300 | Loss: 0.2920 | Val Acc: 63.40%
+Epoch 119/300 | Loss: 0.2905 | Val Acc: 62.07%
+Epoch 120/300 | Loss: 0.2940 | Val Acc: 63.03%
+Epoch 121/300 | Loss: 0.2829 | Val Acc: 62.13%
+Epoch 122/300 | Loss: 0.2857 | Val Acc: 62.40%
+Epoch 123/300 | Loss: 0.2827 | Val Acc: 62.91%
+Epoch 124/300 | Loss: 0.2770 | Val Acc: 63.27%
+Epoch 125/300 | Loss: 0.2701 | Val Acc: 62.96%
+Epoch 126/300 | Loss: 0.2844 | Val Acc: 63.35%
+Epoch 127/300 | Loss: 0.2782 | Val Acc: 62.15%
+Epoch 128/300 | Loss: 0.2679 | Val Acc: 63.41%
+Epoch 129/300 | Loss: 0.2654 | Val Acc: 62.80%
+Epoch 130/300 | Loss: 0.2695 | Val Acc: 63.62%
+Epoch 131/300 | Loss: 0.2660 | Val Acc: 63.75%
+Epoch 132/300 | Loss: 0.2595 | Val Acc: 62.84%
+Epoch 133/300 | Loss: 0.2575 | Val Acc: 63.05%
+Epoch 134/300 | Loss: 0.2620 | Val Acc: 62.42%
+Epoch 135/300 | Loss: 0.2621 | Val Acc: 64.22%
+Epoch 136/300 | Loss: 0.2588 | Val Acc: 63.30%
+Epoch 137/300 | Loss: 0.2452 | Val Acc: 63.18%
+Epoch 138/300 | Loss: 0.2445 | Val Acc: 63.15%
+Epoch 139/300 | Loss: 0.2531 | Val Acc: 62.30%
+Epoch 140/300 | Loss: 0.2542 | Val Acc: 63.50%
+Epoch 141/300 | Loss: 0.2404 | Val Acc: 64.10%
+Epoch 142/300 | Loss: 0.2440 | Val Acc: 62.95%
+Epoch 143/300 | Loss: 0.2476 | Val Acc: 62.45%
+Epoch 144/300 | Loss: 0.2463 | Val Acc: 62.91%
+Epoch 145/300 | Loss: 0.2424 | Val Acc: 62.85%
+Epoch 146/300 | Loss: 0.2363 | Val Acc: 64.19%
+Epoch 147/300 | Loss: 0.2340 | Val Acc: 63.65%
+Epoch 148/300 | Loss: 0.2236 | Val Acc: 63.99%
+Epoch 149/300 | Loss: 0.2303 | Val Acc: 63.84%
+Epoch 150/300 | Loss: 0.2340 | Val Acc: 64.11%
+Epoch 151/300 | Loss: 0.2224 | Val Acc: 63.87%
+Epoch 152/300 | Loss: 0.2305 | Val Acc: 63.21%
+Epoch 153/300 | Loss: 0.2294 | Val Acc: 63.48%
+Epoch 154/300 | Loss: 0.2361 | Val Acc: 63.52%
+Epoch 155/300 | Loss: 0.2224 | Val Acc: 63.36%
+Epoch 156/300 | Loss: 0.2259 | Val Acc: 63.76%
+Epoch 157/300 | Loss: 0.2250 | Val Acc: 64.29%
+Epoch 158/300 | Loss: 0.2208 | Val Acc: 63.04%
+Epoch 159/300 | Loss: 0.2204 | Val Acc: 62.87%
+Epoch 160/300 | Loss: 0.2190 | Val Acc: 63.33%
+Epoch 161/300 | Loss: 0.2195 | Val Acc: 63.50%
+Epoch 162/300 | Loss: 0.2131 | Val Acc: 63.16%
+Epoch 163/300 | Loss: 0.2178 | Val Acc: 63.41%
+Epoch 164/300 | Loss: 0.2162 | Val Acc: 63.64%
+Epoch 165/300 | Loss: 0.2109 | Val Acc: 63.73%
+Epoch 166/300 | Loss: 0.1988 | Val Acc: 64.88%
+Epoch 167/300 | Loss: 0.2052 | Val Acc: 64.01%
+Epoch 168/300 | Loss: 0.2162 | Val Acc: 63.36%
+Epoch 169/300 | Loss: 0.2199 | Val Acc: 63.08%
+Epoch 170/300 | Loss: 0.2176 | Val Acc: 63.78%
+Epoch 171/300 | Loss: 0.2016 | Val Acc: 64.43%
+Epoch 172/300 | Loss: 0.2098 | Val Acc: 63.09%
+Epoch 173/300 | Loss: 0.2053 | Val Acc: 64.07%
+Epoch 174/300 | Loss: 0.2056 | Val Acc: 63.48%
+Epoch 175/300 | Loss: 0.2127 | Val Acc: 64.04%
+Epoch 176/300 | Loss: 0.1971 | Val Acc: 62.89%
+Epoch 177/300 | Loss: 0.2012 | Val Acc: 63.56%
+Epoch 178/300 | Loss: 0.1913 | Val Acc: 63.64%
+Epoch 179/300 | Loss: 0.1995 | Val Acc: 63.17%
+Epoch 180/300 | Loss: 0.1962 | Val Acc: 63.88%
+Epoch 181/300 | Loss: 0.1956 | Val Acc: 64.23%
+Epoch 182/300 | Loss: 0.1952 | Val Acc: 63.73%
+Epoch 183/300 | Loss: 0.1948 | Val Acc: 62.97%
+Epoch 184/300 | Loss: 0.1946 | Val Acc: 64.28%
+Epoch 185/300 | Loss: 0.2076 | Val Acc: 64.02%
+Epoch 186/300 | Loss: 0.1868 | Val Acc: 62.95%
+Epoch 187/300 | Loss: 0.1966 | Val Acc: 64.55%
+Epoch 188/300 | Loss: 0.1957 | Val Acc: 63.43%
+Epoch 189/300 | Loss: 0.1853 | Val Acc: 64.46%
+Epoch 190/300 | Loss: 0.1904 | Val Acc: 62.11%
+Epoch 191/300 | Loss: 0.1971 | Val Acc: 64.18%
+Epoch 192/300 | Loss: 0.1892 | Val Acc: 63.30%
+Epoch 193/300 | Loss: 0.1821 | Val Acc: 63.36%
+Epoch 194/300 | Loss: 0.1853 | Val Acc: 64.35%
+Epoch 195/300 | Loss: 0.1850 | Val Acc: 62.76%
+Epoch 196/300 | Loss: 0.1869 | Val Acc: 63.81%
+Epoch 197/300 | Loss: 0.1849 | Val Acc: 63.50%
+Epoch 198/300 | Loss: 0.1847 | Val Acc: 63.62%
+Epoch 199/300 | Loss: 0.1871 | Val Acc: 63.17%
+Epoch 200/300 | Loss: 0.1966 | Val Acc: 64.10%
+Epoch 201/300 | Loss: 0.1846 | Val Acc: 64.16%
+Epoch 202/300 | Loss: 0.1760 | Val Acc: 63.68%
+Epoch 203/300 | Loss: 0.1686 | Val Acc: 64.02%
+Epoch 204/300 | Loss: 0.1835 | Val Acc: 63.03%
+Epoch 205/300 | Loss: 0.1862 | Val Acc: 63.78%
+Epoch 206/300 | Loss: 0.1872 | Val Acc: 63.30%
+Epoch 207/300 | Loss: 0.1770 | Val Acc: 63.59%
+Epoch 208/300 | Loss: 0.1735 | Val Acc: 64.17%
+Epoch 209/300 | Loss: 0.1852 | Val Acc: 63.87%
+Epoch 210/300 | Loss: 0.1822 | Val Acc: 62.88%
+Epoch 211/300 | Loss: 0.1787 | Val Acc: 64.07%
+Epoch 212/300 | Loss: 0.1719 | Val Acc: 64.55%
+Epoch 213/300 | Loss: 0.1702 | Val Acc: 64.78%
+Epoch 214/300 | Loss: 0.1755 | Val Acc: 64.03%
+Epoch 215/300 | Loss: 0.1739 | Val Acc: 63.23%
+Epoch 216/300 | Loss: 0.1760 | Val Acc: 63.69%
+Epoch 217/300 | Loss: 0.1687 | Val Acc: 63.89%
+Epoch 218/300 | Loss: 0.1708 | Val Acc: 63.69%
+Epoch 219/300 | Loss: 0.1765 | Val Acc: 62.57%
+Epoch 220/300 | Loss: 0.1786 | Val Acc: 63.95%
+Epoch 221/300 | Loss: 0.1823 | Val Acc: 63.60%
+Epoch 222/300 | Loss: 0.1687 | Val Acc: 64.13%
+Epoch 223/300 | Loss: 0.1739 | Val Acc: 63.54%
+Epoch 224/300 | Loss: 0.1759 | Val Acc: 63.66%
+Epoch 225/300 | Loss: 0.1726 | Val Acc: 63.48%
+Epoch 226/300 | Loss: 0.1686 | Val Acc: 63.85%
+Epoch 227/300 | Loss: 0.1660 | Val Acc: 63.84%
+Epoch 228/300 | Loss: 0.1684 | Val Acc: 63.55%
+Epoch 229/300 | Loss: 0.1727 | Val Acc: 63.51%
+Epoch 230/300 | Loss: 0.1733 | Val Acc: 64.78%
+Epoch 231/300 | Loss: 0.1651 | Val Acc: 64.44%
+Epoch 232/300 | Loss: 0.1585 | Val Acc: 63.82%
+Epoch 233/300 | Loss: 0.1633 | Val Acc: 64.54%
+Epoch 234/300 | Loss: 0.1690 | Val Acc: 63.77%
+Epoch 235/300 | Loss: 0.1704 | Val Acc: 64.33%
+Epoch 236/300 | Loss: 0.1588 | Val Acc: 63.22%
+Epoch 237/300 | Loss: 0.1655 | Val Acc: 64.57%
+Epoch 238/300 | Loss: 0.1565 | Val Acc: 63.71%
+Epoch 239/300 | Loss: 0.1643 | Val Acc: 63.90%
+Epoch 240/300 | Loss: 0.1650 | Val Acc: 64.04%
+Epoch 241/300 | Loss: 0.1694 | Val Acc: 63.27%
+Epoch 242/300 | Loss: 0.1620 | Val Acc: 64.51%
+Epoch 243/300 | Loss: 0.1612 | Val Acc: 64.32%
+Epoch 244/300 | Loss: 0.1604 | Val Acc: 64.24%
+Epoch 245/300 | Loss: 0.1583 | Val Acc: 64.00%
+Epoch 246/300 | Loss: 0.1649 | Val Acc: 63.67%
+Epoch 247/300 | Loss: 0.1657 | Val Acc: 64.19%
+Epoch 248/300 | Loss: 0.1591 | Val Acc: 64.71%
+Epoch 249/300 | Loss: 0.1564 | Val Acc: 63.50%
+Epoch 250/300 | Loss: 0.1522 | Val Acc: 63.57%
+Epoch 251/300 | Loss: 0.1686 | Val Acc: 64.19%
+Epoch 252/300 | Loss: 0.1570 | Val Acc: 62.34%
+Epoch 253/300 | Loss: 0.1651 | Val Acc: 63.99%
+Epoch 254/300 | Loss: 0.1604 | Val Acc: 63.33%
+Epoch 255/300 | Loss: 0.1583 | Val Acc: 64.07%
+Epoch 256/300 | Loss: 0.1531 | Val Acc: 64.67%
+Epoch 257/300 | Loss: 0.1509 | Val Acc: 64.85%
+Epoch 258/300 | Loss: 0.1583 | Val Acc: 63.63%
+Epoch 259/300 | Loss: 0.1506 | Val Acc: 64.63%
+Epoch 260/300 | Loss: 0.1582 | Val Acc: 63.85%
+Epoch 261/300 | Loss: 0.1557 | Val Acc: 64.23%
+Epoch 262/300 | Loss: 0.1679 | Val Acc: 64.80%
+Epoch 263/300 | Loss: 0.1590 | Val Acc: 62.95%
+Epoch 264/300 | Loss: 0.1676 | Val Acc: 64.34%
+Epoch 265/300 | Loss: 0.1567 | Val Acc: 63.85%
+Epoch 266/300 | Loss: 0.1503 | Val Acc: 64.19%
+Epoch 267/300 | Loss: 0.1552 | Val Acc: 64.07%
+Epoch 268/300 | Loss: 0.1511 | Val Acc: 64.03%
+Epoch 269/300 | Loss: 0.1603 | Val Acc: 63.73%
+Epoch 270/300 | Loss: 0.1512 | Val Acc: 64.60%
+Epoch 271/300 | Loss: 0.1571 | Val Acc: 63.93%
+Epoch 272/300 | Loss: 0.1633 | Val Acc: 63.92%
+Epoch 273/300 | Loss: 0.1579 | Val Acc: 64.63%
+Epoch 274/300 | Loss: 0.1537 | Val Acc: 63.85%
+Epoch 275/300 | Loss: 0.1541 | Val Acc: 64.53%
+Epoch 276/300 | Loss: 0.1585 | Val Acc: 63.99%
+Epoch 277/300 | Loss: 0.1540 | Val Acc: 63.83%
+Epoch 278/300 | Loss: 0.1557 | Val Acc: 63.26%
+Epoch 279/300 | Loss: 0.1492 | Val Acc: 64.18%
+Epoch 280/300 | Loss: 0.1485 | Val Acc: 63.79%
+Epoch 281/300 | Loss: 0.1497 | Val Acc: 63.91%
+Epoch 282/300 | Loss: 0.1524 | Val Acc: 64.14%
+Epoch 283/300 | Loss: 0.1454 | Val Acc: 63.57%
+Epoch 284/300 | Loss: 0.1466 | Val Acc: 64.26%
+Epoch 285/300 | Loss: 0.1456 | Val Acc: 63.42%
+Epoch 286/300 | Loss: 0.1499 | Val Acc: 63.45%
+Epoch 287/300 | Loss: 0.1535 | Val Acc: 63.33%
+Epoch 288/300 | Loss: 0.1580 | Val Acc: 63.31%
+Epoch 289/300 | Loss: 0.1521 | Val Acc: 63.81%
+Epoch 290/300 | Loss: 0.1435 | Val Acc: 64.39%
+Epoch 291/300 | Loss: 0.1509 | Val Acc: 64.70%
+Epoch 292/300 | Loss: 0.1444 | Val Acc: 64.95%
+Epoch 293/300 | Loss: 0.1502 | Val Acc: 63.35%
+Epoch 294/300 | Loss: 0.1450 | Val Acc: 63.88%
+Epoch 295/300 | Loss: 0.1443 | Val Acc: 64.38%
+Epoch 296/300 | Loss: 0.1492 | Val Acc: 64.18%
+Epoch 297/300 | Loss: 0.1558 | Val Acc: 63.97%
+Epoch 298/300 | Loss: 0.1428 | Val Acc: 64.17%
+Epoch 299/300 | Loss: 0.1403 | Val Acc: 63.62%
+Epoch 300/300 | Loss: 0.1314 | Val Acc: 64.44%
+🏁 Final Model Saved: ./exp/checkpoints/resnet56_filter_gema_final.pth
+
+============================== FINAL PHYSICAL COMPRESSION ==============================

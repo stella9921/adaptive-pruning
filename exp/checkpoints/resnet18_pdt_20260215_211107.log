@@ -1,0 +1,46 @@
+📝 Logging started: resnet18_pdt_20260215_211107.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-8) will be pruned.
+[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)
+
+>>> [Pilot Check] Strategy: PDT | Pruning starts at Epoch 30, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.06%      92.026us        70.31%     100.609ms       5.030ms       0.000us         0.00%       1.643ms      82.158us           0 B           0 B     116.94 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.08%     118.831us        70.25%     100.517ms       5.026ms       0.000us         0.00%       1.643ms      82.158us           0 B           0 B     116.94 MB           0 B            20            --  
+                                     aten::_convolution         0.47%     667.197us        70.17%     100.398ms       5.020ms       0.000us         0.00%       1.643ms      82.158us           0 B           0 B     116.94 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.64%      92.490ms        69.70%      99.731ms       4.987ms     863.836us        72.35%       1.643ms      82.158us           0 B           0 B     116.94 MB     116.94 MB            20            --  
+                           aten::_batch_norm_impl_index         0.06%      90.359us        10.42%      14.909ms     745.434us       0.000us         0.00%     234.718us      11.736us           0 B           0 B     114.88 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.37%      13.414ms        10.36%      14.818ms     740.916us     209.983us        17.59%     234.718us      11.736us           0 B           0 B     114.88 MB           0 B            20            --  
+                                            aten::empty         0.16%     227.422us         0.31%     444.892us       4.449us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     114.88 MB     114.88 MB           100            --  
+                                       aten::batch_norm         0.06%      88.109us        10.48%      14.997ms     749.839us       0.000us         0.00%     234.718us      11.736us           0 B           0 B     114.84 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      61.249us         0.26%     377.436us      18.872us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     114.84 MB           0 B            20            --  
+                                           aten::linear         0.03%      40.037us         1.36%       1.951ms       1.951ms       0.000us         0.00%      13.568us      13.568us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 143.087ms
+Self CUDA time total: 1.194ms
+

@@ -1,0 +1,34 @@
+📝 Logging started: resnet34_pat_20260213_125604.log
+Files already downloaded and verified
+Files already downloaded and verified
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: PAT
+Target Model: resnet34 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:   64 | Layers: layer1.2.bn2 ... (1 layers)
+ Group  4 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  5 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  6 | Channels:  128 | Layers: layer2.2.bn2 ... (1 layers)
+ Group  7 | Channels:  128 | Layers: layer2.3.bn2 ... (1 layers)
+ Group  8 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  9 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group 10 | Channels:  256 | Layers: layer3.2.bn2 ... (1 layers)
+ Group 11 | Channels:  256 | Layers: layer3.3.bn2 ... (1 layers)
+ Group 12 | Channels:  256 | Layers: layer3.4.bn2 ... (1 layers)
+ Group 13 | Channels:  256 | Layers: layer3.5.bn2 ... (1 layers)
+ Group 14 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group 15 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+ Group 16 | Channels:  512 | Layers: layer4.2.bn2 ... (1 layers)
+===============================================================
+[*] Total 16 groups identified.
+
+>>> [System] Loading Base Model: ./exp/checkpoints/resnet34_base.pth
+[resnet34] Base Accuracy: 79.30%
+
+>> Analyzing Block: layer1.0
+   - Pruning 20% ... 

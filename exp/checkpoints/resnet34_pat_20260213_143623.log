@@ -1,0 +1,131 @@
+📝 Logging started: resnet34_pat_20260213_143623.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: PAT
+Target Model: resnet34 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:   64 | Layers: layer1.2.bn2 ... (1 layers)
+ Group  4 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  5 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  6 | Channels:  128 | Layers: layer2.2.bn2 ... (1 layers)
+ Group  7 | Channels:  128 | Layers: layer2.3.bn2 ... (1 layers)
+ Group  8 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  9 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group 10 | Channels:  256 | Layers: layer3.2.bn2 ... (1 layers)
+ Group 11 | Channels:  256 | Layers: layer3.3.bn2 ... (1 layers)
+ Group 12 | Channels:  256 | Layers: layer3.4.bn2 ... (1 layers)
+ Group 13 | Channels:  256 | Layers: layer3.5.bn2 ... (1 layers)
+ Group 14 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group 15 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+ Group 16 | Channels:  512 | Layers: layer4.2.bn2 ... (1 layers)
+===============================================================
+[*] Total 16 groups identified.
+
+>>> [System] Loading Base Model: ./exp/checkpoints/resnet34_base.pth
+[Sensitivity] Load from ./exp/checkpoints/resnet34_sensitivity.json
+🚀 PATPruner Ready: 16 blocks identified.
+
+--- PAT One-Shot Pruning (Strategy: amplification) ---
+✅ [FORCE ENABLED] Keeping 91.0% channels for all layers.
+[*] Final Synced Target Modules: 71
+[*] Physically Pruning Block: layer1.0 | Channels: 58
+[*] Physically Pruning Block: layer1.0 | Channels: 58
+[*] Physically Pruning Block: layer1.0 | Channels: 58
+[*] Physically Pruning Block: layer1.0 | Channels: 58
+[*] Physically Pruning Block: layer1.1 | Channels: 58
+[*] Physically Pruning Block: layer1.1 | Channels: 58
+[*] Physically Pruning Block: layer1.1 | Channels: 58
+[*] Physically Pruning Block: layer1.1 | Channels: 58
+[*] Physically Pruning Block: layer1.2 | Channels: 58
+[*] Physically Pruning Block: layer1.2 | Channels: 58
+[*] Physically Pruning Block: layer1.2 | Channels: 58
+[*] Physically Pruning Block: layer1.2 | Channels: 58
+[*] Physically Pruning Block: layer2.0 | Channels: 116
+[*] Physically Pruning Block: layer2.0 | Channels: 116
+[*] Physically Pruning Block: layer2.0 | Channels: 116
+[*] Physically Pruning Block: layer2.0 | Channels: 116
+[*] Physically Pruning Block: layer2.0 | Channels: 116
+[*] Physically Pruning Block: layer2.0 | Channels: 116
+[*] Physically Pruning Block: layer2.1 | Channels: 116
+[*] Physically Pruning Block: layer2.1 | Channels: 116
+[*] Physically Pruning Block: layer2.1 | Channels: 116
+[*] Physically Pruning Block: layer2.1 | Channels: 116
+[*] Physically Pruning Block: layer2.2 | Channels: 116
+[*] Physically Pruning Block: layer2.2 | Channels: 116
+[*] Physically Pruning Block: layer2.2 | Channels: 116
+[*] Physically Pruning Block: layer2.2 | Channels: 116
+[*] Physically Pruning Block: layer2.3 | Channels: 116
+[*] Physically Pruning Block: layer2.3 | Channels: 116
+[*] Physically Pruning Block: layer2.3 | Channels: 116
+[*] Physically Pruning Block: layer2.3 | Channels: 116
+[*] Physically Pruning Block: layer3.0 | Channels: 232
+[*] Physically Pruning Block: layer3.0 | Channels: 232
+[*] Physically Pruning Block: layer3.0 | Channels: 232
+[*] Physically Pruning Block: layer3.0 | Channels: 232
+[*] Physically Pruning Block: layer3.0 | Channels: 232
+[*] Physically Pruning Block: layer3.0 | Channels: 232
+[*] Physically Pruning Block: layer3.1 | Channels: 232
+[*] Physically Pruning Block: layer3.1 | Channels: 232
+[*] Physically Pruning Block: layer3.1 | Channels: 232
+[*] Physically Pruning Block: layer3.1 | Channels: 232
+[*] Physically Pruning Block: layer3.2 | Channels: 232
+[*] Physically Pruning Block: layer3.2 | Channels: 232
+[*] Physically Pruning Block: layer3.2 | Channels: 232
+[*] Physically Pruning Block: layer3.2 | Channels: 232
+[*] Physically Pruning Block: layer3.3 | Channels: 232
+[*] Physically Pruning Block: layer3.3 | Channels: 232
+[*] Physically Pruning Block: layer3.3 | Channels: 232
+[*] Physically Pruning Block: layer3.3 | Channels: 232
+[*] Physically Pruning Block: layer3.4 | Channels: 232
+[*] Physically Pruning Block: layer3.4 | Channels: 232
+[*] Physically Pruning Block: layer3.4 | Channels: 232
+[*] Physically Pruning Block: layer3.4 | Channels: 232
+[*] Physically Pruning Block: layer3.5 | Channels: 232
+[*] Physically Pruning Block: layer3.5 | Channels: 232
+[*] Physically Pruning Block: layer3.5 | Channels: 232
+[*] Physically Pruning Block: layer3.5 | Channels: 232
+[*] Physically Pruning Block: layer4.0 | Channels: 465
+[*] Physically Pruning Block: layer4.0 | Channels: 465
+[*] Physically Pruning Block: layer4.0 | Channels: 465
+[*] Physically Pruning Block: layer4.0 | Channels: 465
+[*] Physically Pruning Block: layer4.0 | Channels: 465
+[*] Physically Pruning Block: layer4.0 | Channels: 465
+[*] Physically Pruning Block: layer4.1 | Channels: 465
+[*] Physically Pruning Block: layer4.1 | Channels: 465
+[*] Physically Pruning Block: layer4.1 | Channels: 465
+[*] Physically Pruning Block: layer4.1 | Channels: 465
+[*] Physically Pruning Block: layer4.2 | Channels: 465
+[*] Physically Pruning Block: layer4.2 | Channels: 465
+[*] Physically Pruning Block: layer4.2 | Channels: 465
+[*] Physically Pruning Block: layer4.2 | Channels: 465
+[*] Final FC Synced: 512 features
+
+========================================
+📊 [Pruning Result Summary]
+ - Original Params: 21.328 M
+ - Pruned Params:   14.001 M
+ - Compression Ratio: 34.35 %
+========================================
+
+FT Epoch [1/70] | Loss: 0.5363 | Val Acc: 67.92% | LR: 0.00999
+ ⭐ Best model saved with Acc: 67.92%
+FT Epoch [2/70] | Loss: 0.3904 | Val Acc: 68.18% | LR: 0.00998
+ ⭐ Best model saved with Acc: 68.18%
+FT Epoch [3/70] | Loss: 0.3166 | Val Acc: 69.71% | LR: 0.00995
+ ⭐ Best model saved with Acc: 69.71%
+FT Epoch [4/70] | Loss: 0.2742 | Val Acc: 70.33% | LR: 0.00992
+ ⭐ Best model saved with Acc: 70.33%
+FT Epoch [5/70] | Loss: 0.2387 | Val Acc: 70.11% | LR: 0.00987
+FT Epoch [6/70] | Loss: 0.1988 | Val Acc: 70.11% | LR: 0.00982
+FT Epoch [7/70] | Loss: 0.1897 | Val Acc: 71.25% | LR: 0.00976
+ ⭐ Best model saved with Acc: 71.25%
+FT Epoch [8/70] | Loss: 0.1786 | Val Acc: 71.81% | LR: 0.00968
+ ⭐ Best model saved with Acc: 71.81%
+FT Epoch [9/70] | Loss: 0.1481 | Val Acc: 70.98% | LR: 0.00960
+FT Epoch [10/70] | Loss: 0.1406 | Val Acc: 72.53% | LR: 0.00950
+ ⭐ Best model saved with Acc: 72.53%
+FT Epoch [11/70] | Loss: 0.1329 | Val Acc: 70.71% | LR: 0.00940

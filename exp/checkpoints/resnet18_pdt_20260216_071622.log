@@ -1,0 +1,56 @@
+📝 Logging started: resnet18_pdt_20260216_071622.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-8) will be pruned.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+✅ Success: Weights loaded from resnet18_pdt_ep120_sp0.0.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.05%      75.180us        70.39%     101.614ms       5.081ms       0.000us         0.00%       1.621ms      81.031us           0 B           0 B     118.81 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.08%     117.676us        70.34%     101.538ms       5.077ms       0.000us         0.00%       1.621ms      81.031us           0 B           0 B     118.81 MB           0 B            20            --  
+                                     aten::_convolution         0.51%     740.257us        70.26%     101.421ms       5.071ms       0.000us         0.00%       1.621ms      81.031us           0 B           0 B     118.81 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.01%      92.399ms        69.75%     100.681ms       5.034ms     851.290us        71.97%       1.621ms      81.031us           0 B           0 B     118.81 MB     118.81 MB            20            --  
+                           aten::_batch_norm_impl_index         0.06%      83.293us        10.50%      15.162ms     758.112us       0.000us         0.00%     235.008us      11.750us           0 B           0 B     115.63 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.64%      13.913ms        10.45%      15.079ms     753.947us     210.272us        17.78%     235.008us      11.750us           0 B           0 B     115.63 MB           0 B            20            --  
+                                            aten::empty         0.16%     230.218us         0.35%     505.214us       5.052us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.63 MB     115.63 MB           100            --  
+                                       aten::batch_norm         0.06%      85.505us        10.56%      15.248ms     762.387us       0.000us         0.00%     235.008us      11.750us           0 B           0 B     115.59 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      58.852us         0.30%     432.181us      21.609us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.59 MB           0 B            20            --  
+                                           aten::linear         0.03%      37.655us         1.12%       1.620ms       1.620ms       0.000us         0.00%      13.952us      13.952us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 144.348ms
+Self CUDA time total: 1.183ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+Epoch 120/400 | Loss: 1.2073 | Val Acc: 57.64%
+Epoch 121/400 | Loss: 0.9842 | Val Acc: 60.25%

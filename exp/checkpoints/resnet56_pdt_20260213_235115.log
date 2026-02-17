@@ -1,0 +1,49 @@
+📝 Logging started: resnet56_pdt_20260213_235115.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet56 | Dataset: cifar100
+[*] Note: resnet56 doesn't accept 'num_classes' argument. Loading default.
+
+[Stage 1] Analyzing Residual Topology for cifarresnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   16 | Layers: bn1 ... (2 layers)
+ Group  2 | Channels:   16 | Layers: bn1 ... (3 layers)
+ Group  3 | Channels:   16 | Layers: bn1 ... (4 layers)
+ Group  4 | Channels:   16 | Layers: bn1 ... (5 layers)
+ Group  5 | Channels:   16 | Layers: bn1 ... (6 layers)
+ Group  6 | Channels:   16 | Layers: layer1.0.bn2 ... (6 layers)
+ Group  7 | Channels:   16 | Layers: layer1.1.bn2 ... (6 layers)
+ Group  8 | Channels:   16 | Layers: layer1.2.bn2 ... (6 layers)
+ Group  9 | Channels:   16 | Layers: layer1.3.bn2 ... (6 layers)
+ Group 10 | Channels:   32 | Layers: layer2.0.bn2 ... (2 layers)
+ Group 11 | Channels:   32 | Layers: layer2.0.bn2 ... (3 layers)
+ Group 12 | Channels:   32 | Layers: layer2.0.bn2 ... (4 layers)
+ Group 13 | Channels:   32 | Layers: layer2.0.bn2 ... (5 layers)
+ Group 14 | Channels:   32 | Layers: layer2.0.bn2 ... (6 layers)
+ Group 15 | Channels:   32 | Layers: layer2.0.bn2 ... (7 layers)
+ Group 16 | Channels:   32 | Layers: layer2.1.bn2 ... (6 layers)
+ Group 17 | Channels:   32 | Layers: layer2.2.bn2 ... (6 layers)
+ Group 18 | Channels:   32 | Layers: layer2.3.bn2 ... (6 layers)
+ Group 19 | Channels:   64 | Layers: layer3.0.bn2 ... (2 layers)
+ Group 20 | Channels:   64 | Layers: layer3.0.bn2 ... (3 layers)
+ Group 21 | Channels:   64 | Layers: layer3.0.bn2 ... (4 layers)
+ Group 22 | Channels:   64 | Layers: layer3.0.bn2 ... (5 layers)
+ Group 23 | Channels:   64 | Layers: layer3.0.bn2 ... (6 layers)
+ Group 24 | Channels:   64 | Layers: layer3.0.bn2 ... (7 layers)
+ Group 25 | Channels:   64 | Layers: layer3.1.bn2 ... (6 layers)
+ Group 26 | Channels:   64 | Layers: layer3.2.bn2 ... (6 layers)
+ Group 27 | Channels:   64 | Layers: layer3.3.bn2 ... (6 layers)
+===============================================================
+[*] Total 27 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-27) will be pruned.
+[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)
+
+>>> [Pilot Check] Strategy: PDT | Pruning starts at Epoch 120, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 204 nodes currently in graph.

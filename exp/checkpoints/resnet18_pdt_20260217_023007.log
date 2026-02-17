@@ -1,0 +1,835 @@
+📝 Logging started: resnet18_pdt_20260217_023007.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Total 8 groups linked to 41 prunable layers.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+✅ Success: Weights loaded from resnet18_pdt_ep120_sp0.0.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.05%      75.113us        70.33%      99.601ms       4.980ms       0.000us         0.00%       1.635ms      81.727us           0 B           0 B     118.81 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.08%     113.612us        70.28%      99.526ms       4.976ms       0.000us         0.00%       1.635ms      81.727us           0 B           0 B     118.81 MB           0 B            20            --  
+                                     aten::_convolution         0.52%     731.744us        70.20%      99.412ms       4.971ms       0.000us         0.00%       1.635ms      81.727us           0 B           0 B     118.81 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.09%      90.768ms        69.68%      98.680ms       4.934ms     861.365us        72.24%       1.635ms      81.727us           0 B           0 B     118.81 MB     118.81 MB            20            --  
+                           aten::_batch_norm_impl_index         0.06%      85.453us        10.67%      15.107ms     755.360us       0.000us         0.00%     235.263us      11.763us           0 B           0 B     115.63 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.80%      13.871ms        10.61%      15.022ms     751.087us     210.303us        17.64%     235.263us      11.763us           0 B           0 B     115.63 MB           0 B            20            --  
+                                            aten::empty         0.16%     223.281us         0.35%     494.680us       4.947us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.63 MB     115.63 MB           100            --  
+                                       aten::batch_norm         0.06%      84.826us        10.73%      15.192ms     759.601us       0.000us         0.00%     235.263us      11.763us           0 B           0 B     115.59 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      55.506us         0.30%     422.822us      21.141us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.59 MB           0 B            20            --  
+                                           aten::linear         0.03%      37.165us         1.16%       1.638ms       1.638ms       0.000us         0.00%      15.104us      15.104us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 141.614ms
+Self CUDA time total: 1.192ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[DEBUG] === step_pruning Started at Epoch 120 ===
+[DEBUG] Current Model Sparsity: 8.02% (Alive: 91.98%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [1, 2, 3, 4, 5, 6, 7, 8]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 1531
+[DEBUG] Target Keep Ratio: 0.8198 (Inc: 0.8913)
+[DEBUG] Lagrangian Decision: Pruned 111 units.
+[DEBUG] Actual Mask Updates: 222 channels.
+
+============================== PDT Pruning Results: Epoch 120 ==============================
+ [*] Pruned this step: 222
+ Group  1 |   64/  64 |     0.0% |     0.154569 | [TARGET]
+ Group  2 |   64/  64 |     0.0% |     0.170736 | [TARGET]
+ Group  3 |   69/ 128 |    46.1% |     0.070183 | [TARGET]
+ Group  4 |  128/ 128 |     0.0% |     0.134962 | [TARGET]
+ Group  5 |   72/ 256 |    71.9% |     0.033391 | [TARGET]
+ Group  6 |  256/ 256 |     0.0% |     0.032565 | [TARGET]
+ Group  7 |  255/ 512 |    50.2% |     0.051117 | [TARGET]
+ Group  8 |  512/ 512 |     0.0% |     0.080900 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.02 %
+ 🟢 Model Size: 42.79 MB
+ 🟠 Peak VRAM (RQ2): 739.01 MB
+ ⚡ Inference Latency (RQ3): 0.8773 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.02 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+Epoch 120/400 | Loss: 1.9800 | Val Acc: 50.25%
+Epoch 121/400 | Loss: 1.3814 | Val Acc: 50.97%
+Epoch 122/400 | Loss: 1.2697 | Val Acc: 54.99%
+Epoch 123/400 | Loss: 1.2069 | Val Acc: 51.50%
+Epoch 124/400 | Loss: 1.1794 | Val Acc: 54.35%
+Epoch 125/400 | Loss: 1.1519 | Val Acc: 57.08%
+Epoch 126/400 | Loss: 1.1233 | Val Acc: 52.68%
+Epoch 127/400 | Loss: 1.1184 | Val Acc: 58.04%
+Epoch 128/400 | Loss: 1.1042 | Val Acc: 58.17%
+Epoch 129/400 | Loss: 1.1005 | Val Acc: 57.70%
+Epoch 130/400 | Loss: 1.0868 | Val Acc: 56.16%
+Epoch 131/400 | Loss: 1.0889 | Val Acc: 55.83%
+Epoch 132/400 | Loss: 1.0733 | Val Acc: 53.53%
+Epoch 133/400 | Loss: 1.0682 | Val Acc: 53.80%
+Epoch 134/400 | Loss: 1.0750 | Val Acc: 59.01%
+Epoch 135/400 | Loss: 1.0788 | Val Acc: 56.63%
+Epoch 136/400 | Loss: 1.0669 | Val Acc: 57.22%
+Epoch 137/400 | Loss: 1.0614 | Val Acc: 55.33%
+Epoch 138/400 | Loss: 1.0638 | Val Acc: 59.54%
+Epoch 139/400 | Loss: 1.0597 | Val Acc: 58.46%
+
+[Action] Triggering PDT Pruning at Epoch 140...
+
+[DEBUG] === step_pruning Started at Epoch 140 ===
+[DEBUG] Current Model Sparsity: 10.31% (Alive: 89.69%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 3, 2, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 1420
+[DEBUG] Target Keep Ratio: 0.7969 (Inc: 0.8885)
+[DEBUG] Lagrangian Decision: Pruned 194 units.
+[DEBUG] Actual Mask Updates: 203 channels.
+
+============================== PDT Pruning Results: Epoch 140 ==============================
+ [*] Pruned this step: 203
+ Group  1 |   58/  64 |     9.4% |     0.153057 | [TARGET]
+ Group  2 |   62/  64 |     3.1% |     0.120099 | [TARGET]
+ Group  3 |   69/ 128 |    46.1% |     0.047901 | [TARGET]
+ Group  4 |  120/ 128 |     6.2% |     0.066633 | [TARGET]
+ Group  5 |   72/ 256 |    71.9% |     0.029207 | [TARGET]
+ Group  6 |  207/ 256 |    19.1% |     0.026688 | [TARGET]
+ Group  7 |  246/ 512 |    52.0% |     0.024324 | [TARGET]
+ Group  8 |  392/ 512 |    23.4% |     0.048331 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.02 %
+ 🟢 Model Size: 42.79 MB
+ 🟠 Peak VRAM (RQ2): 783.06 MB
+ ⚡ Inference Latency (RQ3): 0.9004 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.02 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep140_sp0.0.pth
+Epoch 140/400 | Loss: 1.3821 | Val Acc: 58.85%
+Epoch 141/400 | Loss: 1.1378 | Val Acc: 58.22%
+Epoch 142/400 | Loss: 1.0942 | Val Acc: 57.30%
+Epoch 143/400 | Loss: 1.0839 | Val Acc: 56.03%
+Epoch 144/400 | Loss: 1.0736 | Val Acc: 56.56%
+Epoch 145/400 | Loss: 1.0790 | Val Acc: 58.21%
+Epoch 146/400 | Loss: 1.0731 | Val Acc: 56.22%
+Epoch 147/400 | Loss: 1.0745 | Val Acc: 59.41%
+Epoch 148/400 | Loss: 1.0620 | Val Acc: 60.48%
+Epoch 149/400 | Loss: 1.0595 | Val Acc: 56.98%
+Epoch 150/400 | Loss: 1.0526 | Val Acc: 55.52%
+Epoch 151/400 | Loss: 1.0578 | Val Acc: 59.44%
+Epoch 152/400 | Loss: 1.0506 | Val Acc: 57.26%
+Epoch 153/400 | Loss: 1.0569 | Val Acc: 57.69%
+Epoch 154/400 | Loss: 1.0559 | Val Acc: 58.30%
+Epoch 155/400 | Loss: 1.0503 | Val Acc: 60.21%
+Epoch 156/400 | Loss: 1.0527 | Val Acc: 57.86%
+Epoch 157/400 | Loss: 1.0499 | Val Acc: 56.67%
+Epoch 158/400 | Loss: 1.0482 | Val Acc: 52.27%
+Epoch 159/400 | Loss: 1.0470 | Val Acc: 56.80%
+
+[Action] Triggering PDT Pruning at Epoch 160...
+
+[DEBUG] === step_pruning Started at Epoch 160 ===
+[DEBUG] Current Model Sparsity: 12.40% (Alive: 87.60%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 3, 2, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 1226
+[DEBUG] Target Keep Ratio: 0.7760 (Inc: 0.8858)
+[DEBUG] Lagrangian Decision: Pruned 177 units.
+[DEBUG] Actual Mask Updates: 185 channels.
+
+============================== PDT Pruning Results: Epoch 160 ==============================
+ [*] Pruned this step: 185
+ Group  1 |   53/  64 |    17.2% |     0.175962 | [TARGET]
+ Group  2 |   59/  64 |     7.8% |     0.107902 | [TARGET]
+ Group  3 |   69/ 128 |    46.1% |     0.070285 | [TARGET]
+ Group  4 |  107/ 128 |    16.4% |     0.062887 | [TARGET]
+ Group  5 |   70/ 256 |    72.7% |     0.029301 | [TARGET]
+ Group  6 |  193/ 256 |    24.6% |     0.050593 | [TARGET]
+ Group  7 |  240/ 512 |    53.1% |     0.047552 | [TARGET]
+ Group  8 |  258/ 512 |    49.6% |     0.028141 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.02 %
+ 🟢 Model Size: 42.79 MB
+ 🟠 Peak VRAM (RQ2): 782.56 MB
+ ⚡ Inference Latency (RQ3): 0.9413 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.02 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep160_sp0.0.pth
+Epoch 160/400 | Loss: 1.3758 | Val Acc: 59.92%
+Epoch 161/400 | Loss: 1.1413 | Val Acc: 56.91%
+Epoch 162/400 | Loss: 1.0870 | Val Acc: 55.14%
+Epoch 163/400 | Loss: 1.0742 | Val Acc: 57.66%
+Epoch 164/400 | Loss: 1.0679 | Val Acc: 58.30%
+Epoch 165/400 | Loss: 1.0742 | Val Acc: 48.72%
+Epoch 166/400 | Loss: 1.0593 | Val Acc: 58.77%
+Epoch 167/400 | Loss: 1.0672 | Val Acc: 55.39%
+Epoch 168/400 | Loss: 1.0591 | Val Acc: 57.64%
+Epoch 169/400 | Loss: 1.0583 | Val Acc: 58.02%
+Epoch 170/400 | Loss: 1.0569 | Val Acc: 56.60%
+Epoch 171/400 | Loss: 1.0607 | Val Acc: 57.04%
+Epoch 172/400 | Loss: 1.0474 | Val Acc: 56.19%
+Epoch 173/400 | Loss: 1.0572 | Val Acc: 59.51%
+Epoch 174/400 | Loss: 1.0484 | Val Acc: 51.74%
+Epoch 175/400 | Loss: 1.0554 | Val Acc: 53.94%
+Epoch 176/400 | Loss: 1.0490 | Val Acc: 59.07%
+Epoch 177/400 | Loss: 1.0562 | Val Acc: 52.54%
+Epoch 178/400 | Loss: 1.0569 | Val Acc: 57.76%
+Epoch 179/400 | Loss: 1.0451 | Val Acc: 57.51%
+
+[Action] Triggering PDT Pruning at Epoch 180...
+
+[DEBUG] === step_pruning Started at Epoch 180 ===
+[DEBUG] Current Model Sparsity: 14.31% (Alive: 85.69%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 3, 2, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 1049
+[DEBUG] Target Keep Ratio: 0.7569 (Inc: 0.8833)
+[DEBUG] Lagrangian Decision: Pruned 150 units.
+[DEBUG] Actual Mask Updates: 167 channels.
+
+============================== PDT Pruning Results: Epoch 180 ==============================
+ [*] Pruned this step: 167
+ Group  1 |   52/  64 |    18.8% |     0.071765 | [TARGET]
+ Group  2 |   57/  64 |    10.9% |     0.088013 | [TARGET]
+ Group  3 |   69/ 128 |    46.1% |     0.125894 | [TARGET]
+ Group  4 |  107/ 128 |    16.4% |     0.087860 | [TARGET]
+ Group  5 |   68/ 256 |    73.4% |     0.026086 | [TARGET]
+ Group  6 |  163/ 256 |    36.3% |     0.008483 | [TARGET]
+ Group  7 |  225/ 512 |    56.1% |     0.017807 | [TARGET]
+ Group  8 |  158/ 512 |    69.1% |     0.012903 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.03 %
+ 🟢 Model Size: 42.79 MB
+ 🟠 Peak VRAM (RQ2): 782.56 MB
+ ⚡ Inference Latency (RQ3): 0.9910 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 180]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.03 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep180_sp0.0.pth
+Epoch 180/400 | Loss: 1.4098 | Val Acc: 55.85%
+Epoch 181/400 | Loss: 1.1622 | Val Acc: 58.54%
+Epoch 182/400 | Loss: 1.0998 | Val Acc: 58.04%
+Epoch 183/400 | Loss: 1.0921 | Val Acc: 60.99%
+Epoch 184/400 | Loss: 1.0855 | Val Acc: 56.56%
+Epoch 185/400 | Loss: 1.0848 | Val Acc: 57.71%
+Epoch 186/400 | Loss: 1.0804 | Val Acc: 55.62%
+Epoch 187/400 | Loss: 1.0653 | Val Acc: 58.38%
+Epoch 188/400 | Loss: 1.0710 | Val Acc: 58.68%
+Epoch 189/400 | Loss: 1.0678 | Val Acc: 57.40%
+Epoch 190/400 | Loss: 1.0667 | Val Acc: 58.07%
+Epoch 191/400 | Loss: 1.0790 | Val Acc: 59.78%
+Epoch 192/400 | Loss: 1.0662 | Val Acc: 59.93%
+Epoch 193/400 | Loss: 1.0620 | Val Acc: 57.20%
+Epoch 194/400 | Loss: 1.0711 | Val Acc: 57.03%
+Epoch 195/400 | Loss: 1.0569 | Val Acc: 59.83%
+Epoch 196/400 | Loss: 1.0646 | Val Acc: 56.42%
+Epoch 197/400 | Loss: 1.0688 | Val Acc: 56.57%
+Epoch 198/400 | Loss: 1.0649 | Val Acc: 58.35%
+Epoch 199/400 | Loss: 1.0634 | Val Acc: 56.38%
+
+[Action] Triggering PDT Pruning at Epoch 200...
+
+[DEBUG] === step_pruning Started at Epoch 200 ===
+[DEBUG] Current Model Sparsity: 16.03% (Alive: 83.97%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 2, 3, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 899
+[DEBUG] Target Keep Ratio: 0.7397 (Inc: 0.8809)
+[DEBUG] Lagrangian Decision: Pruned 115 units.
+[DEBUG] Actual Mask Updates: 152 channels.
+
+============================== PDT Pruning Results: Epoch 200 ==============================
+ [*] Pruned this step: 152
+ Group  1 |   51/  64 |    20.3% |     0.075207 | [TARGET]
+ Group  2 |   55/  64 |    14.1% |     0.133333 | [TARGET]
+ Group  3 |   67/ 128 |    47.7% |     0.018194 | [TARGET]
+ Group  4 |  104/ 128 |    18.8% |     0.031237 | [TARGET]
+ Group  5 |   66/ 256 |    74.2% |     0.017707 | [TARGET]
+ Group  6 |  132/ 256 |    48.4% |     0.014366 | [TARGET]
+ Group  7 |  192/ 512 |    62.5% |     0.009040 | [TARGET]
+ Group  8 |  117/ 512 |    77.1% |     0.012100 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.03 %
+ 🟢 Model Size: 42.79 MB
+ 🟠 Peak VRAM (RQ2): 782.56 MB
+ ⚡ Inference Latency (RQ3): 0.9613 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.03 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep200_sp0.0.pth
+Epoch 200/400 | Loss: 1.4396 | Val Acc: 53.75%
+Epoch 201/400 | Loss: 1.1846 | Val Acc: 59.70%
+Epoch 202/400 | Loss: 1.1326 | Val Acc: 55.74%
+Epoch 203/400 | Loss: 1.1294 | Val Acc: 53.78%
+Epoch 204/400 | Loss: 1.1116 | Val Acc: 56.27%
+Epoch 205/400 | Loss: 1.1025 | Val Acc: 57.09%
+Epoch 206/400 | Loss: 1.1067 | Val Acc: 52.45%
+Epoch 207/400 | Loss: 1.0984 | Val Acc: 56.72%
+Epoch 208/400 | Loss: 1.0888 | Val Acc: 55.71%
+Epoch 209/400 | Loss: 1.0883 | Val Acc: 56.62%
+Epoch 210/400 | Loss: 1.0856 | Val Acc: 56.96%
+Epoch 211/400 | Loss: 1.0910 | Val Acc: 57.92%
+Epoch 212/400 | Loss: 1.0927 | Val Acc: 56.40%
+Epoch 213/400 | Loss: 1.0914 | Val Acc: 57.42%
+Epoch 214/400 | Loss: 1.0893 | Val Acc: 58.57%
+Epoch 215/400 | Loss: 1.0860 | Val Acc: 58.16%
+Epoch 216/400 | Loss: 1.0723 | Val Acc: 59.52%
+Epoch 217/400 | Loss: 1.0862 | Val Acc: 57.37%
+Epoch 218/400 | Loss: 1.0813 | Val Acc: 58.59%
+Epoch 219/400 | Loss: 1.0820 | Val Acc: 56.19%
+
+[Action] Triggering PDT Pruning at Epoch 220...
+
+[DEBUG] === step_pruning Started at Epoch 220 ===
+[DEBUG] Current Model Sparsity: 17.60% (Alive: 82.40%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 3, 2, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 784
+[DEBUG] Target Keep Ratio: 0.7114 (Inc: 0.8634)
+[DEBUG] Lagrangian Decision: Pruned 127 units.
+[DEBUG] Actual Mask Updates: 152 channels.
+
+============================== PDT Pruning Results: Epoch 220 ==============================
+ [*] Pruned this step: 152
+ Group  1 |   46/  64 |    28.1% |     0.148598 | [TARGET]
+ Group  2 |   49/  64 |    23.4% |     0.069634 | [TARGET]
+ Group  3 |   64/ 128 |    50.0% |     0.080659 | [TARGET]
+ Group  4 |   88/ 128 |    31.2% |     0.068988 | [TARGET]
+ Group  5 |   65/ 256 |    74.6% |     0.047298 | [TARGET]
+ Group  6 |  104/ 256 |    59.4% |     0.040338 | [TARGET]
+ Group  7 |  171/ 512 |    66.6% |     0.023271 | [TARGET]
+ Group  8 |   70/ 512 |    86.3% |     0.023001 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.03 %
+ 🟢 Model Size: 42.79 MB
+ 🟠 Peak VRAM (RQ2): 782.56 MB
+ ⚡ Inference Latency (RQ3): 1.0152 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 220]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.03 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep220_sp0.0.pth
+Epoch 220/400 | Loss: 1.5286 | Val Acc: 57.63%
+Epoch 221/400 | Loss: 1.2540 | Val Acc: 54.58%
+Epoch 222/400 | Loss: 1.1610 | Val Acc: 58.23%
+Epoch 223/400 | Loss: 1.1489 | Val Acc: 59.49%
+Epoch 224/400 | Loss: 1.1445 | Val Acc: 56.92%
+Epoch 225/400 | Loss: 1.1332 | Val Acc: 52.41%
+Epoch 226/400 | Loss: 1.1311 | Val Acc: 58.46%
+Epoch 227/400 | Loss: 1.1330 | Val Acc: 54.68%
+Epoch 228/400 | Loss: 1.1277 | Val Acc: 55.57%
+Epoch 229/400 | Loss: 1.1225 | Val Acc: 55.98%
+Epoch 230/400 | Loss: 1.1237 | Val Acc: 56.27%
+Epoch 231/400 | Loss: 1.1232 | Val Acc: 58.45%
+Epoch 232/400 | Loss: 1.1153 | Val Acc: 57.56%
+Epoch 233/400 | Loss: 1.1075 | Val Acc: 57.29%
+Epoch 234/400 | Loss: 1.1126 | Val Acc: 56.01%
+Epoch 235/400 | Loss: 1.1123 | Val Acc: 54.64%
+Epoch 236/400 | Loss: 1.1089 | Val Acc: 54.80%
+Epoch 237/400 | Loss: 1.1108 | Val Acc: 58.28%
+Epoch 238/400 | Loss: 1.1114 | Val Acc: 53.79%
+Epoch 239/400 | Loss: 1.1082 | Val Acc: 56.98%
+
+[Action] Triggering PDT Pruning at Epoch 240...
+
+[DEBUG] === step_pruning Started at Epoch 240 ===
+[DEBUG] Current Model Sparsity: 19.16% (Alive: 80.84%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 6, 7, 4, 5, 3, 2, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 657
+[DEBUG] Target Keep Ratio: 0.6543 (Inc: 0.8094)
+[DEBUG] Lagrangian Decision: Pruned 139 units.
+[DEBUG] Actual Mask Updates: 183 channels.
+
+============================== PDT Pruning Results: Epoch 240 ==============================
+ [*] Pruned this step: 183
+ Group  1 |   43/  64 |    32.8% |     0.086837 | [TARGET]
+ Group  2 |   38/  64 |    40.6% |     0.043115 | [TARGET]
+ Group  3 |   58/ 128 |    54.7% |     0.052044 | [TARGET]
+ Group  4 |   68/ 128 |    46.9% |     0.044826 | [TARGET]
+ Group  5 |   60/ 256 |    76.6% |     0.031603 | [TARGET]
+ Group  6 |   73/ 256 |    71.5% |     0.028942 | [TARGET]
+ Group  7 |  138/ 512 |    73.0% |     0.031421 | [TARGET]
+ Group  8 |   40/ 512 |    92.2% |     0.025272 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.04 %
+ 🟢 Model Size: 42.79 MB
+ 🟠 Peak VRAM (RQ2): 782.31 MB
+ ⚡ Inference Latency (RQ3): 1.0361 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 240]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.04 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep240_sp0.0.pth
+Epoch 240/400 | Loss: 1.7825 | Val Acc: 54.75%
+Epoch 241/400 | Loss: 1.3859 | Val Acc: 55.80%
+Epoch 242/400 | Loss: 1.2712 | Val Acc: 55.50%
+Epoch 243/400 | Loss: 1.2572 | Val Acc: 50.08%
+Epoch 244/400 | Loss: 1.2389 | Val Acc: 56.77%
+Epoch 245/400 | Loss: 1.2258 | Val Acc: 54.72%
+Epoch 246/400 | Loss: 1.2225 | Val Acc: 54.56%
+Epoch 247/400 | Loss: 1.2073 | Val Acc: 57.98%
+Epoch 248/400 | Loss: 1.2024 | Val Acc: 55.40%
+Epoch 249/400 | Loss: 1.1937 | Val Acc: 55.60%
+Epoch 250/400 | Loss: 1.1937 | Val Acc: 54.52%
+Epoch 251/400 | Loss: 1.1941 | Val Acc: 54.89%
+Epoch 252/400 | Loss: 1.1870 | Val Acc: 56.73%
+Epoch 253/400 | Loss: 1.1939 | Val Acc: 54.01%
+Epoch 254/400 | Loss: 1.1875 | Val Acc: 51.98%
+Epoch 255/400 | Loss: 1.1854 | Val Acc: 53.41%
+Epoch 256/400 | Loss: 1.1797 | Val Acc: 55.82%
+Epoch 257/400 | Loss: 1.1763 | Val Acc: 57.13%
+Epoch 258/400 | Loss: 1.1864 | Val Acc: 58.80%
+Epoch 259/400 | Loss: 1.1811 | Val Acc: 57.78%
+
+[Action] Triggering PDT Pruning at Epoch 260...
+
+[DEBUG] === step_pruning Started at Epoch 260 ===
+[DEBUG] Current Model Sparsity: 21.05% (Alive: 78.95%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 6, 7, 4, 5, 2, 3, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 518
+[DEBUG] Target Keep Ratio: 0.5971 (Inc: 0.7564)
+[DEBUG] Lagrangian Decision: Pruned 126 units.
+[DEBUG] Actual Mask Updates: 189 channels.
+
+============================== PDT Pruning Results: Epoch 260 ==============================
+ [*] Pruned this step: 189
+ Group  1 |   38/  64 |    40.6% |     0.070837 | [TARGET]
+ Group  2 |   34/  64 |    46.9% |     0.092966 | [TARGET]
+ Group  3 |   50/ 128 |    60.9% |     0.088187 | [TARGET]
+ Group  4 |   48/ 128 |    62.5% |     0.020324 | [TARGET]
+ Group  5 |   49/ 256 |    80.9% |     0.022396 | [TARGET]
+ Group  6 |   59/ 256 |    77.0% |     0.042416 | [TARGET]
+ Group  7 |   94/ 512 |    81.6% |     0.013435 | [TARGET]
+ Group  8 |   20/ 512 |    96.1% |     0.013027 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.04 %
+ 🟢 Model Size: 42.78 MB
+ 🟠 Peak VRAM (RQ2): 782.81 MB
+ ⚡ Inference Latency (RQ3): 1.0468 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 260]
+ 🟢 Model Size: 42.78 MB | 🔵 Sparsity: 0.04 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep260_sp0.0.pth
+Epoch 260/400 | Loss: 2.1074 | Val Acc: 53.20%
+Epoch 261/400 | Loss: 1.6367 | Val Acc: 50.05%
+Epoch 262/400 | Loss: 1.4787 | Val Acc: 49.95%
+Epoch 263/400 | Loss: 1.4403 | Val Acc: 49.87%
+Epoch 264/400 | Loss: 1.4069 | Val Acc: 53.12%
+Epoch 265/400 | Loss: 1.3874 | Val Acc: 54.57%
+Epoch 266/400 | Loss: 1.3735 | Val Acc: 50.34%
+Epoch 267/400 | Loss: 1.3539 | Val Acc: 53.18%
+Epoch 268/400 | Loss: 1.3561 | Val Acc: 53.86%
+Epoch 269/400 | Loss: 1.3401 | Val Acc: 49.97%
+Epoch 270/400 | Loss: 1.3366 | Val Acc: 55.57%
+Epoch 271/400 | Loss: 1.3360 | Val Acc: 51.79%
+Epoch 272/400 | Loss: 1.3281 | Val Acc: 54.21%
+Epoch 273/400 | Loss: 1.3299 | Val Acc: 53.76%
+Epoch 274/400 | Loss: 1.3152 | Val Acc: 54.87%
+Epoch 275/400 | Loss: 1.3153 | Val Acc: 56.58%
+Epoch 276/400 | Loss: 1.3106 | Val Acc: 53.77%
+Epoch 277/400 | Loss: 1.3094 | Val Acc: 54.27%
+Epoch 278/400 | Loss: 1.2984 | Val Acc: 53.67%
+Epoch 279/400 | Loss: 1.3031 | Val Acc: 51.87%
+
+[Action] Triggering PDT Pruning at Epoch 280...
+
+[DEBUG] === step_pruning Started at Epoch 280 ===
+[DEBUG] Current Model Sparsity: 23.00% (Alive: 77.00%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 4, 5, 2, 3, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 392
+[DEBUG] Target Keep Ratio: 0.5400 (Inc: 0.7013)
+[DEBUG] Lagrangian Decision: Pruned 101 units.
+[DEBUG] Actual Mask Updates: 175 channels.
+
+============================== PDT Pruning Results: Epoch 280 ==============================
+ [*] Pruned this step: 175
+ Group  1 |   35/  64 |    45.3% |     0.102679 | [TARGET]
+ Group  2 |   29/  64 |    54.7% |     0.092910 | [TARGET]
+ Group  3 |   46/ 128 |    64.1% |     0.040642 | [TARGET]
+ Group  4 |   45/ 128 |    64.8% |     0.067543 | [TARGET]
+ Group  5 |   46/ 256 |    82.0% |     0.030213 | [TARGET]
+ Group  6 |   56/ 256 |    78.1% |     0.045465 | [TARGET]
+ Group  7 |   27/ 512 |    94.7% |     0.005469 | [TARGET]
+ Group  8 |    7/ 512 |    98.6% |     0.008088 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.04 %
+ 🟢 Model Size: 42.78 MB
+ 🟠 Peak VRAM (RQ2): 781.31 MB
+ ⚡ Inference Latency (RQ3): 1.0687 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 280]
+ 🟢 Model Size: 42.78 MB | 🔵 Sparsity: 0.04 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep280_sp0.0.pth
+Epoch 280/400 | Loss: 2.4357 | Val Acc: 45.45%
+Epoch 281/400 | Loss: 1.8266 | Val Acc: 44.90%
+Epoch 282/400 | Loss: 1.5404 | Val Acc: 50.92%
+Epoch 283/400 | Loss: 1.4752 | Val Acc: 52.56%
+Epoch 284/400 | Loss: 1.4477 | Val Acc: 48.58%
+Epoch 285/400 | Loss: 1.4187 | Val Acc: 49.21%
+Epoch 286/400 | Loss: 1.4034 | Val Acc: 52.63%
+Epoch 287/400 | Loss: 1.3900 | Val Acc: 52.83%
+Epoch 288/400 | Loss: 1.3695 | Val Acc: 53.31%
+Epoch 289/400 | Loss: 1.3670 | Val Acc: 51.83%
+Epoch 290/400 | Loss: 1.3595 | Val Acc: 52.65%
+Epoch 291/400 | Loss: 1.3539 | Val Acc: 52.59%
+Epoch 292/400 | Loss: 1.3425 | Val Acc: 49.38%
+Epoch 293/400 | Loss: 1.3431 | Val Acc: 50.91%
+Epoch 294/400 | Loss: 1.3383 | Val Acc: 50.14%
+Epoch 295/400 | Loss: 1.3363 | Val Acc: 49.89%
+Epoch 296/400 | Loss: 1.3292 | Val Acc: 47.89%
+Epoch 297/400 | Loss: 1.3251 | Val Acc: 52.53%
+Epoch 298/400 | Loss: 1.3251 | Val Acc: 54.49%
+Epoch 299/400 | Loss: 1.3272 | Val Acc: 44.70%
+
+[Action] Triggering PDT Pruning at Epoch 300...
+
+[DEBUG] === step_pruning Started at Epoch 300 ===
+[DEBUG] Current Model Sparsity: 24.80% (Alive: 75.20%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 4, 5, 2, 3, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 291
+[DEBUG] Target Keep Ratio: 0.4829 (Inc: 0.6421)
+[DEBUG] Lagrangian Decision: Pruned 101 units.
+[DEBUG] Actual Mask Updates: 148 channels.
+
+============================== PDT Pruning Results: Epoch 300 ==============================
+ [*] Pruned this step: 148
+ Group  1 |   30/  64 |    53.1% |     0.091653 | [TARGET]
+ Group  2 |   23/  64 |    64.1% |     0.063486 | [TARGET]
+ Group  3 |   39/ 128 |    69.5% |     0.032856 | [TARGET]
+ Group  4 |   36/ 128 |    71.9% |     0.047823 | [TARGET]
+ Group  5 |   31/ 256 |    87.9% |     0.015763 | [TARGET]
+ Group  6 |   29/ 256 |    88.7% |     0.009915 | [TARGET]
+ Group  7 |    2/ 512 |    99.6% |     0.013173 | [TARGET]
+ Group  8 |    0/ 512 |   100.0% |     0.006854 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.05 %
+ 🟢 Model Size: 42.78 MB
+ 🟠 Peak VRAM (RQ2): 781.31 MB
+ ⚡ Inference Latency (RQ3): 1.1472 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 300]
+ 🟢 Model Size: 42.78 MB | 🔵 Sparsity: 0.05 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep300_sp0.0.pth
+Epoch 300/400 | Loss: 4.6000 | Val Acc: 1.00%
+Epoch 301/400 | Loss: 4.0867 | Val Acc: 5.23%
+Epoch 302/400 | Loss: 3.8141 | Val Acc: 6.81%
+Epoch 303/400 | Loss: 3.7099 | Val Acc: 7.17%
+Epoch 304/400 | Loss: 3.6420 | Val Acc: 8.05%
+Epoch 305/400 | Loss: 3.6052 | Val Acc: 7.83%
+Epoch 306/400 | Loss: 3.5815 | Val Acc: 7.23%
+Epoch 307/400 | Loss: 3.5601 | Val Acc: 9.54%
+Epoch 308/400 | Loss: 3.5440 | Val Acc: 8.54%
+Epoch 309/400 | Loss: 3.5452 | Val Acc: 7.33%
+Epoch 310/400 | Loss: 3.5323 | Val Acc: 8.36%
+Epoch 311/400 | Loss: 3.5288 | Val Acc: 7.17%
+Epoch 312/400 | Loss: 3.5276 | Val Acc: 8.43%
+Epoch 313/400 | Loss: 3.5236 | Val Acc: 9.01%
+Epoch 314/400 | Loss: 3.5163 | Val Acc: 8.76%
+Epoch 315/400 | Loss: 3.5073 | Val Acc: 8.45%
+Epoch 316/400 | Loss: 3.5093 | Val Acc: 8.84%
+Epoch 317/400 | Loss: 3.5117 | Val Acc: 9.17%
+Epoch 318/400 | Loss: 3.5019 | Val Acc: 9.96%
+Epoch 319/400 | Loss: 3.4976 | Val Acc: 8.28%
+
+[Action] Triggering PDT Pruning at Epoch 320...
+
+[DEBUG] === step_pruning Started at Epoch 320 ===
+[DEBUG] Current Model Sparsity: 26.33% (Alive: 73.67%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 4, 5, 2, 3, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] 🚨 ALERT: Group 8 mask is ALL ZERO. Resetting to 1.0.
+[DEBUG] Total Unit Candidates: 702
+[DEBUG] Target Keep Ratio: 0.4257 (Inc: 0.5779)
+[DEBUG] Lagrangian Decision: Pruned 515 units.
+[DEBUG] Actual Mask Updates: 515 channels.
+
+============================== PDT Pruning Results: Epoch 320 ==============================
+ [*] Pruned this step: 515
+ Group  1 |   28/  64 |    56.2% |     0.035808 | [TARGET]
+ Group  2 |   22/  64 |    65.6% |     0.046020 | [TARGET]
+ Group  3 |   39/ 128 |    69.5% |     0.055731 | [TARGET]
+ Group  4 |   36/ 128 |    71.9% |     0.021710 | [TARGET]
+ Group  5 |   31/ 256 |    87.9% |     0.005663 | [TARGET]
+ Group  6 |   29/ 256 |    88.7% |     0.011504 | [TARGET]
+ Group  7 |    2/ 512 |    99.6% |     0.002465 | [TARGET]
+ Group  8 |    0/ 512 |   100.0% |     0.000000 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.05 %
+ 🟢 Model Size: 42.78 MB
+ 🟠 Peak VRAM (RQ2): 781.31 MB
+ ⚡ Inference Latency (RQ3): 0.9960 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 320]
+ 🟢 Model Size: 42.78 MB | 🔵 Sparsity: 0.05 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep320_sp0.0.pth
+Epoch 320/400 | Loss: 3.6129 | Val Acc: 9.57%
+Epoch 321/400 | Loss: 3.5394 | Val Acc: 7.95%
+Epoch 322/400 | Loss: 3.5155 | Val Acc: 8.67%
+Epoch 323/400 | Loss: 3.5118 | Val Acc: 9.85%
+Epoch 324/400 | Loss: 3.4943 | Val Acc: 8.72%
+Epoch 325/400 | Loss: 3.5034 | Val Acc: 9.29%
+Epoch 326/400 | Loss: 3.4994 | Val Acc: 10.07%
+Epoch 327/400 | Loss: 3.4970 | Val Acc: 8.73%
+Epoch 328/400 | Loss: 3.4944 | Val Acc: 9.89%
+Epoch 329/400 | Loss: 3.4950 | Val Acc: 8.51%
+Epoch 330/400 | Loss: 3.4842 | Val Acc: 9.42%
+Epoch 331/400 | Loss: 3.5001 | Val Acc: 6.80%
+Epoch 332/400 | Loss: 3.4914 | Val Acc: 8.13%
+Epoch 333/400 | Loss: 3.4926 | Val Acc: 9.84%
+Epoch 334/400 | Loss: 3.4838 | Val Acc: 9.96%
+Epoch 335/400 | Loss: 3.4851 | Val Acc: 8.55%
+Epoch 336/400 | Loss: 3.4884 | Val Acc: 7.53%
+Epoch 337/400 | Loss: 3.4865 | Val Acc: 8.43%
+Epoch 338/400 | Loss: 3.4879 | Val Acc: 9.75%
+Epoch 339/400 | Loss: 3.4919 | Val Acc: 8.38%
+
+[Action] Triggering PDT Pruning at Epoch 340...
+
+[DEBUG] === step_pruning Started at Epoch 340 ===
+[DEBUG] Current Model Sparsity: 26.36% (Alive: 73.64%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 3, 2, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] 🚨 ALERT: Group 8 mask is ALL ZERO. Resetting to 1.0.
+[DEBUG] Total Unit Candidates: 699
+[DEBUG] Target Keep Ratio: 0.3686 (Inc: 0.5005)
+[DEBUG] Lagrangian Decision: Pruned 512 units.
+[DEBUG] Actual Mask Updates: 512 channels.
+
+============================== PDT Pruning Results: Epoch 340 ==============================
+ [*] Pruned this step: 512
+ Group  1 |   28/  64 |    56.2% |     0.062535 | [TARGET]
+ Group  2 |   22/  64 |    65.6% |     0.078236 | [TARGET]
+ Group  3 |   39/ 128 |    69.5% |     0.061973 | [TARGET]
+ Group  4 |   36/ 128 |    71.9% |     0.018595 | [TARGET]
+ Group  5 |   31/ 256 |    87.9% |     0.019465 | [TARGET]
+ Group  6 |   29/ 256 |    88.7% |     0.022456 | [TARGET]
+ Group  7 |    2/ 512 |    99.6% |     0.002035 | [TARGET]
+ Group  8 |    0/ 512 |   100.0% |     0.000000 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.05 %
+ 🟢 Model Size: 42.78 MB
+ 🟠 Peak VRAM (RQ2): 781.31 MB
+ ⚡ Inference Latency (RQ3): 0.9699 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 340]
+ 🟢 Model Size: 42.78 MB | 🔵 Sparsity: 0.05 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep340_sp0.0.pth
+Epoch 340/400 | Loss: 3.6253 | Val Acc: 7.75%
+Epoch 341/400 | Loss: 3.5194 | Val Acc: 7.45%
+Epoch 342/400 | Loss: 3.5021 | Val Acc: 9.99%
+Epoch 343/400 | Loss: 3.4852 | Val Acc: 7.65%
+Epoch 344/400 | Loss: 3.4851 | Val Acc: 8.83%
+Epoch 345/400 | Loss: 3.4831 | Val Acc: 9.18%
+Epoch 346/400 | Loss: 3.4839 | Val Acc: 8.11%
+Epoch 347/400 | Loss: 3.4784 | Val Acc: 9.16%
+Epoch 348/400 | Loss: 3.4915 | Val Acc: 10.31%
+Epoch 349/400 | Loss: 3.4924 | Val Acc: 5.35%
+Epoch 350/400 | Loss: 3.4796 | Val Acc: 8.84%
+Epoch 351/400 | Loss: 3.4809 | Val Acc: 9.56%
+Epoch 352/400 | Loss: 3.4910 | Val Acc: 9.15%
+Epoch 353/400 | Loss: 3.4801 | Val Acc: 8.24%
+Epoch 354/400 | Loss: 3.4762 | Val Acc: 8.41%
+Epoch 355/400 | Loss: 3.4780 | Val Acc: 8.51%
+Epoch 356/400 | Loss: 3.4773 | Val Acc: 9.28%
+Epoch 357/400 | Loss: 3.4891 | Val Acc: 8.97%
+Epoch 358/400 | Loss: 3.4867 | Val Acc: 8.68%
+Epoch 359/400 | Loss: 3.4876 | Val Acc: 8.75%
+
+[Action] Triggering PDT Pruning at Epoch 360...
+
+[DEBUG] === step_pruning Started at Epoch 360 ===
+[DEBUG] Current Model Sparsity: 26.36% (Alive: 73.64%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 2, 3, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] 🚨 ALERT: Group 8 mask is ALL ZERO. Resetting to 1.0.
+[DEBUG] Total Unit Candidates: 699
+[DEBUG] Target Keep Ratio: 0.3114 (Inc: 0.4229)
+[DEBUG] Lagrangian Decision: Pruned 512 units.
+[DEBUG] Actual Mask Updates: 512 channels.
+
+============================== PDT Pruning Results: Epoch 360 ==============================
+ [*] Pruned this step: 512
+ Group  1 |   28/  64 |    56.2% |     0.089946 | [TARGET]
+ Group  2 |   22/  64 |    65.6% |     0.054295 | [TARGET]
+ Group  3 |   39/ 128 |    69.5% |     0.044349 | [TARGET]
+ Group  4 |   36/ 128 |    71.9% |     0.045282 | [TARGET]
+ Group  5 |   31/ 256 |    87.9% |     0.023739 | [TARGET]
+ Group  6 |   29/ 256 |    88.7% |     0.020364 | [TARGET]
+ Group  7 |    2/ 512 |    99.6% |     0.002227 | [TARGET]
+ Group  8 |    0/ 512 |   100.0% |     0.000000 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.05 %
+ 🟢 Model Size: 42.78 MB
+ 🟠 Peak VRAM (RQ2): 781.31 MB
+ ⚡ Inference Latency (RQ3): 0.9744 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 360]
+ 🟢 Model Size: 42.78 MB | 🔵 Sparsity: 0.05 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep360_sp0.0.pth
+Epoch 360/400 | Loss: 3.6066 | Val Acc: 9.07%
+Epoch 361/400 | Loss: 3.5141 | Val Acc: 8.32%
+Epoch 362/400 | Loss: 3.5023 | Val Acc: 9.81%
+Epoch 363/400 | Loss: 3.4894 | Val Acc: 7.93%
+Epoch 364/400 | Loss: 3.4823 | Val Acc: 9.58%
+Epoch 365/400 | Loss: 3.4869 | Val Acc: 8.75%
+Epoch 366/400 | Loss: 3.4825 | Val Acc: 8.78%
+Epoch 367/400 | Loss: 3.4765 | Val Acc: 9.98%
+Epoch 368/400 | Loss: 3.4720 | Val Acc: 8.45%
+Epoch 369/400 | Loss: 3.4755 | Val Acc: 7.71%
+Epoch 370/400 | Loss: 3.4789 | Val Acc: 8.25%
+Epoch 371/400 | Loss: 3.4774 | Val Acc: 8.72%
+Epoch 372/400 | Loss: 3.4760 | Val Acc: 9.05%
+Epoch 373/400 | Loss: 3.4835 | Val Acc: 7.78%
+Epoch 374/400 | Loss: 3.4847 | Val Acc: 9.51%
+Epoch 375/400 | Loss: 3.4763 | Val Acc: 8.21%
+Epoch 376/400 | Loss: 3.4828 | Val Acc: 9.50%
+Epoch 377/400 | Loss: 3.4779 | Val Acc: 8.58%
+Epoch 378/400 | Loss: 3.4692 | Val Acc: 8.39%
+Epoch 379/400 | Loss: 3.4818 | Val Acc: 8.68%
+
+[Action] Triggering PDT Pruning at Epoch 380...
+
+[DEBUG] === step_pruning Started at Epoch 380 ===
+[DEBUG] Current Model Sparsity: 26.36% (Alive: 73.64%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 5, 4, 2, 3, 1]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] 🚨 ALERT: Group 8 mask is ALL ZERO. Resetting to 1.0.
+[DEBUG] Total Unit Candidates: 699
+[DEBUG] Target Keep Ratio: 0.2543 (Inc: 0.3453)
+[DEBUG] Lagrangian Decision: Pruned 512 units.
+[DEBUG] Actual Mask Updates: 512 channels.
+
+============================== PDT Pruning Results: Epoch 380 ==============================
+ [*] Pruned this step: 512
+ Group  1 |   28/  64 |    56.2% |     0.048142 | [TARGET]
+ Group  2 |   22/  64 |    65.6% |     0.094044 | [TARGET]
+ Group  3 |   39/ 128 |    69.5% |     0.042778 | [TARGET]
+ Group  4 |   36/ 128 |    71.9% |     0.032503 | [TARGET]
+ Group  5 |   31/ 256 |    87.9% |     0.016312 | [TARGET]
+ Group  6 |   29/ 256 |    88.7% |     0.011989 | [TARGET]
+ Group  7 |    2/ 512 |    99.6% |     0.003042 | [TARGET]
+ Group  8 |    0/ 512 |   100.0% |     0.000000 | [TARGET]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.05 %
+ 🟢 Model Size: 42.78 MB
+ 🟠 Peak VRAM (RQ2): 781.31 MB
+ ⚡ Inference Latency (RQ3): 0.9945 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 380]
+ 🟢 Model Size: 42.78 MB | 🔵 Sparsity: 0.05 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep380_sp0.0.pth
+Epoch 380/400 | Loss: 3.5950 | Val Acc: 8.85%
+Epoch 381/400 | Loss: 3.5074 | Val Acc: 9.81%
+Epoch 382/400 | Loss: 3.4862 | Val Acc: 9.56%
+Epoch 383/400 | Loss: 3.4846 | Val Acc: 9.44%
+Epoch 384/400 | Loss: 3.4953 | Val Acc: 9.86%

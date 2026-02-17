@@ -1,0 +1,84 @@
+📝 Logging started: resnet56_filter_gema_20260214_043522.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet56 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for cifarresnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   16 | Layers: bn1 ... (2 layers)
+ Group  2 | Channels:   16 | Layers: bn1 ... (3 layers)
+ Group  3 | Channels:   16 | Layers: bn1 ... (4 layers)
+ Group  4 | Channels:   16 | Layers: bn1 ... (5 layers)
+ Group  5 | Channels:   16 | Layers: bn1 ... (6 layers)
+ Group  6 | Channels:   16 | Layers: layer1.0.bn2 ... (6 layers)
+ Group  7 | Channels:   16 | Layers: layer1.1.bn2 ... (6 layers)
+ Group  8 | Channels:   16 | Layers: layer1.2.bn2 ... (6 layers)
+ Group  9 | Channels:   16 | Layers: layer1.3.bn2 ... (6 layers)
+ Group 10 | Channels:   32 | Layers: layer2.0.bn2 ... (2 layers)
+ Group 11 | Channels:   32 | Layers: layer2.0.bn2 ... (3 layers)
+ Group 12 | Channels:   32 | Layers: layer2.0.bn2 ... (4 layers)
+ Group 13 | Channels:   32 | Layers: layer2.0.bn2 ... (5 layers)
+ Group 14 | Channels:   32 | Layers: layer2.0.bn2 ... (6 layers)
+ Group 15 | Channels:   32 | Layers: layer2.0.bn2 ... (7 layers)
+ Group 16 | Channels:   32 | Layers: layer2.1.bn2 ... (6 layers)
+ Group 17 | Channels:   32 | Layers: layer2.2.bn2 ... (6 layers)
+ Group 18 | Channels:   32 | Layers: layer2.3.bn2 ... (6 layers)
+ Group 19 | Channels:   64 | Layers: layer3.0.bn2 ... (2 layers)
+ Group 20 | Channels:   64 | Layers: layer3.0.bn2 ... (3 layers)
+ Group 21 | Channels:   64 | Layers: layer3.0.bn2 ... (4 layers)
+ Group 22 | Channels:   64 | Layers: layer3.0.bn2 ... (5 layers)
+ Group 23 | Channels:   64 | Layers: layer3.0.bn2 ... (6 layers)
+ Group 24 | Channels:   64 | Layers: layer3.0.bn2 ... (7 layers)
+ Group 25 | Channels:   64 | Layers: layer3.1.bn2 ... (6 layers)
+ Group 26 | Channels:   64 | Layers: layer3.2.bn2 ... (6 layers)
+ Group 27 | Channels:   64 | Layers: layer3.3.bn2 ... (6 layers)
+===============================================================
+[*] Total 27 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-27) will be pruned.
+[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)
+
+>>> [Pilot Check] Strategy: FILTER_GEMA | Pruning starts at Epoch 3, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 204 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::linear         0.02%      32.888us        31.13%      42.669ms      42.669ms       0.000us         0.00%       4.896us       4.896us           0 B           0 B       9.13 MB           0 B             1            --  
+                                            aten::addmm        28.87%      39.575ms        31.08%      42.611ms      42.611ms       1.632us         0.26%       4.896us       4.896us           0 B           0 B       9.13 MB       9.13 MB             1        12.800  
+                                        model_inference         1.55%       2.124ms        99.99%     137.072ms     137.072ms       0.000us         0.00%     719.353us     719.353us           0 B           0 B       9.12 MB    -114.00 KB             1            --  
+                                           aten::conv2d         0.08%     103.635us        51.85%      71.073ms       1.247ms       0.000us         0.00%     568.027us       9.965us           0 B           0 B      38.00 KB           0 B            57      3342.944  
+                                      aten::convolution         0.13%     176.445us        51.77%      70.970ms       1.245ms       0.000us         0.00%     568.027us       9.965us           0 B           0 B      38.00 KB           0 B            57            --  
+                                     aten::_convolution         0.54%     733.409us        51.64%      70.793ms       1.242ms       0.000us         0.00%     568.027us       9.965us           0 B           0 B      38.00 KB           0 B            57            --  
+                                aten::cudnn_convolution        43.09%      59.074ms        51.11%      70.060ms       1.229ms     482.074us        77.10%     568.027us       9.965us           0 B           0 B      38.00 KB      38.00 KB            57            --  
+                                       aten::batch_norm         0.06%      82.689us         2.55%       3.502ms      61.438us       0.000us         0.00%      59.809us       1.049us           0 B           0 B      38.00 KB           0 B            57            --  
+                           aten::_batch_norm_impl_index         0.08%     103.925us         2.49%       3.419ms      59.987us       0.000us         0.00%      59.809us       1.049us           0 B           0 B      38.00 KB           0 B            57            --  
+                                 aten::cudnn_batch_norm         1.77%       2.427ms         2.42%       3.315ms      58.164us      58.657us         9.38%      59.809us       1.049us           0 B           0 B      38.00 KB           0 B            57            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 137.083ms
+Self CUDA time total: 625.272us
+
+Epoch 1/300 | Loss: 4.1739 | Val Acc: 9.48%
+Epoch 2/300 | Loss: 3.6222 | Val Acc: 16.01%
+Epoch 3/300 | Loss: 3.2439 | Val Acc: 22.38%
+Epoch 4/300 | Loss: 2.9176 | Val Acc: 27.89%
+Epoch 5/300 | Loss: 2.6497 | Val Acc: 31.73%
+Epoch 6/300 | Loss: 2.4399 | Val Acc: 31.61%
+Epoch 7/300 | Loss: 2.2661 | Val Acc: 37.98%
+Epoch 8/300 | Loss: 2.1158 | Val Acc: 41.76%
+Epoch 9/300 | Loss: 1.9913 | Val Acc: 42.22%
+Epoch 10/300 | Loss: 1.8943 | Val Acc: 45.39%
+Epoch 11/300 | Loss: 1.7965 | Val Acc: 45.60%
+Epoch 12/300 | Loss: 1.7276 | Val Acc: 48.62%
+Epoch 13/300 | Loss: 1.6607 | Val Acc: 46.15%
+Epoch 14/300 | Loss: 1.5867 | Val Acc: 47.51%
+Epoch 15/300 | Loss: 1.5338 | Val Acc: 50.53%
+Epoch 16/300 | Loss: 1.4816 | Val Acc: 51.51%
+Epoch 17/300 | Loss: 1.4238 | Val Acc: 53.89%
+Epoch 18/300 | Loss: 1.3869 | Val Acc: 50.92%
+Epoch 19/300 | Loss: 1.3493 | Val Acc: 52.85%

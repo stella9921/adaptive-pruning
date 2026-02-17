@@ -1,0 +1,165 @@
+📝 Logging started: resnet18_pdt_20260215_212754.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-8) will be pruned.
+[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)
+
+>>> [Pilot Check] Strategy: PDT | Pruning starts at Epoch 30, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.04%      55.373us        71.06%      96.900ms       4.845ms       0.000us         0.00%       1.633ms      81.651us           0 B           0 B     116.94 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.07%      95.802us        71.02%      96.845ms       4.842ms       0.000us         0.00%       1.633ms      81.651us           0 B           0 B     116.94 MB           0 B            20            --  
+                                     aten::_convolution         0.46%     633.603us        70.95%      96.749ms       4.837ms       0.000us         0.00%       1.633ms      81.651us           0 B           0 B     116.94 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.85%      88.433ms        70.48%      96.116ms       4.806ms     860.634us        72.17%       1.633ms      81.651us           0 B           0 B     116.94 MB     116.94 MB            20            --  
+                           aten::_batch_norm_impl_index         0.05%      69.414us        10.36%      14.133ms     706.626us       0.000us         0.00%     236.440us      11.822us           0 B           0 B     114.88 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.50%      12.954ms        10.31%      14.063ms     703.155us     211.545us        17.74%     236.440us      11.822us           0 B           0 B     114.88 MB           0 B            20            --  
+                                            aten::empty         0.16%     213.426us         0.35%     473.529us       4.735us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     114.88 MB     114.88 MB           100            --  
+                                       aten::batch_norm         0.05%      67.218us        10.41%      14.200ms     709.986us       0.000us         0.00%     236.440us      11.822us           0 B           0 B     114.84 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      52.227us         0.29%     400.321us      20.016us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     114.84 MB           0 B            20            --  
+                                           aten::linear         0.02%      25.717us         0.95%       1.292ms       1.292ms       0.000us         0.00%      13.820us      13.820us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 136.368ms
+Self CUDA time total: 1.193ms
+
+Epoch 1/100 | Loss: 3.9248 | Val Acc: 14.96%
+Epoch 2/100 | Loss: 3.2625 | Val Acc: 25.57%
+Epoch 3/100 | Loss: 2.7158 | Val Acc: 31.37%
+Epoch 4/100 | Loss: 2.2684 | Val Acc: 40.71%
+Epoch 5/100 | Loss: 1.9903 | Val Acc: 39.47%
+Epoch 6/100 | Loss: 1.8018 | Val Acc: 45.28%
+Epoch 7/100 | Loss: 1.6806 | Val Acc: 49.80%
+Epoch 8/100 | Loss: 1.5843 | Val Acc: 46.64%
+Epoch 9/100 | Loss: 1.5077 | Val Acc: 47.15%
+Epoch 10/100 | Loss: 1.4506 | Val Acc: 51.95%
+Epoch 11/100 | Loss: 1.4031 | Val Acc: 53.97%
+Epoch 12/100 | Loss: 1.3682 | Val Acc: 54.46%
+Epoch 13/100 | Loss: 1.3409 | Val Acc: 51.88%
+Epoch 14/100 | Loss: 1.3051 | Val Acc: 54.81%
+Epoch 15/100 | Loss: 1.2751 | Val Acc: 54.32%
+Epoch 16/100 | Loss: 1.2615 | Val Acc: 53.97%
+Epoch 17/100 | Loss: 1.2344 | Val Acc: 54.55%
+Epoch 18/100 | Loss: 1.2101 | Val Acc: 53.13%
+Epoch 19/100 | Loss: 1.1993 | Val Acc: 53.56%
+Epoch 20/100 | Loss: 1.1909 | Val Acc: 49.96%
+Epoch 21/100 | Loss: 1.1767 | Val Acc: 55.26%
+Epoch 22/100 | Loss: 1.1584 | Val Acc: 58.21%
+Epoch 23/100 | Loss: 1.1481 | Val Acc: 57.01%
+Epoch 24/100 | Loss: 1.1504 | Val Acc: 54.40%
+Epoch 25/100 | Loss: 1.1101 | Val Acc: 55.78%
+Epoch 26/100 | Loss: 1.1129 | Val Acc: 54.40%
+Epoch 27/100 | Loss: 1.1030 | Val Acc: 52.97%
+Epoch 28/100 | Loss: 1.1004 | Val Acc: 53.22%
+Epoch 29/100 | Loss: 1.0949 | Val Acc: 57.66%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 30, Batch 0
+Epoch 30/100 | Loss: 1.0901 | Val Acc: 57.38%
+Epoch 31/100 | Loss: 1.0822 | Val Acc: 56.24%
+Epoch 32/100 | Loss: 1.0747 | Val Acc: 58.74%
+Epoch 33/100 | Loss: 1.0662 | Val Acc: 53.04%
+Epoch 34/100 | Loss: 1.0717 | Val Acc: 58.98%
+Epoch 35/100 | Loss: 1.0556 | Val Acc: 58.03%
+Epoch 36/100 | Loss: 1.0523 | Val Acc: 57.75%
+Epoch 37/100 | Loss: 1.0595 | Val Acc: 59.69%
+Epoch 38/100 | Loss: 1.0484 | Val Acc: 58.67%
+Epoch 39/100 | Loss: 1.0463 | Val Acc: 59.36%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 40, Batch 0
+Epoch 40/100 | Loss: 1.0380 | Val Acc: 55.44%
+Epoch 41/100 | Loss: 1.0413 | Val Acc: 58.69%
+Epoch 42/100 | Loss: 1.0324 | Val Acc: 57.12%
+Epoch 43/100 | Loss: 1.0283 | Val Acc: 56.14%
+Epoch 44/100 | Loss: 1.0277 | Val Acc: 58.85%
+Epoch 45/100 | Loss: 1.0325 | Val Acc: 56.63%
+Epoch 46/100 | Loss: 1.0223 | Val Acc: 58.92%
+Epoch 47/100 | Loss: 1.0173 | Val Acc: 54.24%
+Epoch 48/100 | Loss: 1.0142 | Val Acc: 54.71%
+Epoch 49/100 | Loss: 1.0167 | Val Acc: 59.59%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 50, Batch 0
+Epoch 50/100 | Loss: 1.0184 | Val Acc: 56.63%
+Epoch 51/100 | Loss: 1.0155 | Val Acc: 53.34%
+Epoch 52/100 | Loss: 1.0115 | Val Acc: 53.02%
+Epoch 53/100 | Loss: 1.0098 | Val Acc: 59.43%
+Epoch 54/100 | Loss: 1.0014 | Val Acc: 58.47%
+Epoch 55/100 | Loss: 0.9971 | Val Acc: 55.11%
+Epoch 56/100 | Loss: 1.0002 | Val Acc: 53.48%
+Epoch 57/100 | Loss: 0.9991 | Val Acc: 59.33%
+Epoch 58/100 | Loss: 0.9997 | Val Acc: 56.26%
+Epoch 59/100 | Loss: 0.9888 | Val Acc: 57.10%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 60, Batch 0
+Epoch 60/100 | Loss: 0.9961 | Val Acc: 54.54%
+Epoch 61/100 | Loss: 0.9869 | Val Acc: 57.39%
+Epoch 62/100 | Loss: 0.9947 | Val Acc: 58.44%
+Epoch 63/100 | Loss: 0.9908 | Val Acc: 59.51%
+Epoch 64/100 | Loss: 0.9903 | Val Acc: 59.04%
+Epoch 65/100 | Loss: 0.9880 | Val Acc: 56.20%
+Epoch 66/100 | Loss: 0.9867 | Val Acc: 59.42%
+Epoch 67/100 | Loss: 0.9982 | Val Acc: 56.24%
+Epoch 68/100 | Loss: 0.9879 | Val Acc: 56.69%
+Epoch 69/100 | Loss: 0.9844 | Val Acc: 59.62%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 70, Batch 0
+Epoch 70/100 | Loss: 0.9781 | Val Acc: 59.15%
+Epoch 71/100 | Loss: 0.9772 | Val Acc: 59.71%
+Epoch 72/100 | Loss: 0.9767 | Val Acc: 57.58%
+Epoch 73/100 | Loss: 0.9790 | Val Acc: 54.78%
+Epoch 74/100 | Loss: 0.9747 | Val Acc: 59.60%
+Epoch 75/100 | Loss: 0.9771 | Val Acc: 52.96%
+Epoch 76/100 | Loss: 0.9770 | Val Acc: 60.11%
+Epoch 77/100 | Loss: 0.9764 | Val Acc: 54.73%
+Epoch 78/100 | Loss: 0.9792 | Val Acc: 56.60%
+Epoch 79/100 | Loss: 0.9678 | Val Acc: 57.73%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 80, Batch 0
+Epoch 80/100 | Loss: 0.9766 | Val Acc: 58.07%
+Epoch 81/100 | Loss: 0.9715 | Val Acc: 54.43%
+Epoch 82/100 | Loss: 0.9720 | Val Acc: 56.54%
+Epoch 83/100 | Loss: 0.9644 | Val Acc: 59.87%
+Epoch 84/100 | Loss: 0.9779 | Val Acc: 61.10%
+Epoch 85/100 | Loss: 0.9744 | Val Acc: 59.50%
+Epoch 86/100 | Loss: 0.9567 | Val Acc: 57.31%
+Epoch 87/100 | Loss: 0.9590 | Val Acc: 60.65%
+Epoch 88/100 | Loss: 0.9704 | Val Acc: 60.39%
+Epoch 89/100 | Loss: 0.9651 | Val Acc: 52.39%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 90, Batch 0
+Epoch 90/100 | Loss: 0.9678 | Val Acc: 54.53%
+Epoch 91/100 | Loss: 0.9565 | Val Acc: 61.34%
+Epoch 92/100 | Loss: 0.9585 | Val Acc: 58.47%
+Epoch 93/100 | Loss: 0.9622 | Val Acc: 60.13%
+Epoch 94/100 | Loss: 0.9517 | Val Acc: 57.09%
+Epoch 95/100 | Loss: 0.9585 | Val Acc: 54.13%
+Epoch 96/100 | Loss: 0.9660 | Val Acc: 55.78%
+Epoch 97/100 | Loss: 0.9612 | Val Acc: 61.40%
+Epoch 98/100 | Loss: 0.9544 | Val Acc: 57.18%
+Epoch 99/100 | Loss: 0.9572 | Val Acc: 59.36%
+
+🔥 [PDT DEBUG] Attempting Hessian Pruning at Epoch 100, Batch 0
+Epoch 100/100 | Loss: 0.9573 | Val Acc: 58.66%
+🏁 Final Model Saved: ./exp/checkpoints/resnet18_pdt_final.pth
+
+============================== FINAL PHYSICAL COMPRESSION ==============================

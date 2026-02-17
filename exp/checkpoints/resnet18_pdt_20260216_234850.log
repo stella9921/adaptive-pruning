@@ -1,0 +1,150 @@
+📝 Logging started: resnet18_pdt_20260216_234850.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Total 8 groups linked to 41 prunable layers.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+✅ Success: Weights loaded from resnet18_pdt_ep120_sp0.0.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.05%      67.569us        70.79%      94.947ms       4.747ms       0.000us         0.00%       1.615ms      80.762us           0 B           0 B     118.81 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.08%     112.533us        70.74%      94.880ms       4.744ms       0.000us         0.00%       1.615ms      80.762us           0 B           0 B     118.81 MB           0 B            20            --  
+                                     aten::_convolution         0.56%     756.691us        70.65%      94.767ms       4.738ms       0.000us         0.00%       1.615ms      80.762us           0 B           0 B     118.81 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.42%      86.415ms        70.09%      94.010ms       4.701ms     848.627us        72.07%       1.615ms      80.762us           0 B           0 B     118.81 MB     118.81 MB            20            --  
+                           aten::_batch_norm_impl_index         0.06%      85.277us        10.27%      13.781ms     689.066us       0.000us         0.00%     233.983us      11.699us           0 B           0 B     115.63 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.34%      12.526ms        10.21%      13.696ms     684.802us     209.087us        17.76%     233.983us      11.699us           0 B           0 B     115.63 MB           0 B            20            --  
+                                            aten::empty         0.17%     232.493us         0.38%     507.647us       5.076us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.63 MB     115.63 MB           100            --  
+                                       aten::batch_norm         0.06%      84.068us        10.34%      13.865ms     693.269us       0.000us         0.00%     233.983us      11.699us           0 B           0 B     115.59 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      58.512us         0.32%     430.266us      21.513us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.59 MB           0 B            20            --  
+                                           aten::linear         0.03%      34.130us         1.20%       1.604ms       1.604ms       0.000us         0.00%      15.228us      15.228us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 134.134ms
+Self CUDA time total: 1.178ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[DEBUG] === step_pruning Started at Epoch 120 ===
+[DEBUG] Current Model Sparsity: 1.59% (Alive: 98.41%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [1, 2, 3, 4, 5, 6]
+[DEBUG] Calculating Hessian for 8 parameters...
+[DEBUG] Total Unit Candidates: 819
+[DEBUG] Target Keep Ratio: 0.8800 (Inc: 0.8942)
+[DEBUG] Lagrangian Decision: Pruned 60 units.
+[DEBUG] Actual Mask Updates: 120 channels.
+
+============================== PDT Pruning Results: Epoch 120 ==============================
+ [*] Pruned this step: 120
+ Group  1 |   64/  64 |     0.0% |     0.116179 | [TARGET]
+ Group  2 |   64/  64 |     0.0% |     0.073583 | [TARGET]
+ Group  3 |  103/ 128 |    19.5% |     0.159050 | [TARGET]
+ Group  4 |  128/ 128 |     0.0% |     0.098003 | [TARGET]
+ Group  5 |  144/ 256 |    43.8% |     0.056201 | [TARGET]
+ Group  6 |  256/ 256 |     0.0% |     0.044696 | [TARGET]
+ Group  7 |  512/ 512 |     0.0% |     0.000000 | [FIXED]
+ Group  8 |  512/ 512 |     0.0% |     0.000000 | [FIXED]
+
+[Scientific Metrics]
+ 🟢 Model Size: 42.80 MB / 🔵 Sparsity: 0.00 %
+ 🟠 GPU Mem: 724.02 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 42.80 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+Epoch 120/400 | Loss: 1.4529 | Val Acc: 59.96%
+Epoch 121/400 | Loss: 1.0955 | Val Acc: 59.82%
+Epoch 122/400 | Loss: 1.0501 | Val Acc: 58.38%
+Epoch 123/400 | Loss: 1.0268 | Val Acc: 57.93%
+Epoch 124/400 | Loss: 1.0187 | Val Acc: 61.19%
+Epoch 125/400 | Loss: 1.0057 | Val Acc: 59.71%
+Epoch 126/400 | Loss: 0.9988 | Val Acc: 61.53%
+Epoch 127/400 | Loss: 0.9968 | Val Acc: 59.97%
+Epoch 128/400 | Loss: 0.9884 | Val Acc: 60.47%
+Epoch 129/400 | Loss: 0.9821 | Val Acc: 59.97%
+Epoch 130/400 | Loss: 0.9751 | Val Acc: 59.33%
+Epoch 131/400 | Loss: 0.9790 | Val Acc: 57.50%
+Epoch 132/400 | Loss: 0.9728 | Val Acc: 57.65%
+Epoch 133/400 | Loss: 0.9752 | Val Acc: 59.46%
+Epoch 134/400 | Loss: 0.9774 | Val Acc: 56.94%
+Epoch 135/400 | Loss: 0.9726 | Val Acc: 59.24%
+Epoch 136/400 | Loss: 0.9727 | Val Acc: 59.81%
+Epoch 137/400 | Loss: 0.9745 | Val Acc: 58.38%
+Epoch 138/400 | Loss: 0.9695 | Val Acc: 61.25%
+Epoch 139/400 | Loss: 0.9642 | Val Acc: 59.78%
+
+[Action] Triggering PDT Pruning at Epoch 140...
+
+[DEBUG] === step_pruning Started at Epoch 140 ===
+[DEBUG] Current Model Sparsity: 2.82% (Alive: 97.18%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [8, 7, 6, 4, 2, 5]
+[DEBUG] Calculating Hessian for 8 parameters...
+[DEBUG] Total Unit Candidates: 1616
+[DEBUG] Target Keep Ratio: 0.8718 (Inc: 0.8971)
+[DEBUG] Lagrangian Decision: Pruned 202 units.
+[DEBUG] Actual Mask Updates: 234 channels.
+
+============================== PDT Pruning Results: Epoch 140 ==============================
+ [*] Pruned this step: 234
+ Group  1 |   64/  64 |     0.0% |     0.000000 | [FIXED]
+ Group  2 |   61/  64 |     4.7% |     0.081582 | [TARGET]
+ Group  3 |  103/ 128 |    19.5% |     0.000000 | [FIXED]
+ Group  4 |  119/ 128 |     7.0% |     0.049483 | [TARGET]
+ Group  5 |  140/ 256 |    45.3% |     0.034566 | [TARGET]
+ Group  6 |  214/ 256 |    16.4% |     0.030155 | [TARGET]
+ Group  7 |  484/ 512 |     5.5% |     0.063297 | [TARGET]
+ Group  8 |  396/ 512 |    22.7% |     0.045696 | [TARGET]
+
+[Scientific Metrics]
+ 🟢 Model Size: 42.80 MB / 🔵 Sparsity: 0.01 %
+ 🟠 GPU Mem: 768.08 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 42.80 MB | 🔵 Sparsity: 0.01 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep140_sp0.0.pth
+Epoch 140/400 | Loss: 1.3062 | Val Acc: 60.31%
+Epoch 141/400 | Loss: 1.0546 | Val Acc: 56.13%
+Epoch 142/400 | Loss: 1.0080 | Val Acc: 59.04%
+Epoch 143/400 | Loss: 1.0004 | Val Acc: 57.40%
+Epoch 144/400 | Loss: 0.9981 | Val Acc: 57.72%
+Epoch 145/400 | Loss: 0.9799 | Val Acc: 62.80%
+Epoch 146/400 | Loss: 0.9847 | Val Acc: 57.52%
+Epoch 147/400 | Loss: 0.9769 | Val Acc: 59.64%
+Epoch 148/400 | Loss: 0.9749 | Val Acc: 57.09%
+Epoch 149/400 | Loss: 0.9757 | Val Acc: 56.40%
+Epoch 150/400 | Loss: 0.9799 | Val Acc: 60.40%
+Epoch 151/400 | Loss: 0.9778 | Val Acc: 60.14%
+Epoch 152/400 | Loss: 0.9679 | Val Acc: 61.27%
+Epoch 153/400 | Loss: 0.9780 | Val Acc: 62.93%

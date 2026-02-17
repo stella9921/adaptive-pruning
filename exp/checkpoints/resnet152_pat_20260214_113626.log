@@ -1,0 +1,94 @@
+📝 Logging started: resnet152_pat_20260214_113626.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: PAT
+Target Model: resnet152 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.bn3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.1.bn3 ... (1 layers)
+ Group  3 | Channels:  256 | Layers: layer1.2.bn3 ... (1 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.bn3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.1.bn3 ... (1 layers)
+ Group  6 | Channels:  512 | Layers: layer2.2.bn3 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer2.3.bn3 ... (1 layers)
+ Group  8 | Channels:  512 | Layers: layer2.4.bn3 ... (1 layers)
+ Group  9 | Channels:  512 | Layers: layer2.5.bn3 ... (1 layers)
+ Group 10 | Channels:  512 | Layers: layer2.6.bn3 ... (1 layers)
+ Group 11 | Channels:  512 | Layers: layer2.7.bn3 ... (1 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.bn3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.1.bn3 ... (1 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.2.bn3 ... (1 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.3.bn3 ... (1 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.4.bn3 ... (1 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.5.bn3 ... (1 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.6.bn3 ... (1 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.7.bn3 ... (1 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.8.bn3 ... (1 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.9.bn3 ... (1 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.10.bn3 ... (1 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.11.bn3 ... (1 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.12.bn3 ... (1 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.13.bn3 ... (1 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.14.bn3 ... (1 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.15.bn3 ... (1 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.16.bn3 ... (1 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.17.bn3 ... (1 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.18.bn3 ... (1 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.19.bn3 ... (1 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.20.bn3 ... (1 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.21.bn3 ... (1 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.22.bn3 ... (1 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.23.bn3 ... (1 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.24.bn3 ... (1 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.25.bn3 ... (1 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.26.bn3 ... (1 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.27.bn3 ... (1 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.28.bn3 ... (1 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.29.bn3 ... (1 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.30.bn3 ... (1 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.31.bn3 ... (1 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.32.bn3 ... (1 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.33.bn3 ... (1 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.34.bn3 ... (1 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.35.bn3 ... (1 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.bn3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.1.bn3 ... (1 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.2.bn3 ... (1 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+>>> [System] Loading Base Model: ./exp/checkpoints/resnet152_base.pth
+[Sensitivity] Load from ./exp/checkpoints/resnet152_sensitivity.json
+🔍 [Matching SI] Checking sensitivity mapping...
+🚀 PAT-AMP Pruner Ready | Blocks: 50 | Total Params: 12.46M
+
+--- PAT One-Shot Pruning (Strategy: amplification) ---
+
+⚡ [PAT-AMP] Amplified Pruning Ratios (p=2.5):
+ - Group  0: SI=0.1701 -> Prune 1.0% (Keep 99.0%)
+ - Group 10: SI=0.1314 -> Prune 5.2% (Keep 94.8%)
+ - Group 20: SI=0.1304 -> Prune 15.0% (Keep 85.0%)
+ - Group 30: SI=0.1407 -> Prune 15.0% (Keep 85.0%)
+ - Group 40: SI=0.1167 -> Prune 15.0% (Keep 85.0%)
+[*] Final Synced Target Modules: 308
+
+✂️ [Physical Pruning] Shrinking layers via DependencyGraph...
+
+!!!!!!!!!!!!!!!!!!!!!!!!! FINAL BENCHMARK TABLE !!!!!!!!!!!!!!!!!!!!!!!!!
+🔍 Final Evaluation on Test Set...
+
+!!!!!!!!!!!!!!!!!!!!!!!!! FINAL BENCHMARK TABLE !!!!!!!!!!!!!!!!!!!!!!!!!
+============================================================
+ 🟢 Target Model      : resnet152
+ 🟢 Pruning Strategy  : PAT-AMP (p=2.5)
+ 🟢 Original Params   : 58.34 M
+ 🟢 Pruned Params     : 58.34 M
+ 🟢 Pruning Ratio (%) : -0.00 %
+ 🟢 FLOPs (M)         : 3743.37 M
+ 🟢 Best Val Acc      : 0.00 %
+ 🟢 Final Test Acc    : 78.47 %
+============================================================
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+

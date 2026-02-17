@@ -7,6 +7,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 import torch_pruning as tp
+import sys
+from datetime import datetime
+import json
 
 # 기존 모듈 임포트
 from src.pruning.topology_manager import get_model_topology
@@ -47,6 +50,23 @@ def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
 def main():
     # 1. 설정 및 데이터 준비
     config, args = load_config()
+
+    # --- 로그 파일 자동 저장 설정 시작 ---
+    log_dir = config.get('save_dir', './exp/logs')
+    os.makedirs(log_dir, exist_ok=True)
+    log_filename = f"{config['model']['name']}_{getattr(args, 'strategy', 'pdt')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    
+    class Logger(object):
+        def __init__(self):
+            self.terminal = sys.stdout
+            self.log = open(os.path.join(log_dir, log_filename), "a")
+        def write(self, message):
+            self.terminal.write(message)
+            self.log.write(message)
+        def flush(self): pass
+
+    sys.stdout = Logger() # 이제 모든 print문이 파일로 
+    print(f"📝 Logging started: {log_filename}")
     
     # [System] CLI 인자가 YAML 설정을 덮어쓰도록 명시적으로 우선순위 부여
     if hasattr(args, 'channel_keep_ratio') and args.channel_keep_ratio is not None:
@@ -114,50 +134,55 @@ def main():
     elif strategy_method == 'pdt':
         execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups, args)
 
-
 def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups, args):
-    # --- [0] 저장 경로 설정 (추가됨) ---
+    # --- [0] 저장 및 로드 경로 설정 ---
     checkpoint_dir = config.get('save_dir', './exp/checkpoints')
     os.makedirs(checkpoint_dir, exist_ok=True)
+    model_cfg = config.get('model', {})
+    model_name = model_cfg['name']
 
-    # --- [1] CLI 인자가 YAML 설정을 덮어쓰도록 우선 적용 ---
+    # --- [1] 중요: Pruner 엔진을 먼저 생성 (모델에 mask, hessian 공간 확보) ---
     strat_cfg = config.get('strategy', {})
-    if args.group_selection_ratio is not None:
-        strat_cfg['group_selection_ratio'] = args.group_selection_ratio
-    if args.channel_keep_ratio is not None:
-        strat_cfg['channel_keep_ratio'] = args.channel_keep_ratio
-    if args.min_survival_ratio is not None:
-        strat_cfg['min_survival_ratio'] = args.min_survival_ratio
-    
-    config['strategy'] = strat_cfg 
-
-    # --- [2] Pruner 전략 분기 및 엔진 생성 ---
+    # CLI 인자 반영
+    if args.start_epoch is not None: strat_cfg['start_epoch'] = args.start_epoch
+    if args.channel_keep_ratio is not None: strat_cfg['channel_keep_ratio'] = args.channel_keep_ratio
+    config['strategy'] = strat_cfg
     strategy_type = getattr(args, 'strategy', 'pdt').lower()
 
-    if strategy_type == 'hap':
-        pdt_engine = HAPPruner(model, config, args, topology_groups)
-        print("[System] Initializing HAPPruner (Hessian Inverse Strategy)")
-    elif strategy_type == 'snows':
-        pdt_engine = SNOWSPruner(model, config, args, topology_groups)
-        print("[System] Initializing SNOWSPruner (Pure Hessian Trace Strategy)")
-    elif strategy_type == 'ato': # 추가
-        pdt_engine = ATOPruner(model, config, args, topology_groups)
-        print("[System] Initializing ATOPruner (Magnitude Strategy)")
-    elif strategy_type == 'st': # 추가
-        pdt_engine = STPruner(model, config, args, topology_groups)
-        print("[System] Initializing STPruner (SuperTickets Strategy)")
-    elif strategy_type == 'dfpc': # 추가
-        pdt_engine = DFPCPruner(model, config, args, topology_groups)
-        print("[System] Initializing DFPCPruner (Geometric Uniqueness Strategy)")
-    elif strategy_type == 'tpp': # 최종 추가!
-        pdt_engine = TPPPruner(model, config, args, topology_groups)
-        print("[System] Initializing TPPPruner (Personalized Importance Strategy)")
+    # 여기서 Pruner를 먼저 만들어야 model에 "mask", "hessian_score" 등이 등록됩니다.
+    pruner_class_name = f"{strategy_type.upper()}Pruner"
+    if pruner_class_name in globals():
+        pdt_engine = globals()[pruner_class_name](model, config, args, topology_groups)
     else:
         pdt_engine = PDTPruner(model, config, args, topology_groups)
-        print("[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)")
 
-    # --- [3] 학습 설정 준비 ---
-    model_cfg = config.get('model', {})
+    # --- [2] 이제 가중치 로드 (순서 변경됨) ---
+    base_candidates = [
+        os.path.join(checkpoint_dir, f"{model_name}_base.pth"),
+        os.path.join(checkpoint_dir, f"{model_name}_pdt_ep120_sp0.0.pth")
+    ]
+    
+    loaded_from_base = False
+    for path in base_candidates:
+        if os.path.exists(path):
+            print(f"\n>>> [System] Loading pre-trained model: {path}")
+            state_dict = torch.load(path, map_location=device)
+            
+            # 딕셔너리 구조 대응
+            if isinstance(state_dict, dict) and 'model_state_dict' in state_dict:
+                sd = state_dict['model_state_dict']
+            elif isinstance(state_dict, dict) and 'model' in state_dict:
+                sd = state_dict['model']
+            else:
+                sd = state_dict
+            
+            # 🚨 핵심: strict=False를 주어 Hessian/Mask 키가 달라도 로드되게 함
+            model.load_state_dict(sd, strict=False)
+            print(f"✅ Success: Weights loaded from {os.path.basename(path)}")
+            loaded_from_base = True
+            break
+
+    # --- [3] 나머지 학습 설정 ---
     optimizer = optim.SGD(model.parameters(), 
                           lr=model_cfg.get('base_lr', 0.01), 
                           momentum=model_cfg.get('momentum', 0.9), 
@@ -168,11 +193,18 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     prune_every = strat_cfg.get('prune_every', 20)
     start_epoch = strat_cfg.get('start_epoch', 120) 
 
-    print(f"\n>>> [Pilot Check] Strategy: {strategy_type.upper()} | Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
-    analyze_topology_and_profiling(model, device, config, tag="Baseline Before Pruning")
+    # 모델 로드 성공 시 루프 시작점을 start_epoch로 고정하여 즉시 프루닝 유도
+    loop_start = start_epoch if loaded_from_base else 1
+
+    # 통합 로그 파일 설정
+    history_file = os.path.join(checkpoint_dir, f"{model_name}_{strategy_type}_history.json")
+    history_data = []
+
+    print(f"\n>>> [Pilot Check] Strategy: {strategy_type.upper()} | Start Epoch: {start_epoch} | Target Ratio: {strat_cfg.get('channel_keep_ratio')}")
+    analyze_topology_and_profiling(model, device, config, tag="Initial State")
     
-    # --- [4] 메인 학습 루프 ---
-    for epoch in range(1, total_epochs + 1):
+    # --- [5] 메인 학습 & 프루닝 루프 ---
+    for epoch in range(loop_start, total_epochs + 1):
         model.train()
         total_loss = 0.0
         
@@ -183,82 +215,51 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             output = model(x)
             loss = criterion(output, y)
             
+            # 프루닝 스텝 판별 (start_epoch 당일 첫 배치에서 즉시 작동)
             is_hessian_step = (epoch >= start_epoch and (epoch - start_epoch) % prune_every == 0 and batch_idx == 0)
             
             if is_hessian_step:
                 optimizer.zero_grad()
                 loss.backward(retain_graph=True) 
                 
+                print(f"\n[Action] Triggering {strategy_type.upper()} Pruning at Epoch {epoch}...")
                 pdt_engine.step_pruning(loss=loss, current_epoch=epoch, total_epochs=total_epochs)
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
                 
-                # ---------------- [추가: 프루닝 시점 저장] ----------------
-                current_sp = pdt_engine.get_current_sparsity()
-                ckpt_name = f"{model_cfg['name']}_{strategy_type}_ep{epoch}_sp{current_sp:.1f}.pth"
-                save_path = os.path.join(checkpoint_dir, ckpt_name)
-                torch.save({
-                    'epoch': epoch,
-                    'model_state_dict': model.state_dict(),
-                    'sparsity': current_sp,
-                }, save_path)
-                print(f"💾 Checkpoint saved: {save_path}")
-                # -------------------------------------------------------
+                # 🟢 학회용 리소스 지표 즉시 출력
+                eff = pdt_engine.get_model_efficiency()
+                print(f"\n[Scientific Metrics - Epoch {epoch}]")
+                print(f" 🟢 Model Size: {eff['curr_mb']:.2f} MB | 🔵 Sparsity: {eff['sparsity']:.2f} % | 🟡 Speedup: {eff['speedup']:.2f}x")
 
+                # 💾 JSON 로그 및 체크포인트 저장
+                val_acc = evaluate(model, val_loader, device)
+                history_data.append({'epoch': epoch, 'val_acc': val_acc, 'sparsity': eff['sparsity'], 'size_mb': eff['curr_mb']})
+                with open(history_file, 'w') as f: json.dump(history_data, f, indent=4)
+
+                save_path = os.path.join(checkpoint_dir, f"{model_name}_{strategy_type}_ep{epoch}_sp{eff['sparsity']:.1f}.pth")
+                torch.save({'model_state_dict': model.state_dict(), 'sparsity': eff['sparsity']}, save_path)
+                print(f"💾 Checkpoint saved: {save_path}")
                 torch.cuda.empty_cache()
-                analyze_topology_and_profiling(model, device, config, tag=f"{strategy_type.upper()} Epoch {epoch} Update")
             else:
                 loss.backward()
             
             pdt_engine.update_ema_and_mask_grad()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
-            
             pdt_engine.apply_mask_to_weights()
             total_loss += loss.item()
 
+        # 에폭 종료 후 결과 출력
         val_acc = evaluate(model, val_loader, device)
         print(f"Epoch {epoch}/{total_epochs} | Loss: {total_loss/len(train_loader):.4f} | Val Acc: {val_acc:.2f}%")
 
-    # ---------------- [추가: 최종 학습 완료 저장] ----------------
-    final_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_final.pth")
+    # --- [6] 최종 물리적 압축 (Stage 5) ---
+    final_path = os.path.join(checkpoint_dir, f"{model_name}_{strategy_type}_final.pth")
     torch.save(model.state_dict(), final_path)
     print(f"🏁 Final Model Saved: {final_path}")
-    # ----------------------------------------------------------
-    # ==============================================================================
-    # 2. [추가] 물리적 압축 및 메모리 제약 해소 검증 (Stage 5)
-    # ==============================================================================
+
     print("\n" + "="*30 + " FINAL PHYSICAL COMPRESSION " + "="*30)
-    
-    # [검증 1] 압축 전 메모리 측정
-    torch.cuda.empty_cache()
-    mem_before = torch.cuda.memory_allocated(device) / (1024**2)
-    
-    # [작업] 물리적 구조 변경 시작
-    model.cpu() 
-    example_inputs = torch.randn(1, 3, config['model'].get('input_size', 224), config['model'].get('input_size', 224))
-    DG = tp.DependencyGraph().build_graph(model, example_inputs=example_inputs)
 
-    for name, m in model.named_modules():
-        if isinstance(m, (nn.Conv2d, nn.Linear)) and hasattr(m, 'mask'):
-            prune_indices = torch.where(m.mask == 0)[0].tolist()
-            if len(prune_indices) > 0:
-                # 텐서 차원 도려내기
-                pruning_plan = DG.get_pruning_plan(m, tp.prune_conv_out_channels, idxs=prune_indices)
-                pruning_plan.exec()
-
-    # [검증 2] 압축 후 메모리 측정
-    model.to(device)
-    torch.cuda.empty_cache()
-    mem_after = torch.cuda.memory_allocated(device) / (1024**2)
-    
-    print(f"[*] Before: {mem_before:.2f} MB | After: {mem_after:.2f} MB")
-    print(f"[*] Memory Saved: {mem_before - mem_after:.2f} MB ({((mem_before-mem_after)/mem_before)*100:.1f}% reduction)")
-    
-    # [저장] 진짜 가벼워진 '물리적 압축 모델' 저장
-    compressed_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_FINAL_COMPRESSED.pth")
-    torch.save(model.state_dict(), compressed_path)
-    print(f"✅ Physically Compressed Model Saved: {compressed_path}")
-    print("="*89 + "\n")
 
 def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args):
     

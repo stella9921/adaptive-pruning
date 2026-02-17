@@ -1,0 +1,114 @@
+📝 Logging started: resnet18_snows_20260217_035452.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Total 8 groups linked to 41 prunable layers.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+✅ Success: Weights loaded from resnet18_pdt_ep120_sp0.0.pth
+
+>>> [Pilot Check] Strategy: SNOWS | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.04%      58.440us        70.66%      95.994ms       4.800ms       0.000us         0.00%       1.633ms      81.667us           0 B           0 B     118.81 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.07%      97.874us        70.61%      95.936ms       4.797ms       0.000us         0.00%       1.633ms      81.667us           0 B           0 B     118.81 MB           0 B            20            --  
+                                     aten::_convolution         0.50%     677.190us        70.54%      95.838ms       4.792ms       0.000us         0.00%       1.633ms      81.667us           0 B           0 B     118.81 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.45%      87.567ms        70.04%      95.161ms       4.758ms     859.191us        72.22%       1.633ms      81.667us           0 B           0 B     118.81 MB     118.81 MB            20            --  
+                           aten::_batch_norm_impl_index         0.05%      74.420us        10.61%      14.412ms     720.577us       0.000us         0.00%     234.751us      11.738us           0 B           0 B     115.63 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.71%      13.188ms        10.55%      14.337ms     716.856us     209.727us        17.63%     234.751us      11.738us           0 B           0 B     115.63 MB           0 B            20            --  
+                                            aten::empty         0.16%     223.643us         0.37%     499.220us       4.992us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.63 MB     115.63 MB           100            --  
+                                       aten::batch_norm         0.06%      75.352us        10.66%      14.487ms     724.344us       0.000us         0.00%     234.751us      11.738us           0 B           0 B     115.59 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      52.401us         0.31%     420.152us      21.008us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.59 MB           0 B            20            --  
+                                           aten::linear         0.02%      24.455us         0.97%       1.317ms       1.317ms       0.000us         0.00%      14.336us      14.336us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 135.862ms
+Self CUDA time total: 1.190ms
+
+
+[Action] Triggering SNOWS Pruning at Epoch 120...
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.02 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_snows_ep120_sp0.0.pth
+Epoch 120/400 | Loss: 2.3270 | Val Acc: 44.32%
+Epoch 121/400 | Loss: 1.5230 | Val Acc: 50.12%
+Epoch 122/400 | Loss: 1.3588 | Val Acc: 50.74%
+Epoch 123/400 | Loss: 1.2867 | Val Acc: 53.29%
+Epoch 124/400 | Loss: 1.2424 | Val Acc: 54.47%
+Epoch 125/400 | Loss: 1.2146 | Val Acc: 51.47%
+Epoch 126/400 | Loss: 1.1851 | Val Acc: 54.39%
+Epoch 127/400 | Loss: 1.1688 | Val Acc: 53.70%
+Epoch 128/400 | Loss: 1.1542 | Val Acc: 53.63%
+Epoch 129/400 | Loss: 1.1471 | Val Acc: 48.57%
+Epoch 130/400 | Loss: 1.1452 | Val Acc: 55.81%
+Epoch 131/400 | Loss: 1.1369 | Val Acc: 55.56%
+Epoch 132/400 | Loss: 1.1210 | Val Acc: 55.51%
+Epoch 133/400 | Loss: 1.1169 | Val Acc: 56.25%
+Epoch 134/400 | Loss: 1.1133 | Val Acc: 52.91%
+Epoch 135/400 | Loss: 1.1135 | Val Acc: 58.45%
+Epoch 136/400 | Loss: 1.1077 | Val Acc: 55.30%
+Epoch 137/400 | Loss: 1.1032 | Val Acc: 59.79%
+Epoch 138/400 | Loss: 1.0961 | Val Acc: 53.74%
+Epoch 139/400 | Loss: 1.0944 | Val Acc: 54.12%
+
+[Action] Triggering SNOWS Pruning at Epoch 140...
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.02 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_snows_ep140_sp0.0.pth
+Epoch 140/400 | Loss: 1.3885 | Val Acc: 56.85%
+Epoch 141/400 | Loss: 1.1374 | Val Acc: 59.54%
+Epoch 142/400 | Loss: 1.1115 | Val Acc: 59.70%
+Epoch 143/400 | Loss: 1.1081 | Val Acc: 58.28%
+Epoch 144/400 | Loss: 1.0981 | Val Acc: 59.19%
+Epoch 145/400 | Loss: 1.0982 | Val Acc: 53.77%
+Epoch 146/400 | Loss: 1.0940 | Val Acc: 55.92%
+Epoch 147/400 | Loss: 1.0845 | Val Acc: 53.64%
+Epoch 148/400 | Loss: 1.0888 | Val Acc: 57.85%
+Epoch 149/400 | Loss: 1.0833 | Val Acc: 54.46%
+Epoch 150/400 | Loss: 1.0869 | Val Acc: 49.93%
+Epoch 151/400 | Loss: 1.0746 | Val Acc: 58.68%
+Epoch 152/400 | Loss: 1.0866 | Val Acc: 56.58%
+Epoch 153/400 | Loss: 1.0837 | Val Acc: 59.65%
+Epoch 154/400 | Loss: 1.0801 | Val Acc: 58.73%
+Epoch 155/400 | Loss: 1.0757 | Val Acc: 55.45%
+Epoch 156/400 | Loss: 1.0813 | Val Acc: 58.31%
+Epoch 157/400 | Loss: 1.0724 | Val Acc: 56.55%
+Epoch 158/400 | Loss: 1.0730 | Val Acc: 52.51%
+Epoch 159/400 | Loss: 1.0758 | Val Acc: 58.82%
+
+[Action] Triggering SNOWS Pruning at Epoch 160...
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 42.79 MB | 🔵 Sparsity: 0.02 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_snows_ep160_sp0.0.pth
+Epoch 160/400 | Loss: 1.3474 | Val Acc: 56.63%
+Epoch 161/400 | Loss: 1.1146 | Val Acc: 58.04%
+Epoch 162/400 | Loss: 1.0894 | Val Acc: 56.72%
+Epoch 163/400 | Loss: 1.0866 | Val Acc: 58.84%
+Epoch 164/400 | Loss: 1.0821 | Val Acc: 59.16%
+Epoch 165/400 | Loss: 1.0810 | Val Acc: 54.44%
+Epoch 166/400 | Loss: 1.0779 | Val Acc: 57.97%
+Epoch 167/400 | Loss: 1.0782 | Val Acc: 56.78%

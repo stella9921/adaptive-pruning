@@ -1,0 +1,97 @@
+📝 Logging started: resnet152_pdt_20260216_085055.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet152 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.bn3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.1.bn3 ... (1 layers)
+ Group  3 | Channels:  256 | Layers: layer1.2.bn3 ... (1 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.bn3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.1.bn3 ... (1 layers)
+ Group  6 | Channels:  512 | Layers: layer2.2.bn3 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer2.3.bn3 ... (1 layers)
+ Group  8 | Channels:  512 | Layers: layer2.4.bn3 ... (1 layers)
+ Group  9 | Channels:  512 | Layers: layer2.5.bn3 ... (1 layers)
+ Group 10 | Channels:  512 | Layers: layer2.6.bn3 ... (1 layers)
+ Group 11 | Channels:  512 | Layers: layer2.7.bn3 ... (1 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.bn3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.1.bn3 ... (1 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.2.bn3 ... (1 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.3.bn3 ... (1 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.4.bn3 ... (1 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.5.bn3 ... (1 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.6.bn3 ... (1 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.7.bn3 ... (1 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.8.bn3 ... (1 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.9.bn3 ... (1 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.10.bn3 ... (1 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.11.bn3 ... (1 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.12.bn3 ... (1 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.13.bn3 ... (1 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.14.bn3 ... (1 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.15.bn3 ... (1 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.16.bn3 ... (1 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.17.bn3 ... (1 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.18.bn3 ... (1 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.19.bn3 ... (1 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.20.bn3 ... (1 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.21.bn3 ... (1 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.22.bn3 ... (1 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.23.bn3 ... (1 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.24.bn3 ... (1 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.25.bn3 ... (1 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.26.bn3 ... (1 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.27.bn3 ... (1 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.28.bn3 ... (1 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.29.bn3 ... (1 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.30.bn3 ... (1 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.31.bn3 ... (1 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.32.bn3 ... (1 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.33.bn3 ... (1 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.34.bn3 ... (1 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.35.bn3 ... (1 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.bn3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.1.bn3 ... (1 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.2.bn3 ... (1 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-50) will be pruned.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet152_base.pth
+✅ Success: Weights loaded from resnet152_base.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                           aten::_batch_norm_impl_index         0.18%     245.541us        12.79%      17.585ms     113.450us       0.000us         0.00%       1.781ms      11.487us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        10.25%      14.102ms        12.61%      17.339ms     111.866us       1.756ms        21.43%       1.781ms      11.487us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         0.88%       1.206ms         1.45%       1.998ms       2.578us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         0.18%     252.482us        12.97%      17.837ms     115.079us       0.000us         0.00%       1.781ms      11.487us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.14%     198.247us         0.97%       1.327ms       8.563us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                           aten::conv2d         0.17%     228.464us        69.21%      95.186ms     614.105us       0.000us         0.00%       6.444ms      41.574us           0 B           0 B       1.32 GB           0 B           155  364767477.760  
+                                      aten::convolution         0.22%     304.461us        69.05%      94.958ms     612.631us       0.000us         0.00%       6.444ms      41.574us           0 B           0 B       1.32 GB           0 B           155            --  
+                                     aten::_convolution         0.78%       1.075ms        68.82%      94.653ms     610.667us       0.000us         0.00%       6.444ms      41.574us           0 B           0 B       1.32 GB           0 B           155            --  
+                                aten::cudnn_convolution        62.43%      85.857ms        68.04%      93.579ms     603.735us       5.044ms        61.58%       6.444ms      41.574us           0 B           0 B       1.32 GB       1.32 GB           155            --  
+                                           aten::linear         0.03%      43.134us         1.07%       1.475ms       1.475ms       0.000us         0.00%      17.792us      17.792us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 137.528ms
+Self CUDA time total: 8.191ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 221.98 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep120_sp0.0.pth
+Epoch 120/200 | Loss: 1.1788 | Val Acc: 55.71%

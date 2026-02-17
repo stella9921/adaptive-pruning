@@ -1,0 +1,133 @@
+📝 Logging started: resnet18_pdt_20260215_202335.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-8) will be pruned.
+[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)
+
+>>> [Pilot Check] Strategy: PDT | Pruning starts at Epoch 30, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.05%      69.901us        71.41%     100.912ms       5.046ms       0.000us         0.00%       1.640ms      82.013us           0 B           0 B     116.94 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.08%     113.408us        71.36%     100.842ms       5.042ms       0.000us         0.00%       1.640ms      82.013us           0 B           0 B     116.94 MB           0 B            20            --  
+                                     aten::_convolution         0.52%     734.965us        71.28%     100.729ms       5.036ms       0.000us         0.00%       1.640ms      82.013us           0 B           0 B     116.94 MB           0 B            20            --  
+                                aten::cudnn_convolution        65.51%      92.568ms        70.76%      99.994ms       5.000ms     862.642us        72.31%       1.640ms      82.013us           0 B           0 B     116.94 MB     116.94 MB            20            --  
+                           aten::_batch_norm_impl_index         0.06%      83.168us        10.13%      14.319ms     715.975us       0.000us         0.00%     234.842us      11.742us           0 B           0 B     114.88 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.28%      13.114ms        10.07%      14.236ms     711.817us     210.139us        17.61%     234.842us      11.742us           0 B           0 B     114.88 MB           0 B            20            --  
+                                            aten::empty         0.16%     223.299us         0.34%     473.667us       4.737us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     114.88 MB     114.88 MB           100            --  
+                                       aten::batch_norm         0.06%      79.967us        10.19%      14.399ms     719.973us       0.000us         0.00%     234.842us      11.742us           0 B           0 B     114.84 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      55.041us         0.28%     398.737us      19.937us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     114.84 MB           0 B            20            --  
+                                           aten::linear         0.02%      33.930us         1.13%       1.602ms       1.602ms       0.000us         0.00%      13.308us      13.308us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 141.314ms
+Self CUDA time total: 1.193ms
+
+Epoch 1/400 | Loss: 3.8550 | Val Acc: 15.33%
+Epoch 2/400 | Loss: 3.0547 | Val Acc: 26.53%
+Epoch 3/400 | Loss: 2.5206 | Val Acc: 32.09%
+Epoch 4/400 | Loss: 2.1712 | Val Acc: 42.25%
+Epoch 5/400 | Loss: 1.9156 | Val Acc: 42.51%
+Epoch 6/400 | Loss: 1.7492 | Val Acc: 45.98%
+Epoch 7/400 | Loss: 1.6387 | Val Acc: 44.61%
+Epoch 8/400 | Loss: 1.5376 | Val Acc: 52.01%
+Epoch 9/400 | Loss: 1.4612 | Val Acc: 49.45%
+Epoch 10/400 | Loss: 1.4046 | Val Acc: 49.11%
+Epoch 11/400 | Loss: 1.3657 | Val Acc: 48.83%
+Epoch 12/400 | Loss: 1.3262 | Val Acc: 51.23%
+Epoch 13/400 | Loss: 1.2961 | Val Acc: 52.79%
+Epoch 14/400 | Loss: 1.2704 | Val Acc: 55.14%
+Epoch 15/400 | Loss: 1.2504 | Val Acc: 57.81%
+Epoch 16/400 | Loss: 1.2287 | Val Acc: 55.12%
+Epoch 17/400 | Loss: 1.2096 | Val Acc: 49.83%
+Epoch 18/400 | Loss: 1.1990 | Val Acc: 56.95%
+Epoch 19/400 | Loss: 1.1781 | Val Acc: 56.83%
+Epoch 20/400 | Loss: 1.1774 | Val Acc: 55.27%
+Epoch 21/400 | Loss: 1.1541 | Val Acc: 56.77%
+Epoch 22/400 | Loss: 1.1501 | Val Acc: 58.30%
+Epoch 23/400 | Loss: 1.1369 | Val Acc: 53.11%
+Epoch 24/400 | Loss: 1.1259 | Val Acc: 53.78%
+Epoch 25/400 | Loss: 1.1111 | Val Acc: 55.47%
+Epoch 26/400 | Loss: 1.1097 | Val Acc: 56.94%
+Epoch 27/400 | Loss: 1.1120 | Val Acc: 60.40%
+Epoch 28/400 | Loss: 1.0932 | Val Acc: 51.81%
+Epoch 29/400 | Loss: 1.0888 | Val Acc: 57.64%
+
+[Scientific Metrics - Epoch 30]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 %
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep30_sp0.0.pth
+Epoch 30/400 | Loss: 1.3447 | Val Acc: 58.42%
+Epoch 31/400 | Loss: 1.1172 | Val Acc: 58.39%
+Epoch 32/400 | Loss: 1.0951 | Val Acc: 59.83%
+Epoch 33/400 | Loss: 1.0913 | Val Acc: 58.55%
+Epoch 34/400 | Loss: 1.0790 | Val Acc: 54.68%
+Epoch 35/400 | Loss: 1.0710 | Val Acc: 59.39%
+Epoch 36/400 | Loss: 1.0641 | Val Acc: 58.20%
+Epoch 37/400 | Loss: 1.0552 | Val Acc: 55.66%
+Epoch 38/400 | Loss: 1.0530 | Val Acc: 59.98%
+Epoch 39/400 | Loss: 1.0500 | Val Acc: 52.85%
+Epoch 40/400 | Loss: 1.0393 | Val Acc: 61.69%
+Epoch 41/400 | Loss: 1.0511 | Val Acc: 59.42%
+Epoch 42/400 | Loss: 1.0361 | Val Acc: 58.36%
+Epoch 43/400 | Loss: 1.0315 | Val Acc: 52.34%
+Epoch 44/400 | Loss: 1.0234 | Val Acc: 60.47%
+Epoch 45/400 | Loss: 1.0270 | Val Acc: 57.29%
+Epoch 46/400 | Loss: 1.0176 | Val Acc: 57.82%
+Epoch 47/400 | Loss: 1.0250 | Val Acc: 54.05%
+Epoch 48/400 | Loss: 1.0134 | Val Acc: 57.54%
+Epoch 49/400 | Loss: 1.0127 | Val Acc: 55.27%
+
+[Scientific Metrics - Epoch 50]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 %
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep50_sp0.0.pth
+Epoch 50/400 | Loss: 1.2928 | Val Acc: 57.33%
+Epoch 51/400 | Loss: 1.0493 | Val Acc: 61.21%
+Epoch 52/400 | Loss: 1.0250 | Val Acc: 59.87%
+Epoch 53/400 | Loss: 1.0308 | Val Acc: 57.99%
+Epoch 54/400 | Loss: 1.0178 | Val Acc: 53.17%
+Epoch 55/400 | Loss: 1.0165 | Val Acc: 56.90%
+Epoch 56/400 | Loss: 1.0071 | Val Acc: 56.97%
+Epoch 57/400 | Loss: 1.0040 | Val Acc: 60.89%
+Epoch 58/400 | Loss: 1.0043 | Val Acc: 61.36%
+Epoch 59/400 | Loss: 0.9951 | Val Acc: 58.94%
+Epoch 60/400 | Loss: 1.0124 | Val Acc: 56.12%
+Epoch 61/400 | Loss: 0.9980 | Val Acc: 58.51%
+Epoch 62/400 | Loss: 0.9944 | Val Acc: 56.81%
+Epoch 63/400 | Loss: 0.9968 | Val Acc: 57.67%
+Epoch 64/400 | Loss: 0.9865 | Val Acc: 56.20%
+Epoch 65/400 | Loss: 0.9851 | Val Acc: 58.95%
+Epoch 66/400 | Loss: 0.9887 | Val Acc: 56.72%
+Epoch 67/400 | Loss: 0.9870 | Val Acc: 58.18%
+Epoch 68/400 | Loss: 0.9855 | Val Acc: 60.89%
+Epoch 69/400 | Loss: 0.9827 | Val Acc: 59.64%
+
+[Scientific Metrics - Epoch 70]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 %
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep70_sp0.0.pth
+Epoch 70/400 | Loss: 1.2352 | Val Acc: 55.66%
+Epoch 71/400 | Loss: 1.0251 | Val Acc: 58.43%
+Epoch 72/400 | Loss: 0.9966 | Val Acc: 60.40%
+Epoch 73/400 | Loss: 0.9912 | Val Acc: 58.53%
+Epoch 74/400 | Loss: 0.9867 | Val Acc: 58.71%
+Epoch 75/400 | Loss: 0.9931 | Val Acc: 57.66%

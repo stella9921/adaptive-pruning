@@ -1,0 +1,4 @@
+📝 Logging started: resnet152_pdt_20260213_145652.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet152 | Dataset: cifar100

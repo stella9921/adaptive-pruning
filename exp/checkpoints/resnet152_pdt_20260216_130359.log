@@ -1,0 +1,154 @@
+📝 Logging started: resnet152_pdt_20260216_130359.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet152 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.bn3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.1.bn3 ... (1 layers)
+ Group  3 | Channels:  256 | Layers: layer1.2.bn3 ... (1 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.bn3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.1.bn3 ... (1 layers)
+ Group  6 | Channels:  512 | Layers: layer2.2.bn3 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer2.3.bn3 ... (1 layers)
+ Group  8 | Channels:  512 | Layers: layer2.4.bn3 ... (1 layers)
+ Group  9 | Channels:  512 | Layers: layer2.5.bn3 ... (1 layers)
+ Group 10 | Channels:  512 | Layers: layer2.6.bn3 ... (1 layers)
+ Group 11 | Channels:  512 | Layers: layer2.7.bn3 ... (1 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.bn3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.1.bn3 ... (1 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.2.bn3 ... (1 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.3.bn3 ... (1 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.4.bn3 ... (1 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.5.bn3 ... (1 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.6.bn3 ... (1 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.7.bn3 ... (1 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.8.bn3 ... (1 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.9.bn3 ... (1 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.10.bn3 ... (1 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.11.bn3 ... (1 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.12.bn3 ... (1 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.13.bn3 ... (1 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.14.bn3 ... (1 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.15.bn3 ... (1 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.16.bn3 ... (1 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.17.bn3 ... (1 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.18.bn3 ... (1 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.19.bn3 ... (1 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.20.bn3 ... (1 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.21.bn3 ... (1 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.22.bn3 ... (1 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.23.bn3 ... (1 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.24.bn3 ... (1 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.25.bn3 ... (1 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.26.bn3 ... (1 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.27.bn3 ... (1 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.28.bn3 ... (1 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.29.bn3 ... (1 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.30.bn3 ... (1 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.31.bn3 ... (1 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.32.bn3 ... (1 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.33.bn3 ... (1 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.34.bn3 ... (1 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.35.bn3 ... (1 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.bn3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.1.bn3 ... (1 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.2.bn3 ... (1 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-50) will be pruned.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet152_base.pth
+✅ Success: Weights loaded from resnet152_base.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                           aten::_batch_norm_impl_index         0.17%     240.627us        13.03%      18.300ms     118.063us       0.000us         0.00%       1.782ms      11.495us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        10.58%      14.859ms        12.86%      18.059ms     116.510us       1.757ms        21.47%       1.782ms      11.495us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         0.87%       1.222ms         1.40%       1.962ms       2.531us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         0.18%     257.893us        13.21%      18.558ms     119.726us       0.000us         0.00%       1.782ms      11.495us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.14%     194.721us         0.91%       1.280ms       8.257us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                           aten::conv2d         0.17%     234.815us        69.20%      97.189ms     627.023us       0.000us         0.00%       6.431ms      41.490us           0 B           0 B       1.32 GB           0 B           155  364767477.760  
+                                      aten::convolution         0.22%     306.852us        69.03%      96.954ms     625.508us       0.000us         0.00%       6.431ms      41.490us           0 B           0 B       1.32 GB           0 B           155            --  
+                                     aten::_convolution         0.80%       1.125ms        68.81%      96.647ms     623.528us       0.000us         0.00%       6.431ms      41.490us           0 B           0 B       1.32 GB           0 B           155            --  
+                                aten::cudnn_convolution        62.43%      87.688ms        68.01%      95.522ms     616.270us       5.038ms        61.57%       6.431ms      41.490us           0 B           0 B       1.32 GB       1.32 GB           155            --  
+                                           aten::linear         0.03%      44.055us         1.07%       1.500ms       1.500ms       0.000us         0.00%      19.456us      19.456us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 140.456ms
+Self CUDA time total: 8.183ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[DEBUG] === step_pruning Started at Epoch 120 ===
+[DEBUG] Current Model Sparsity: 0.00% (Alive: 100.00%)
+[DEBUG] Warning: Group 1 has no valid layers matching the model.
+[DEBUG] Warning: Group 2 has no valid layers matching the model.
+[DEBUG] Warning: Group 3 has no valid layers matching the model.
+[DEBUG] Warning: Group 4 has no valid layers matching the model.
+[DEBUG] Warning: Group 5 has no valid layers matching the model.
+[DEBUG] Warning: Group 6 has no valid layers matching the model.
+[DEBUG] Warning: Group 7 has no valid layers matching the model.
+[DEBUG] Warning: Group 8 has no valid layers matching the model.
+[DEBUG] Warning: Group 9 has no valid layers matching the model.
+[DEBUG] Warning: Group 10 has no valid layers matching the model.
+[DEBUG] Warning: Group 11 has no valid layers matching the model.
+[DEBUG] Warning: Group 12 has no valid layers matching the model.
+[DEBUG] Warning: Group 13 has no valid layers matching the model.
+[DEBUG] Warning: Group 14 has no valid layers matching the model.
+[DEBUG] Warning: Group 15 has no valid layers matching the model.
+[DEBUG] Warning: Group 16 has no valid layers matching the model.
+[DEBUG] Warning: Group 17 has no valid layers matching the model.
+[DEBUG] Warning: Group 18 has no valid layers matching the model.
+[DEBUG] Warning: Group 19 has no valid layers matching the model.
+[DEBUG] Warning: Group 20 has no valid layers matching the model.
+[DEBUG] Warning: Group 21 has no valid layers matching the model.
+[DEBUG] Warning: Group 22 has no valid layers matching the model.
+[DEBUG] Warning: Group 23 has no valid layers matching the model.
+[DEBUG] Warning: Group 24 has no valid layers matching the model.
+[DEBUG] Warning: Group 25 has no valid layers matching the model.
+[DEBUG] Warning: Group 26 has no valid layers matching the model.
+[DEBUG] Warning: Group 27 has no valid layers matching the model.
+[DEBUG] Warning: Group 28 has no valid layers matching the model.
+[DEBUG] Warning: Group 29 has no valid layers matching the model.
+[DEBUG] Warning: Group 30 has no valid layers matching the model.
+[DEBUG] Warning: Group 31 has no valid layers matching the model.
+[DEBUG] Warning: Group 32 has no valid layers matching the model.
+[DEBUG] Warning: Group 33 has no valid layers matching the model.
+[DEBUG] Warning: Group 34 has no valid layers matching the model.
+[DEBUG] Warning: Group 35 has no valid layers matching the model.
+[DEBUG] Warning: Group 36 has no valid layers matching the model.
+[DEBUG] Warning: Group 37 has no valid layers matching the model.
+[DEBUG] Warning: Group 38 has no valid layers matching the model.
+[DEBUG] Warning: Group 39 has no valid layers matching the model.
+[DEBUG] Warning: Group 40 has no valid layers matching the model.
+[DEBUG] Warning: Group 41 has no valid layers matching the model.
+[DEBUG] Warning: Group 42 has no valid layers matching the model.
+[DEBUG] Warning: Group 43 has no valid layers matching the model.
+[DEBUG] Warning: Group 44 has no valid layers matching the model.
+[DEBUG] Warning: Group 45 has no valid layers matching the model.
+[DEBUG] Warning: Group 46 has no valid layers matching the model.
+[DEBUG] Warning: Group 47 has no valid layers matching the model.
+[DEBUG] Warning: Group 48 has no valid layers matching the model.
+[DEBUG] Warning: Group 49 has no valid layers matching the model.
+[DEBUG] Warning: Group 50 has no valid layers matching the model.
+[DEBUG] 🚨 ERROR: No valid group_info_list created. Check layer names!
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 221.98 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep120_sp0.0.pth
+Epoch 120/200 | Loss: 1.2096 | Val Acc: 57.61%
+Epoch 121/200 | Loss: 0.8573 | Val Acc: 60.33%
+Epoch 122/200 | Loss: 0.8380 | Val Acc: 65.27%
+Epoch 123/200 | Loss: 0.7943 | Val Acc: 64.00%

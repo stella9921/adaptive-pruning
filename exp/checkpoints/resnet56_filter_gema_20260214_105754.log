@@ -1,0 +1,311 @@
+📝 Logging started: resnet56_filter_gema_20260214_105754.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet56 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for cifarresnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   16 | Layers: bn1 ... (2 layers)
+ Group  2 | Channels:   16 | Layers: bn1 ... (3 layers)
+ Group  3 | Channels:   16 | Layers: bn1 ... (4 layers)
+ Group  4 | Channels:   16 | Layers: bn1 ... (5 layers)
+ Group  5 | Channels:   16 | Layers: bn1 ... (6 layers)
+ Group  6 | Channels:   16 | Layers: layer1.0.bn2 ... (6 layers)
+ Group  7 | Channels:   16 | Layers: layer1.1.bn2 ... (6 layers)
+ Group  8 | Channels:   16 | Layers: layer1.2.bn2 ... (6 layers)
+ Group  9 | Channels:   16 | Layers: layer1.3.bn2 ... (6 layers)
+ Group 10 | Channels:   32 | Layers: layer2.0.bn2 ... (2 layers)
+ Group 11 | Channels:   32 | Layers: layer2.0.bn2 ... (3 layers)
+ Group 12 | Channels:   32 | Layers: layer2.0.bn2 ... (4 layers)
+ Group 13 | Channels:   32 | Layers: layer2.0.bn2 ... (5 layers)
+ Group 14 | Channels:   32 | Layers: layer2.0.bn2 ... (6 layers)
+ Group 15 | Channels:   32 | Layers: layer2.0.bn2 ... (7 layers)
+ Group 16 | Channels:   32 | Layers: layer2.1.bn2 ... (6 layers)
+ Group 17 | Channels:   32 | Layers: layer2.2.bn2 ... (6 layers)
+ Group 18 | Channels:   32 | Layers: layer2.3.bn2 ... (6 layers)
+ Group 19 | Channels:   64 | Layers: layer3.0.bn2 ... (2 layers)
+ Group 20 | Channels:   64 | Layers: layer3.0.bn2 ... (3 layers)
+ Group 21 | Channels:   64 | Layers: layer3.0.bn2 ... (4 layers)
+ Group 22 | Channels:   64 | Layers: layer3.0.bn2 ... (5 layers)
+ Group 23 | Channels:   64 | Layers: layer3.0.bn2 ... (6 layers)
+ Group 24 | Channels:   64 | Layers: layer3.0.bn2 ... (7 layers)
+ Group 25 | Channels:   64 | Layers: layer3.1.bn2 ... (6 layers)
+ Group 26 | Channels:   64 | Layers: layer3.2.bn2 ... (6 layers)
+ Group 27 | Channels:   64 | Layers: layer3.3.bn2 ... (6 layers)
+===============================================================
+[*] Total 27 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-27) will be pruned.
+[System] Initializing FilterGEMAPruner (Step-wise Filter Pruning Strategy)
+
+>>> [Pilot Check] Strategy: FILTER_GEMA | Pruning starts at Epoch 60, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 204 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::linear         0.02%      32.278us        31.59%      42.363ms      42.363ms       0.000us         0.00%       4.800us       4.800us           0 B           0 B       9.13 MB           0 B             1            --  
+                                            aten::addmm        29.22%      39.184ms        31.55%      42.307ms      42.307ms       1.600us         0.26%       4.800us       4.800us           0 B           0 B       9.13 MB       9.13 MB             1        12.800  
+                                        model_inference         1.59%       2.136ms        99.99%     134.100ms     134.100ms       0.000us         0.00%     721.895us     721.895us           0 B           0 B       9.12 MB    -114.00 KB             1            --  
+                                           aten::conv2d         0.08%     104.226us        51.79%      69.452ms       1.218ms       0.000us         0.00%     570.249us      10.004us           0 B           0 B      38.00 KB           0 B            57      3342.944  
+                                      aten::convolution         0.13%     176.595us        51.71%      69.348ms       1.217ms       0.000us         0.00%     570.249us      10.004us           0 B           0 B      38.00 KB           0 B            57            --  
+                                     aten::_convolution         0.54%     719.720us        51.58%      69.171ms       1.214ms       0.000us         0.00%     570.249us      10.004us           0 B           0 B      38.00 KB           0 B            57            --  
+                                aten::cudnn_convolution        42.93%      57.570ms        51.04%      68.452ms       1.201ms     483.588us        77.12%     570.249us      10.004us           0 B           0 B      38.00 KB      38.00 KB            57            --  
+                                       aten::batch_norm         0.06%      80.105us         2.65%       3.553ms      62.339us       0.000us         0.00%      59.869us       1.050us           0 B           0 B      38.00 KB           0 B            57            --  
+                           aten::_batch_norm_impl_index         0.08%     106.236us         2.59%       3.473ms      60.933us       0.000us         0.00%      59.869us       1.050us           0 B           0 B      38.00 KB           0 B            57            --  
+                                 aten::cudnn_batch_norm         1.85%       2.485ms         2.51%       3.367ms      59.069us      58.685us         9.36%      59.869us       1.050us           0 B           0 B      38.00 KB           0 B            57            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 134.112ms
+Self CUDA time total: 627.074us
+
+Epoch 1/300 | Loss: 4.1292 | Val Acc: 8.61%
+Epoch 2/300 | Loss: 3.5941 | Val Acc: 15.33%
+Epoch 3/300 | Loss: 3.2093 | Val Acc: 16.99%
+Epoch 4/300 | Loss: 2.8892 | Val Acc: 22.77%
+Epoch 5/300 | Loss: 2.6246 | Val Acc: 30.12%
+Epoch 6/300 | Loss: 2.4125 | Val Acc: 34.17%
+Epoch 7/300 | Loss: 2.2367 | Val Acc: 38.43%
+Epoch 8/300 | Loss: 2.0926 | Val Acc: 41.66%
+Epoch 9/300 | Loss: 1.9816 | Val Acc: 44.32%
+Epoch 10/300 | Loss: 1.8839 | Val Acc: 45.73%
+Epoch 11/300 | Loss: 1.7955 | Val Acc: 41.75%
+Epoch 12/300 | Loss: 1.7188 | Val Acc: 47.84%
+Epoch 13/300 | Loss: 1.6527 | Val Acc: 47.60%
+Epoch 14/300 | Loss: 1.5875 | Val Acc: 48.05%
+Epoch 15/300 | Loss: 1.5379 | Val Acc: 51.97%
+Epoch 16/300 | Loss: 1.4812 | Val Acc: 51.11%
+Epoch 17/300 | Loss: 1.4356 | Val Acc: 50.22%
+Epoch 18/300 | Loss: 1.3958 | Val Acc: 51.94%
+Epoch 19/300 | Loss: 1.3595 | Val Acc: 54.29%
+Epoch 20/300 | Loss: 1.3141 | Val Acc: 54.99%
+Epoch 21/300 | Loss: 1.2768 | Val Acc: 52.16%
+Epoch 22/300 | Loss: 1.2457 | Val Acc: 56.10%
+Epoch 23/300 | Loss: 1.2072 | Val Acc: 57.03%
+Epoch 24/300 | Loss: 1.1811 | Val Acc: 54.74%
+Epoch 25/300 | Loss: 1.1556 | Val Acc: 56.87%
+Epoch 26/300 | Loss: 1.1329 | Val Acc: 56.83%
+Epoch 27/300 | Loss: 1.0933 | Val Acc: 56.28%
+Epoch 28/300 | Loss: 1.0664 | Val Acc: 58.19%
+Epoch 29/300 | Loss: 1.0573 | Val Acc: 57.83%
+Epoch 30/300 | Loss: 1.0228 | Val Acc: 59.24%
+Epoch 31/300 | Loss: 1.0094 | Val Acc: 56.97%
+Epoch 32/300 | Loss: 0.9814 | Val Acc: 58.32%
+Epoch 33/300 | Loss: 0.9609 | Val Acc: 60.41%
+Epoch 34/300 | Loss: 0.9473 | Val Acc: 59.72%
+Epoch 35/300 | Loss: 0.9222 | Val Acc: 58.56%
+Epoch 36/300 | Loss: 0.9071 | Val Acc: 60.40%
+Epoch 37/300 | Loss: 0.8829 | Val Acc: 60.06%
+Epoch 38/300 | Loss: 0.8709 | Val Acc: 59.22%
+Epoch 39/300 | Loss: 0.8511 | Val Acc: 58.39%
+Epoch 40/300 | Loss: 0.8352 | Val Acc: 59.39%
+Epoch 41/300 | Loss: 0.8207 | Val Acc: 58.38%
+Epoch 42/300 | Loss: 0.8123 | Val Acc: 60.56%
+Epoch 43/300 | Loss: 0.7915 | Val Acc: 60.36%
+Epoch 44/300 | Loss: 0.7794 | Val Acc: 59.57%
+Epoch 45/300 | Loss: 0.7653 | Val Acc: 60.88%
+Epoch 46/300 | Loss: 0.7491 | Val Acc: 61.07%
+Epoch 47/300 | Loss: 0.7321 | Val Acc: 59.73%
+Epoch 48/300 | Loss: 0.7228 | Val Acc: 61.43%
+Epoch 49/300 | Loss: 0.7184 | Val Acc: 61.37%
+Epoch 50/300 | Loss: 0.7010 | Val Acc: 60.40%
+Epoch 51/300 | Loss: 0.6846 | Val Acc: 61.69%
+Epoch 52/300 | Loss: 0.6691 | Val Acc: 61.35%
+Epoch 53/300 | Loss: 0.6619 | Val Acc: 62.21%
+Epoch 54/300 | Loss: 0.6491 | Val Acc: 60.55%
+Epoch 55/300 | Loss: 0.6422 | Val Acc: 61.37%
+Epoch 56/300 | Loss: 0.6377 | Val Acc: 62.09%
+Epoch 57/300 | Loss: 0.6216 | Val Acc: 61.65%
+Epoch 58/300 | Loss: 0.6093 | Val Acc: 62.03%
+Epoch 59/300 | Loss: 0.5960 | Val Acc: 61.83%
+
+🔥 [Filter-GEMA] Step Pruning Triggered | Epoch: 60
+🎯 Target Sparsity: 20.0% | Current: 0.00%
+✅ [Result] Pruned 445 filters to reach 20.0% Sparsity.
+ 🔵 Final Sparsity: 27.67 % | 🟢 Size: 2.37 MB
+=========================================================================================
+
+Epoch 60/300 | Loss: 1.3681 | Val Acc: 60.61%
+Epoch 61/300 | Loss: 0.9977 | Val Acc: 59.91%
+Epoch 62/300 | Loss: 0.9264 | Val Acc: 59.71%
+Epoch 63/300 | Loss: 0.8750 | Val Acc: 61.03%
+Epoch 64/300 | Loss: 0.8429 | Val Acc: 62.49%
+Epoch 65/300 | Loss: 0.8211 | Val Acc: 60.79%
+Epoch 66/300 | Loss: 0.7962 | Val Acc: 61.40%
+Epoch 67/300 | Loss: 0.7900 | Val Acc: 61.70%
+Epoch 68/300 | Loss: 0.7676 | Val Acc: 61.61%
+Epoch 69/300 | Loss: 0.7548 | Val Acc: 61.34%
+Epoch 70/300 | Loss: 0.7342 | Val Acc: 61.45%
+Epoch 71/300 | Loss: 0.7222 | Val Acc: 61.59%
+Epoch 72/300 | Loss: 0.7163 | Val Acc: 62.56%
+Epoch 73/300 | Loss: 0.7076 | Val Acc: 59.45%
+Epoch 74/300 | Loss: 0.6966 | Val Acc: 61.85%
+Epoch 75/300 | Loss: 0.6819 | Val Acc: 63.54%
+Epoch 76/300 | Loss: 0.6737 | Val Acc: 62.85%
+Epoch 77/300 | Loss: 0.6676 | Val Acc: 60.28%
+Epoch 78/300 | Loss: 0.6551 | Val Acc: 61.63%
+Epoch 79/300 | Loss: 0.6430 | Val Acc: 62.13%
+
+🔥 [Filter-GEMA] Step Pruning Triggered | Epoch: 80
+🎯 Target Sparsity: 40.0% | Current: 19.97%
+✅ [Result] Pruned 440 filters to reach 40.0% Sparsity.
+ 🔵 Final Sparsity: 51.17 % | 🟢 Size: 1.60 MB
+=========================================================================================
+
+Epoch 80/300 | Loss: 1.5930 | Val Acc: 54.10%
+Epoch 81/300 | Loss: 1.2521 | Val Acc: 56.74%
+Epoch 82/300 | Loss: 1.1768 | Val Acc: 58.10%
+Epoch 83/300 | Loss: 1.1242 | Val Acc: 57.31%
+Epoch 84/300 | Loss: 1.0802 | Val Acc: 57.77%
+Epoch 85/300 | Loss: 1.0525 | Val Acc: 57.65%
+Epoch 86/300 | Loss: 1.0217 | Val Acc: 59.77%
+Epoch 87/300 | Loss: 1.0054 | Val Acc: 59.96%
+Epoch 88/300 | Loss: 0.9757 | Val Acc: 59.90%
+Epoch 89/300 | Loss: 0.9536 | Val Acc: 59.06%
+Epoch 90/300 | Loss: 0.9440 | Val Acc: 59.16%
+Epoch 91/300 | Loss: 0.9172 | Val Acc: 60.44%
+Epoch 92/300 | Loss: 0.9083 | Val Acc: 59.25%
+Epoch 93/300 | Loss: 0.8918 | Val Acc: 60.74%
+Epoch 94/300 | Loss: 0.8826 | Val Acc: 58.59%
+Epoch 95/300 | Loss: 0.8723 | Val Acc: 60.29%
+Epoch 96/300 | Loss: 0.8691 | Val Acc: 60.14%
+Epoch 97/300 | Loss: 0.8526 | Val Acc: 60.14%
+Epoch 98/300 | Loss: 0.8424 | Val Acc: 61.52%
+Epoch 99/300 | Loss: 0.8341 | Val Acc: 60.94%
+
+🔥 [Filter-GEMA] Step Pruning Triggered | Epoch: 100
+🎯 Target Sparsity: 60.0% | Current: 39.72%
+✅ [Result] Pruned 435 filters to reach 60.0% Sparsity.
+ 🔵 Final Sparsity: 68.69 % | 🟢 Size: 1.02 MB
+=========================================================================================
+
+Epoch 100/300 | Loss: 2.7108 | Val Acc: 35.38%
+Epoch 101/300 | Loss: 1.9896 | Val Acc: 43.12%
+Epoch 102/300 | Loss: 1.8165 | Val Acc: 46.10%
+Epoch 103/300 | Loss: 1.7218 | Val Acc: 46.99%
+Epoch 104/300 | Loss: 1.6470 | Val Acc: 49.13%
+Epoch 105/300 | Loss: 1.5952 | Val Acc: 48.73%
+Epoch 106/300 | Loss: 1.5546 | Val Acc: 51.51%
+Epoch 107/300 | Loss: 1.5202 | Val Acc: 52.31%
+Epoch 108/300 | Loss: 1.4942 | Val Acc: 51.34%
+Epoch 109/300 | Loss: 1.4706 | Val Acc: 53.30%
+Epoch 110/300 | Loss: 1.4490 | Val Acc: 51.29%
+Epoch 111/300 | Loss: 1.4228 | Val Acc: 53.60%
+Epoch 112/300 | Loss: 1.4058 | Val Acc: 54.41%
+Epoch 113/300 | Loss: 1.3853 | Val Acc: 54.14%
+Epoch 114/300 | Loss: 1.3711 | Val Acc: 53.82%
+Epoch 115/300 | Loss: 1.3585 | Val Acc: 56.20%
+Epoch 116/300 | Loss: 1.3458 | Val Acc: 55.59%
+Epoch 117/300 | Loss: 1.3341 | Val Acc: 52.13%
+Epoch 118/300 | Loss: 1.3238 | Val Acc: 55.51%
+Epoch 119/300 | Loss: 1.3128 | Val Acc: 54.83%
+
+🔥 [Filter-GEMA] Step Pruning Triggered | Epoch: 120
+🎯 Target Sparsity: 80.0% | Current: 59.25%
+✅ [Result] Pruned 414 filters to reach 80.0% Sparsity.
+ 🔵 Final Sparsity: 79.59 % | 🟢 Size: 0.67 MB
+=========================================================================================
+
+Epoch 120/300 | Loss: 4.4597 | Val Acc: 6.57%
+Epoch 121/300 | Loss: 4.3917 | Val Acc: 7.31%
+Epoch 122/300 | Loss: 4.3671 | Val Acc: 6.79%
+Epoch 123/300 | Loss: 4.3534 | Val Acc: 7.52%
+Epoch 124/300 | Loss: 4.3451 | Val Acc: 7.82%
+Epoch 125/300 | Loss: 4.3337 | Val Acc: 7.09%
+Epoch 126/300 | Loss: 4.3292 | Val Acc: 7.80%
+Epoch 127/300 | Loss: 4.3227 | Val Acc: 7.93%
+Epoch 128/300 | Loss: 4.3182 | Val Acc: 8.01%
+Epoch 129/300 | Loss: 4.3123 | Val Acc: 7.96%
+Epoch 130/300 | Loss: 4.3081 | Val Acc: 7.90%
+Epoch 131/300 | Loss: 4.3049 | Val Acc: 8.33%
+Epoch 132/300 | Loss: 4.3019 | Val Acc: 8.26%
+Epoch 133/300 | Loss: 4.2961 | Val Acc: 7.81%
+Epoch 134/300 | Loss: 4.2950 | Val Acc: 8.24%
+Epoch 135/300 | Loss: 4.2914 | Val Acc: 8.22%
+Epoch 136/300 | Loss: 4.2894 | Val Acc: 8.30%
+Epoch 137/300 | Loss: 4.2874 | Val Acc: 7.93%
+Epoch 138/300 | Loss: 4.2830 | Val Acc: 8.27%
+Epoch 139/300 | Loss: 4.2817 | Val Acc: 8.41%
+
+🔥 [Filter-GEMA] Step Pruning Triggered | Epoch: 140
+🎯 Target Sparsity: 90.0% | Current: 77.83%
+✅ [Result] Pruned 183 filters to reach 90.0% Sparsity.
+ 🔵 Final Sparsity: 88.52 % | 🟢 Size: 0.38 MB
+=========================================================================================
+
+Epoch 140/300 | Loss: 4.4848 | Val Acc: 6.04%
+Epoch 141/300 | Loss: 4.4094 | Val Acc: 6.43%
+Epoch 142/300 | Loss: 4.3843 | Val Acc: 7.23%
+Epoch 143/300 | Loss: 4.3711 | Val Acc: 7.29%
+Epoch 144/300 | Loss: 4.3633 | Val Acc: 7.48%
+Epoch 145/300 | Loss: 4.3543 | Val Acc: 7.56%
+Epoch 146/300 | Loss: 4.3499 | Val Acc: 7.58%
+Epoch 147/300 | Loss: 4.3431 | Val Acc: 7.86%
+Epoch 148/300 | Loss: 4.3390 | Val Acc: 7.43%
+Epoch 149/300 | Loss: 4.3377 | Val Acc: 7.64%
+Epoch 150/300 | Loss: 4.3326 | Val Acc: 7.72%
+Epoch 151/300 | Loss: 4.3305 | Val Acc: 7.72%
+Epoch 152/300 | Loss: 4.3257 | Val Acc: 7.99%
+Epoch 153/300 | Loss: 4.3235 | Val Acc: 7.72%
+Epoch 154/300 | Loss: 4.3231 | Val Acc: 7.49%
+Epoch 155/300 | Loss: 4.3192 | Val Acc: 7.83%
+Epoch 156/300 | Loss: 4.3180 | Val Acc: 7.80%
+Epoch 157/300 | Loss: 4.3155 | Val Acc: 8.07%
+Epoch 158/300 | Loss: 4.3148 | Val Acc: 7.89%
+Epoch 159/300 | Loss: 4.3126 | Val Acc: 8.11%
+
+🔥 [Filter-GEMA] Step Pruning Triggered | Epoch: 160
+🎯 Target Sparsity: 90.0% | Current: 86.04%
+✅ [Result] Pruned 37 filters to reach 90.0% Sparsity.
+ 🔵 Final Sparsity: 89.41 % | 🟢 Size: 0.35 MB
+=========================================================================================
+
+Epoch 160/300 | Loss: 4.3694 | Val Acc: 7.15%
+Epoch 161/300 | Loss: 4.3417 | Val Acc: 7.09%
+Epoch 162/300 | Loss: 4.3371 | Val Acc: 7.88%
+Epoch 163/300 | Loss: 4.3319 | Val Acc: 7.87%
+Epoch 164/300 | Loss: 4.3297 | Val Acc: 7.63%
+Epoch 165/300 | Loss: 4.3271 | Val Acc: 7.73%
+Epoch 166/300 | Loss: 4.3235 | Val Acc: 7.96%
+Epoch 167/300 | Loss: 4.3215 | Val Acc: 7.90%
+Epoch 168/300 | Loss: 4.3202 | Val Acc: 8.01%
+Epoch 169/300 | Loss: 4.3190 | Val Acc: 7.84%
+Epoch 170/300 | Loss: 4.3155 | Val Acc: 7.92%
+Epoch 171/300 | Loss: 4.3136 | Val Acc: 7.94%
+Epoch 172/300 | Loss: 4.3127 | Val Acc: 7.54%
+Epoch 173/300 | Loss: 4.3126 | Val Acc: 7.58%
+Epoch 174/300 | Loss: 4.3109 | Val Acc: 7.86%
+Epoch 175/300 | Loss: 4.3101 | Val Acc: 8.07%
+Epoch 176/300 | Loss: 4.3069 | Val Acc: 7.96%
+Epoch 177/300 | Loss: 4.3054 | Val Acc: 7.74%
+Epoch 178/300 | Loss: 4.3061 | Val Acc: 7.70%
+Epoch 179/300 | Loss: 4.3037 | Val Acc: 7.87%
+
+🔥 [Filter-GEMA] Step Pruning Triggered | Epoch: 180
+🎯 Target Sparsity: 90.0% | Current: 87.70%
+✅ [Result] Pruned 16 filters to reach 90.0% Sparsity.
+ 🔵 Final Sparsity: 89.71 % | 🟢 Size: 0.34 MB
+=========================================================================================
+
+Epoch 180/300 | Loss: 4.3427 | Val Acc: 7.94%
+Epoch 181/300 | Loss: 4.3238 | Val Acc: 7.87%
+Epoch 182/300 | Loss: 4.3218 | Val Acc: 7.64%
+Epoch 183/300 | Loss: 4.3172 | Val Acc: 7.82%
+Epoch 184/300 | Loss: 4.3155 | Val Acc: 7.76%
+Epoch 185/300 | Loss: 4.3134 | Val Acc: 7.99%
+Epoch 186/300 | Loss: 4.3119 | Val Acc: 7.79%
+Epoch 187/300 | Loss: 4.3116 | Val Acc: 8.03%
+Epoch 188/300 | Loss: 4.3082 | Val Acc: 7.97%
+Epoch 189/300 | Loss: 4.3080 | Val Acc: 8.05%
+Epoch 190/300 | Loss: 4.3086 | Val Acc: 7.74%
+Epoch 191/300 | Loss: 4.3055 | Val Acc: 8.13%
+Epoch 192/300 | Loss: 4.3046 | Val Acc: 7.73%
+Epoch 193/300 | Loss: 4.3029 | Val Acc: 8.23%
+Epoch 194/300 | Loss: 4.3015 | Val Acc: 8.11%
+Epoch 195/300 | Loss: 4.2998 | Val Acc: 7.72%
+Epoch 196/300 | Loss: 4.3025 | Val Acc: 7.57%
+Epoch 197/300 | Loss: 4.2998 | Val Acc: 8.12%

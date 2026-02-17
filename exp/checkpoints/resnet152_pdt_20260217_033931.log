@@ -1,0 +1,244 @@
+📝 Logging started: resnet152_pdt_20260217_033931.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet152 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.bn3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.1.bn3 ... (1 layers)
+ Group  3 | Channels:  256 | Layers: layer1.2.bn3 ... (1 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.bn3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.1.bn3 ... (1 layers)
+ Group  6 | Channels:  512 | Layers: layer2.2.bn3 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer2.3.bn3 ... (1 layers)
+ Group  8 | Channels:  512 | Layers: layer2.4.bn3 ... (1 layers)
+ Group  9 | Channels:  512 | Layers: layer2.5.bn3 ... (1 layers)
+ Group 10 | Channels:  512 | Layers: layer2.6.bn3 ... (1 layers)
+ Group 11 | Channels:  512 | Layers: layer2.7.bn3 ... (1 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.bn3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.1.bn3 ... (1 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.2.bn3 ... (1 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.3.bn3 ... (1 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.4.bn3 ... (1 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.5.bn3 ... (1 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.6.bn3 ... (1 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.7.bn3 ... (1 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.8.bn3 ... (1 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.9.bn3 ... (1 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.10.bn3 ... (1 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.11.bn3 ... (1 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.12.bn3 ... (1 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.13.bn3 ... (1 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.14.bn3 ... (1 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.15.bn3 ... (1 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.16.bn3 ... (1 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.17.bn3 ... (1 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.18.bn3 ... (1 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.19.bn3 ... (1 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.20.bn3 ... (1 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.21.bn3 ... (1 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.22.bn3 ... (1 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.23.bn3 ... (1 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.24.bn3 ... (1 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.25.bn3 ... (1 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.26.bn3 ... (1 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.27.bn3 ... (1 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.28.bn3 ... (1 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.29.bn3 ... (1 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.30.bn3 ... (1 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.31.bn3 ... (1 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.32.bn3 ... (1 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.33.bn3 ... (1 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.34.bn3 ... (1 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.35.bn3 ... (1 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.bn3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.1.bn3 ... (1 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.2.bn3 ... (1 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Total 50 groups linked to 311 prunable layers.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet152_base.pth
+✅ Success: Weights loaded from resnet152_base.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.5
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                           aten::_batch_norm_impl_index         0.18%     242.413us        12.54%      16.867ms     108.821us       0.000us         0.00%       1.800ms      11.615us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        10.12%      13.605ms        12.36%      16.625ms     107.257us       1.775ms        21.42%       1.800ms      11.615us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         0.90%       1.213ms         1.38%       1.854ms       2.392us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         0.20%     265.488us        12.74%      17.133ms     110.534us       0.000us         0.00%       1.800ms      11.615us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.15%     195.373us         0.89%       1.191ms       7.687us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                           aten::conv2d         0.17%     228.246us        68.91%      92.658ms     597.793us       0.000us         0.00%       6.530ms      42.129us           0 B           0 B       1.32 GB           0 B           155  364767477.760  
+                                      aten::convolution         0.23%     306.131us        68.74%      92.430ms     596.320us       0.000us         0.00%       6.530ms      42.129us           0 B           0 B       1.32 GB           0 B           155            --  
+                                     aten::_convolution         0.73%     983.430us        68.51%      92.124ms     594.345us       0.000us         0.00%       6.530ms      42.129us           0 B           0 B       1.32 GB           0 B           155            --  
+                                aten::cudnn_convolution        62.27%      83.726ms        67.78%      91.140ms     588.001us       5.110ms        61.65%       6.530ms      42.129us           0 B           0 B       1.32 GB       1.32 GB           155            --  
+                                           aten::linear         0.03%      41.290us         1.08%       1.446ms       1.446ms       0.000us         0.00%      17.920us      17.920us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 134.462ms
+Self CUDA time total: 8.289ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[DEBUG] === step_pruning Started at Epoch 120 ===
+[DEBUG] Current Model Sparsity: 0.00% (Alive: 100.00%)
+[DEBUG] I am looking for: 'layer1.0.bn3'
+[DEBUG] Closest names in actual model: ['layer1.0.bn3', 'layer4.0.bn3', 'layer3.0.bn3']
+[DEBUG] Target Groups for Hessian: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45]
+[DEBUG] Calculating Hessian for 48 parameters...
+[DEBUG] Total Unit Candidates: 39680
+[DEBUG] Target Keep Ratio: 0.9250 (Inc: 0.9250)
+[DEBUG] Lagrangian Decision: Pruned 1556 units.
+[DEBUG] Actual Mask Updates: 3112 channels.
+
+============================== PDT Pruning Results: Epoch 120 ==============================
+ [*] Pruned this step: 3112
+ Group  1 |   30/ 256 |    88.3% |     0.007534 | [TARGET]
+ Group  2 |  256/ 256 |     0.0% |     0.000000 | [TARGET]
+ Group  3 |  256/ 256 |     0.0% |     0.045876 | [TARGET]
+ Group  4 |   96/ 512 |    81.2% |     0.040615 | [TARGET]
+ Group  5 |  512/ 512 |     0.0% |     0.011477 | [TARGET]
+ Group  6 |  512/ 512 |     0.0% |     0.024717 | [TARGET]
+ Group  7 |  512/ 512 |     0.0% |     0.038062 | [TARGET]
+ Group  8 |  512/ 512 |     0.0% |     0.026357 | [TARGET]
+ Group  9 |  512/ 512 |     0.0% |     0.020415 | [TARGET]
+ Group 10 |  512/ 512 |     0.0% |     0.052033 | [TARGET]
+ Group 11 |  512/ 512 |     0.0% |     0.016484 | [TARGET]
+ Group 12 |  110/1024 |    89.3% |     0.017095 | [TARGET]
+ Group 13 | 1024/1024 |     0.0% |     0.011030 | [TARGET]
+ Group 14 | 1024/1024 |     0.0% |     0.009944 | [TARGET]
+ Group 15 | 1024/1024 |     0.0% |     0.010424 | [TARGET]
+ Group 16 | 1024/1024 |     0.0% |     0.019330 | [TARGET]
+ Group 17 | 1024/1024 |     0.0% |     0.017923 | [TARGET]
+ Group 18 | 1024/1024 |     0.0% |     0.025622 | [TARGET]
+ Group 19 | 1024/1024 |     0.0% |     0.023669 | [TARGET]
+ Group 20 | 1024/1024 |     0.0% |     0.009299 | [TARGET]
+ Group 21 | 1024/1024 |     0.0% |     0.007516 | [TARGET]
+ Group 22 | 1024/1024 |     0.0% |     0.021200 | [TARGET]
+ Group 23 | 1024/1024 |     0.0% |     0.030593 | [TARGET]
+ Group 24 | 1024/1024 |     0.0% |     0.012684 | [TARGET]
+ Group 25 | 1024/1024 |     0.0% |     0.012547 | [TARGET]
+ Group 26 | 1024/1024 |     0.0% |     0.028461 | [TARGET]
+ Group 27 | 1024/1024 |     0.0% |     0.013294 | [TARGET]
+ Group 28 | 1024/1024 |     0.0% |     0.023796 | [TARGET]
+ Group 29 | 1024/1024 |     0.0% |     0.013445 | [TARGET]
+ Group 30 | 1024/1024 |     0.0% |     0.021201 | [TARGET]
+ Group 31 | 1024/1024 |     0.0% |     0.027705 | [TARGET]
+ Group 32 | 1024/1024 |     0.0% |     0.007306 | [TARGET]
+ Group 33 | 1024/1024 |     0.0% |     0.000000 | [TARGET]
+ Group 34 | 1024/1024 |     0.0% |     0.008183 | [TARGET]
+ Group 35 | 1024/1024 |     0.0% |     0.024697 | [TARGET]
+ Group 36 | 1024/1024 |     0.0% |     0.018579 | [TARGET]
+ Group 37 | 1024/1024 |     0.0% |     0.007709 | [TARGET]
+ Group 38 | 1024/1024 |     0.0% |     0.017590 | [TARGET]
+ Group 39 | 1024/1024 |     0.0% |     0.012083 | [TARGET]
+ Group 40 | 1024/1024 |     0.0% |     0.002534 | [TARGET]
+ Group 41 | 1024/1024 |     0.0% |     0.018340 | [TARGET]
+ Group 42 | 1024/1024 |     0.0% |     0.011241 | [TARGET]
+ Group 43 | 1024/1024 |     0.0% |     0.003729 | [TARGET]
+ Group 44 | 1024/1024 |     0.0% |     0.019414 | [TARGET]
+ Group 45 | 1024/1024 |     0.0% |     0.008828 | [TARGET]
+ Group 46 | 1024/1024 |     0.0% |     0.000000 | [FIXED]
+ Group 47 | 1024/1024 |     0.0% |     0.000000 | [FIXED]
+ Group 48 | 2048/2048 |     0.0% |     0.000000 | [FIXED]
+ Group 49 | 2048/2048 |     0.0% |     0.000000 | [FIXED]
+ Group 50 | 2048/2048 |     0.0% |     0.000000 | [FIXED]
+
+[Scientific Metrics - RQ Analysis]
+ 🔵 Sparsity (Params): 0.01 %
+ 🟢 Model Size: 222.53 MB
+ 🟠 Peak VRAM (RQ2): 4091.51 MB
+ ⚡ Inference Latency (RQ3): 5.7103 ms
+ 🚀 Theoretical Speedup: 1.00x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 222.53 MB | 🔵 Sparsity: 0.01 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep120_sp0.0.pth
+Epoch 120/400 | Loss: 2.9629 | Val Acc: 51.51%
+Epoch 121/400 | Loss: 1.1501 | Val Acc: 59.32%
+Epoch 122/400 | Loss: 1.0181 | Val Acc: 60.07%
+Epoch 123/400 | Loss: 0.9329 | Val Acc: 60.40%
+Epoch 124/400 | Loss: 0.8748 | Val Acc: 65.39%
+Epoch 125/400 | Loss: 0.8317 | Val Acc: 61.13%
+Epoch 126/400 | Loss: 0.7926 | Val Acc: 64.78%
+Epoch 127/400 | Loss: 0.7649 | Val Acc: 65.45%
+Epoch 128/400 | Loss: 0.7345 | Val Acc: 65.45%
+Epoch 129/400 | Loss: 0.7182 | Val Acc: 65.85%
+Epoch 130/400 | Loss: 0.6948 | Val Acc: 65.96%
+Epoch 131/400 | Loss: 0.6869 | Val Acc: 66.75%
+Epoch 132/400 | Loss: 0.6633 | Val Acc: 67.49%
+Epoch 133/400 | Loss: 0.6535 | Val Acc: 67.65%
+Epoch 134/400 | Loss: 0.6395 | Val Acc: 66.85%
+Epoch 135/400 | Loss: 0.6315 | Val Acc: 66.66%
+Epoch 136/400 | Loss: 0.6229 | Val Acc: 66.44%
+Epoch 137/400 | Loss: 0.6144 | Val Acc: 66.63%
+Epoch 138/400 | Loss: 0.6129 | Val Acc: 66.23%
+Epoch 139/400 | Loss: 0.6035 | Val Acc: 65.30%
+
+[Action] Triggering PDT Pruning at Epoch 140...
+
+[DEBUG] === step_pruning Started at Epoch 140 ===
+[DEBUG] Current Model Sparsity: 0.01% (Alive: 99.99%)
+[DEBUG] I am looking for: 'layer1.0.bn3'
+[DEBUG] Closest names in actual model: ['layer1.0.bn3', 'layer4.0.bn3', 'layer3.0.bn3']
+[DEBUG] Target Groups for Hessian: [2, 33, 43, 40, 32, 46, 34, 45, 48, 49, 50, 42, 13, 47, 37, 35, 22, 24, 26, 28, 38, 44, 25, 5, 27, 36, 39, 41, 29, 16, 31, 17, 30, 19, 12, 15, 20, 23, 18, 14, 6, 21, 4, 11, 10]
+[DEBUG] Calculating Hessian for 48 parameters...
+[DEBUG] Total Unit Candidates: 44494
+[DEBUG] Target Keep Ratio: 0.9250 (Inc: 0.9251)
+[DEBUG] Lagrangian Decision: Pruned 11260 units.
+[DEBUG] Actual Mask Updates: 11644 channels.
+
+============================== PDT Pruning Results: Epoch 140 ==============================
+ [*] Pruned this step: 11644
+ Group  1 |   30/ 256 |    88.3% |     0.000000 | [FIXED]
+ Group  2 |    0/ 256 |   100.0% |     0.000000 | [TARGET]
+ Group  3 |  256/ 256 |     0.0% |     0.000000 | [FIXED]
+ Group  4 |   94/ 512 |    81.6% |     0.025548 | [TARGET]
+ Group  5 |  225/ 512 |    56.1% |     0.031093 | [TARGET]
+ Group  6 |  341/ 512 |    33.4% |     0.019561 | [TARGET]
+ Group  7 |  512/ 512 |     0.0% |     0.000000 | [FIXED]
+ Group  8 |  512/ 512 |     0.0% |     0.000000 | [FIXED]
+ Group  9 |  512/ 512 |     0.0% |     0.000000 | [FIXED]
+ Group 10 |  470/ 512 |     8.2% |     0.004978 | [TARGET]
+ Group 11 |  467/ 512 |     8.8% |     0.004962 | [TARGET]
+ Group 12 |  109/1024 |    89.4% |     0.013443 | [TARGET]
+ Group 13 |  512/1024 |    50.0% |     0.018200 | [TARGET]
+ Group 14 |  670/1024 |    34.6% |     0.008997 | [TARGET]
+ Group 15 |  760/1024 |    25.8% |     0.019193 | [TARGET]
+ Group 16 |  799/1024 |    22.0% |     0.007534 | [TARGET]
+ Group 17 |  822/1024 |    19.7% |     0.028961 | [TARGET]
+ Group 18 |  821/1024 |    19.8% |     0.017038 | [TARGET]
+ Group 19 |  825/1024 |    19.4% |     0.024107 | [TARGET]
+ Group 20 |  837/1024 |    18.3% |     0.025779 | [TARGET]
+ Group 21 |  882/1024 |    13.9% |     0.033438 | [TARGET]
+ Group 22 |  864/1024 |    15.6% |     0.030487 | [TARGET]
+ Group 23 |  880/1024 |    14.1% |     0.023934 | [TARGET]
+ Group 24 |  835/1024 |    18.5% |     0.018003 | [TARGET]
+ Group 25 |  894/1024 |    12.7% |     0.016730 | [TARGET]
+ Group 26 |  887/1024 |    13.4% |     0.037060 | [TARGET]
+ Group 27 |  886/1024 |    13.5% |     0.017894 | [TARGET]
+ Group 28 |  892/1024 |    12.9% |     0.033932 | [TARGET]
+ Group 29 |  915/1024 |    10.6% |     0.055016 | [TARGET]
+ Group 30 |  923/1024 |     9.9% |     0.026127 | [TARGET]
+ Group 31 |  921/1024 |    10.1% |     0.032720 | [TARGET]
+ Group 32 |  257/1024 |    74.9% |     0.010480 | [TARGET]
+ Group 33 |    0/1024 |   100.0% |     0.000000 | [TARGET]
+ Group 34 |  486/1024 |    52.5% |     0.015519 | [TARGET]
+ Group 35 |  880/1024 |    14.1% |     0.042390 | [TARGET]
+ Group 36 |  920/1024 |    10.2% |     0.033001 | [TARGET]
+ Group 37 |  664/1024 |    35.2% |     0.008242 | [TARGET]
+ Group 38 |  917/1024 |    10.4% |     0.011055 | [TARGET]
+ Group 39 |  920/1024 |    10.2% |     0.020899 | [TARGET]

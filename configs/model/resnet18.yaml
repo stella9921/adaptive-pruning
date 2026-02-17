@@ -3,7 +3,7 @@ num_classes: 100
 base_lr: 0.1
 momentum: 0.9
 weight_decay: 0.0005
-epochs: 300
+epochs: 400
 batch_size: 128
 scheduler: "multistep"
 milestones: [60, 120, 160]

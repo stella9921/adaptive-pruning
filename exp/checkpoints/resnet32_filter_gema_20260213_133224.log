@@ -1,0 +1,35 @@
+📝 Logging started: resnet32_filter_gema_20260213_133224.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet32 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for cifarresnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   16 | Layers: bn1 ... (2 layers)
+ Group  2 | Channels:   16 | Layers: bn1 ... (3 layers)
+ Group  3 | Channels:   16 | Layers: bn1 ... (4 layers)
+ Group  4 | Channels:   16 | Layers: bn1 ... (5 layers)
+ Group  5 | Channels:   16 | Layers: bn1 ... (6 layers)
+ Group  6 | Channels:   32 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  7 | Channels:   32 | Layers: layer2.0.bn2 ... (3 layers)
+ Group  8 | Channels:   32 | Layers: layer2.0.bn2 ... (4 layers)
+ Group  9 | Channels:   32 | Layers: layer2.0.bn2 ... (5 layers)
+ Group 10 | Channels:   32 | Layers: layer2.0.bn2 ... (6 layers)
+ Group 11 | Channels:   64 | Layers: layer3.0.bn2 ... (2 layers)
+ Group 12 | Channels:   64 | Layers: layer3.0.bn2 ... (3 layers)
+ Group 13 | Channels:   64 | Layers: layer3.0.bn2 ... (4 layers)
+ Group 14 | Channels:   64 | Layers: layer3.0.bn2 ... (5 layers)
+ Group 15 | Channels:   64 | Layers: layer3.0.bn2 ... (6 layers)
+===============================================================
+[*] Total 15 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-15) will be pruned.
+[System] Initializing PDTPruner (Proposed Grad-EMA Strategy)
+
+>>> [Pilot Check] Strategy: FILTER_GEMA | Pruning starts at Epoch 130, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===

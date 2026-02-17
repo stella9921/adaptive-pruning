@@ -1,0 +1,72 @@
+📝 Logging started: resnet18_pdt_20260217_022755.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Total 8 groups linked to 41 prunable layers.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+✅ Success: Weights loaded from resnet18_pdt_ep120_sp0.0.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.05%      63.906us        70.13%      94.184ms       4.709ms       0.000us         0.00%       1.638ms      81.897us           0 B           0 B     118.81 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.09%     115.317us        70.08%      94.121ms       4.706ms       0.000us         0.00%       1.638ms      81.897us           0 B           0 B     118.81 MB           0 B            20            --  
+                                     aten::_convolution         0.47%     629.584us        70.00%      94.005ms       4.700ms       0.000us         0.00%       1.638ms      81.897us           0 B           0 B     118.81 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.09%      86.073ms        69.53%      93.376ms       4.669ms     862.522us        72.20%       1.638ms      81.897us           0 B           0 B     118.81 MB     118.81 MB            20            --  
+                           aten::_batch_norm_impl_index         0.06%      78.219us        10.45%      14.030ms     701.480us       0.000us         0.00%     236.413us      11.821us           0 B           0 B     115.63 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.45%      12.694ms        10.39%      13.951ms     697.569us     211.357us        17.69%     236.413us      11.821us           0 B           0 B     115.63 MB           0 B            20            --  
+                                            aten::empty         0.17%     229.551us         0.35%     467.210us       4.672us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.63 MB     115.63 MB           100            --  
+                                       aten::batch_norm         0.06%      82.338us        10.51%      14.112ms     705.597us       0.000us         0.00%     236.413us      11.821us           0 B           0 B     115.59 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.05%      61.772us         0.30%     402.027us      20.101us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.59 MB           0 B            20            --  
+                                           aten::linear         0.02%      30.074us         0.99%       1.336ms       1.336ms       0.000us         0.00%      14.592us      14.592us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 134.297ms
+Self CUDA time total: 1.195ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[DEBUG] === step_pruning Started at Epoch 120 ===
+[DEBUG] Current Model Sparsity: 8.02% (Alive: 91.98%)
+[DEBUG] I am looking for: 'layer1.0.bn2'
+[DEBUG] Closest names in actual model: ['layer1.0.bn2', 'layer4.0.bn2', 'layer3.0.bn2']
+[DEBUG] Target Groups for Hessian: [1, 2, 3, 4, 5, 6, 7, 8]
+[DEBUG] Calculating Hessian for 11 parameters...
+[DEBUG] Total Unit Candidates: 1531
+[DEBUG] Target Keep Ratio: 0.8198 (Inc: 0.8913)
+[DEBUG] Lagrangian Decision: Pruned 111 units.
+[DEBUG] Actual Mask Updates: 222 channels.
+
+============================== PDT Pruning Results: Epoch 120 ==============================
+ [*] Pruned this step: 222
+ Group  1 |   64/  64 |     0.0% |     0.127862 | [TARGET]
+ Group  2 |   64/  64 |     0.0% |     0.112751 | [TARGET]
+ Group  3 |   78/ 128 |    39.1% |     0.025766 | [TARGET]
+ Group  4 |  128/ 128 |     0.0% |     0.164996 | [TARGET]
+ Group  5 |   75/ 256 |    70.7% |     0.012269 | [TARGET]
+ Group  6 |  256/ 256 |     0.0% |     0.070053 | [TARGET]
+ Group  7 |  243/ 512 |    52.5% |     0.009155 | [TARGET]
+ Group  8 |  512/ 512 |     0.0% |     0.024906 | [TARGET]

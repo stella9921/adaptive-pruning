@@ -1,0 +1,163 @@
+📝 Logging started: resnet34_pat_20260213_133432.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: PAT
+Target Model: resnet34 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:   64 | Layers: layer1.2.bn2 ... (1 layers)
+ Group  4 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  5 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  6 | Channels:  128 | Layers: layer2.2.bn2 ... (1 layers)
+ Group  7 | Channels:  128 | Layers: layer2.3.bn2 ... (1 layers)
+ Group  8 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  9 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group 10 | Channels:  256 | Layers: layer3.2.bn2 ... (1 layers)
+ Group 11 | Channels:  256 | Layers: layer3.3.bn2 ... (1 layers)
+ Group 12 | Channels:  256 | Layers: layer3.4.bn2 ... (1 layers)
+ Group 13 | Channels:  256 | Layers: layer3.5.bn2 ... (1 layers)
+ Group 14 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group 15 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+ Group 16 | Channels:  512 | Layers: layer4.2.bn2 ... (1 layers)
+===============================================================
+[*] Total 16 groups identified.
+
+>>> [System] Loading Base Model: ./exp/checkpoints/resnet34_base.pth
+[resnet34] Base Accuracy: 79.31%
+
+>> Analyzing Block: layer1.0
+   - Pruning 20% ... Acc: 74.99%
+   - Pruning 40% ... Acc: 73.83%
+   - Pruning 60% ... Acc: 72.59%
+   - Pruning 80% ... Acc: 72.38%
+
+>> Analyzing Block: layer1.1
+   - Pruning 20% ... Acc: 75.90%
+   - Pruning 40% ... Acc: 72.42%
+   - Pruning 60% ... Acc: 72.81%
+   - Pruning 80% ... Acc: 70.80%
+
+>> Analyzing Block: layer1.2
+   - Pruning 20% ... Acc: 74.74%
+   - Pruning 40% ... Acc: 74.22%
+   - Pruning 60% ... Acc: 73.92%
+   - Pruning 80% ... Acc: 73.18%
+
+>> Analyzing Block: layer2.0
+   - Pruning 20% ... Acc: 73.69%
+   - Pruning 40% ... Acc: 71.81%
+   - Pruning 60% ... Acc: 71.18%
+   - Pruning 80% ... Acc: 71.91%
+
+>> Analyzing Block: layer2.1
+   - Pruning 20% ... Acc: 74.17%
+   - Pruning 40% ... Acc: 72.98%
+   - Pruning 60% ... Acc: 72.41%
+   - Pruning 80% ... Acc: 71.88%
+
+>> Analyzing Block: layer2.2
+   - Pruning 20% ... Acc: 74.21%
+   - Pruning 40% ... Acc: 73.80%
+   - Pruning 60% ... Acc: 74.35%
+   - Pruning 80% ... Acc: 71.82%
+
+>> Analyzing Block: layer2.3
+   - Pruning 20% ... Acc: 74.81%
+   - Pruning 40% ... Acc: 73.16%
+   - Pruning 60% ... Acc: 71.78%
+   - Pruning 80% ... Acc: 72.63%
+
+>> Analyzing Block: layer3.0
+   - Pruning 20% ... Acc: 71.95%
+   - Pruning 40% ... Acc: 71.26%
+   - Pruning 60% ... Acc: 71.76%
+   - Pruning 80% ... Acc: 71.16%
+
+>> Analyzing Block: layer3.1
+   - Pruning 20% ... Acc: 73.07%
+   - Pruning 40% ... Acc: 71.94%
+   - Pruning 60% ... Acc: 71.12%
+   - Pruning 80% ... Acc: 70.94%
+
+>> Analyzing Block: layer3.2
+   - Pruning 20% ... Acc: 72.87%
+   - Pruning 40% ... Acc: 72.48%
+   - Pruning 60% ... Acc: 71.46%
+   - Pruning 80% ... Acc: 72.00%
+
+>> Analyzing Block: layer3.3
+   - Pruning 20% ... Acc: 74.49%
+   - Pruning 40% ... Acc: 74.19%
+   - Pruning 60% ... Acc: 71.87%
+   - Pruning 80% ... Acc: 72.03%
+
+>> Analyzing Block: layer3.4
+   - Pruning 20% ... Acc: 75.27%
+   - Pruning 40% ... Acc: 73.95%
+   - Pruning 60% ... Acc: 72.80%
+   - Pruning 80% ... Acc: 72.22%
+
+>> Analyzing Block: layer3.5
+   - Pruning 20% ... Acc: 73.36%
+   - Pruning 40% ... Acc: 73.35%
+   - Pruning 60% ... Acc: 73.76%
+   - Pruning 80% ... Acc: 72.55%
+
+>> Analyzing Block: layer4.0
+   - Pruning 20% ... Acc: 69.34%
+   - Pruning 40% ... Acc: 71.25%
+   - Pruning 60% ... Acc: 70.99%
+   - Pruning 80% ... Acc: 69.85%
+
+>> Analyzing Block: layer4.1
+   - Pruning 20% ... Acc: 74.57%
+   - Pruning 40% ... Acc: 72.57%
+   - Pruning 60% ... Acc: 72.16%
+   - Pruning 80% ... Acc: 72.65%
+
+>> Analyzing Block: layer4.2
+   - Pruning 20% ... Acc: 73.93%
+   - Pruning 40% ... Acc: 72.46%
+   - Pruning 60% ... Acc: 69.17%
+   - Pruning 80% ... Acc: 68.30%
+[Sensitivity] Saved to ./exp/checkpoints/resnet34_sensitivity.json
+🚀 PATPruner Ready: 16 blocks identified.
+
+--- PAT One-Shot Pruning (Strategy: normalization) ---
+🧠 PAT Strategy Type: normalization
+✅ Final Pruning Map: 20 layers matched.
+[*] Final Synced Target Modules: 72
+
+========================================
+📊 [Pruning Result Summary]
+ - Original Params: 21.328 M
+ - Pruned Params:   21.328 M
+ - Compression Ratio: 0.00 %
+========================================
+
+❗ 경고: 프루닝이 적용되지 않았습니다. 인덱스 매칭 로직을 재확인하세요.
+FT Epoch [1/70] | Loss: 0.0102 | Val Acc: 78.43% | LR: 0.00999
+ ⭐ Best model saved with Acc: 78.43%
+FT Epoch [2/70] | Loss: 0.0144 | Val Acc: 77.61% | LR: 0.00998
+FT Epoch [3/70] | Loss: 0.0382 | Val Acc: 74.54% | LR: 0.00995
+FT Epoch [4/70] | Loss: 0.0758 | Val Acc: 72.58% | LR: 0.00992
+FT Epoch [5/70] | Loss: 0.1426 | Val Acc: 69.63% | LR: 0.00987
+FT Epoch [6/70] | Loss: 0.1634 | Val Acc: 70.08% | LR: 0.00982
+FT Epoch [7/70] | Loss: 0.1561 | Val Acc: 71.59% | LR: 0.00976
+FT Epoch [8/70] | Loss: 0.1543 | Val Acc: 70.63% | LR: 0.00968
+FT Epoch [9/70] | Loss: 0.1302 | Val Acc: 71.49% | LR: 0.00960
+FT Epoch [10/70] | Loss: 0.1289 | Val Acc: 71.90% | LR: 0.00950
+FT Epoch [11/70] | Loss: 0.1149 | Val Acc: 71.56% | LR: 0.00940
+FT Epoch [12/70] | Loss: 0.1067 | Val Acc: 72.31% | LR: 0.00929
+FT Epoch [13/70] | Loss: 0.0938 | Val Acc: 72.45% | LR: 0.00917
+FT Epoch [14/70] | Loss: 0.1000 | Val Acc: 71.67% | LR: 0.00905
+FT Epoch [15/70] | Loss: 0.0827 | Val Acc: 73.45% | LR: 0.00891
+FT Epoch [16/70] | Loss: 0.0699 | Val Acc: 73.79% | LR: 0.00877
+FT Epoch [17/70] | Loss: 0.0638 | Val Acc: 72.96% | LR: 0.00861
+FT Epoch [18/70] | Loss: 0.0702 | Val Acc: 72.66% | LR: 0.00846
+FT Epoch [19/70] | Loss: 0.0618 | Val Acc: 73.44% | LR: 0.00829
+FT Epoch [20/70] | Loss: 0.0575 | Val Acc: 72.84% | LR: 0.00812
+FT Epoch [21/70] | Loss: 0.0539 | Val Acc: 74.41% | LR: 0.00794

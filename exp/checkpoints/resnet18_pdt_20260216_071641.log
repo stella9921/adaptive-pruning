@@ -1,0 +1,422 @@
+📝 Logging started: resnet18_pdt_20260216_071641.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: layer1.0.bn2 ... (1 layers)
+ Group  2 | Channels:   64 | Layers: layer1.1.bn2 ... (1 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.bn2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.1.bn2 ... (1 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.bn2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.1.bn2 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.bn2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.1.bn2 ... (1 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-8) will be pruned.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+✅ Success: Weights loaded from resnet18_pdt_ep120_sp0.0.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 71 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         0.05%      67.899us        70.53%     101.376ms       5.069ms       0.000us         0.00%       1.612ms      80.619us           0 B           0 B     118.81 MB           0 B            20  54430924.800  
+                                      aten::convolution         0.08%     113.227us        70.48%     101.308ms       5.065ms       0.000us         0.00%       1.612ms      80.619us           0 B           0 B     118.81 MB           0 B            20            --  
+                                     aten::_convolution         0.52%     744.906us        70.40%     101.195ms       5.060ms       0.000us         0.00%       1.612ms      80.619us           0 B           0 B     118.81 MB           0 B            20            --  
+                                aten::cudnn_convolution        64.60%      92.854ms        69.88%     100.450ms       5.023ms     849.117us        71.88%       1.612ms      80.619us           0 B           0 B     118.81 MB     118.81 MB            20            --  
+                           aten::_batch_norm_impl_index         0.06%      87.718us        10.24%      14.719ms     735.944us       0.000us         0.00%     235.069us      11.753us           0 B           0 B     115.63 MB           0 B            20            --  
+                                 aten::cudnn_batch_norm         9.37%      13.473ms        10.18%      14.631ms     731.558us     210.270us        17.80%     235.069us      11.753us           0 B           0 B     115.63 MB           0 B            20            --  
+                                            aten::empty         0.16%     228.276us         0.35%     497.453us       4.975us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.63 MB     115.63 MB           100            --  
+                                       aten::batch_norm         0.06%      83.773us        10.30%      14.803ms     740.133us       0.000us         0.00%     235.069us      11.753us           0 B           0 B     115.59 MB     -40.00 KB            20            --  
+                                       aten::empty_like         0.04%      57.651us         0.29%     423.151us      21.158us       0.000us         0.00%       0.000us       0.000us           0 B           0 B     115.59 MB           0 B            20            --  
+                                           aten::linear         0.03%      36.253us         1.13%       1.629ms       1.629ms       0.000us         0.00%      13.952us      13.952us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 143.738ms
+Self CUDA time total: 1.181ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep120_sp0.0.pth
+Epoch 120/400 | Loss: 1.2095 | Val Acc: 57.80%
+Epoch 121/400 | Loss: 0.9859 | Val Acc: 60.88%
+Epoch 122/400 | Loss: 0.9639 | Val Acc: 61.45%
+Epoch 123/400 | Loss: 0.9532 | Val Acc: 61.14%
+Epoch 124/400 | Loss: 0.9488 | Val Acc: 56.29%
+Epoch 125/400 | Loss: 0.9560 | Val Acc: 60.88%
+Epoch 126/400 | Loss: 0.9473 | Val Acc: 59.74%
+Epoch 127/400 | Loss: 0.9505 | Val Acc: 62.53%
+Epoch 128/400 | Loss: 0.9499 | Val Acc: 56.38%
+Epoch 129/400 | Loss: 0.9470 | Val Acc: 59.70%
+Epoch 130/400 | Loss: 0.9438 | Val Acc: 59.78%
+Epoch 131/400 | Loss: 0.9417 | Val Acc: 61.12%
+Epoch 132/400 | Loss: 0.9397 | Val Acc: 61.85%
+Epoch 133/400 | Loss: 0.9359 | Val Acc: 61.52%
+Epoch 134/400 | Loss: 0.9448 | Val Acc: 60.37%
+Epoch 135/400 | Loss: 0.9457 | Val Acc: 57.67%
+Epoch 136/400 | Loss: 0.9413 | Val Acc: 59.91%
+Epoch 137/400 | Loss: 0.9455 | Val Acc: 60.00%
+Epoch 138/400 | Loss: 0.9348 | Val Acc: 57.50%
+Epoch 139/400 | Loss: 0.9376 | Val Acc: 58.21%
+
+[Action] Triggering PDT Pruning at Epoch 140...
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep140_sp0.0.pth
+Epoch 140/400 | Loss: 1.2394 | Val Acc: 58.44%
+Epoch 141/400 | Loss: 0.9861 | Val Acc: 59.44%
+Epoch 142/400 | Loss: 0.9464 | Val Acc: 56.29%
+Epoch 143/400 | Loss: 0.9496 | Val Acc: 61.38%
+Epoch 144/400 | Loss: 0.9420 | Val Acc: 58.95%
+Epoch 145/400 | Loss: 0.9440 | Val Acc: 59.35%
+Epoch 146/400 | Loss: 0.9443 | Val Acc: 58.54%
+Epoch 147/400 | Loss: 0.9333 | Val Acc: 58.18%
+Epoch 148/400 | Loss: 0.9423 | Val Acc: 56.03%
+Epoch 149/400 | Loss: 0.9376 | Val Acc: 60.67%
+Epoch 150/400 | Loss: 0.9421 | Val Acc: 58.75%
+Epoch 151/400 | Loss: 0.9384 | Val Acc: 60.07%
+Epoch 152/400 | Loss: 0.9431 | Val Acc: 61.33%
+Epoch 153/400 | Loss: 0.9279 | Val Acc: 59.81%
+Epoch 154/400 | Loss: 0.9327 | Val Acc: 59.51%
+Epoch 155/400 | Loss: 0.9377 | Val Acc: 57.93%
+Epoch 156/400 | Loss: 0.9416 | Val Acc: 60.54%
+Epoch 157/400 | Loss: 0.9359 | Val Acc: 59.49%
+Epoch 158/400 | Loss: 0.9350 | Val Acc: 53.11%
+Epoch 159/400 | Loss: 0.9367 | Val Acc: 59.28%
+
+[Action] Triggering PDT Pruning at Epoch 160...
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep160_sp0.0.pth
+Epoch 160/400 | Loss: 1.2136 | Val Acc: 61.48%
+Epoch 161/400 | Loss: 0.9785 | Val Acc: 63.07%
+Epoch 162/400 | Loss: 0.9523 | Val Acc: 58.84%
+Epoch 163/400 | Loss: 0.9400 | Val Acc: 62.33%
+Epoch 164/400 | Loss: 0.9434 | Val Acc: 59.13%
+Epoch 165/400 | Loss: 0.9326 | Val Acc: 59.55%
+Epoch 166/400 | Loss: 0.9309 | Val Acc: 60.58%
+Epoch 167/400 | Loss: 0.9362 | Val Acc: 59.61%
+Epoch 168/400 | Loss: 0.9306 | Val Acc: 59.21%
+Epoch 169/400 | Loss: 0.9336 | Val Acc: 59.98%
+Epoch 170/400 | Loss: 0.9321 | Val Acc: 59.14%
+Epoch 171/400 | Loss: 0.9269 | Val Acc: 59.62%
+Epoch 172/400 | Loss: 0.9435 | Val Acc: 58.24%
+Epoch 173/400 | Loss: 0.9309 | Val Acc: 60.17%
+Epoch 174/400 | Loss: 0.9305 | Val Acc: 61.11%
+Epoch 175/400 | Loss: 0.9298 | Val Acc: 61.17%
+Epoch 176/400 | Loss: 0.9274 | Val Acc: 57.31%
+Epoch 177/400 | Loss: 0.9301 | Val Acc: 59.84%
+Epoch 178/400 | Loss: 0.9367 | Val Acc: 59.75%
+Epoch 179/400 | Loss: 0.9280 | Val Acc: 60.38%
+
+[Action] Triggering PDT Pruning at Epoch 180...
+
+[Scientific Metrics - Epoch 180]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep180_sp0.0.pth
+Epoch 180/400 | Loss: 1.2250 | Val Acc: 61.71%
+Epoch 181/400 | Loss: 0.9807 | Val Acc: 59.67%
+Epoch 182/400 | Loss: 0.9482 | Val Acc: 61.95%
+Epoch 183/400 | Loss: 0.9440 | Val Acc: 58.42%
+Epoch 184/400 | Loss: 0.9377 | Val Acc: 59.46%
+Epoch 185/400 | Loss: 0.9330 | Val Acc: 54.85%
+Epoch 186/400 | Loss: 0.9334 | Val Acc: 59.04%
+Epoch 187/400 | Loss: 0.9317 | Val Acc: 53.79%
+Epoch 188/400 | Loss: 0.9284 | Val Acc: 58.20%
+Epoch 189/400 | Loss: 0.9304 | Val Acc: 56.53%
+Epoch 190/400 | Loss: 0.9287 | Val Acc: 60.18%
+Epoch 191/400 | Loss: 0.9266 | Val Acc: 60.06%
+Epoch 192/400 | Loss: 0.9273 | Val Acc: 59.51%
+Epoch 193/400 | Loss: 0.9258 | Val Acc: 59.69%
+Epoch 194/400 | Loss: 0.9217 | Val Acc: 57.90%
+Epoch 195/400 | Loss: 0.9219 | Val Acc: 57.89%
+Epoch 196/400 | Loss: 0.9229 | Val Acc: 59.20%
+Epoch 197/400 | Loss: 0.9259 | Val Acc: 58.89%
+Epoch 198/400 | Loss: 0.9255 | Val Acc: 60.60%
+Epoch 199/400 | Loss: 0.9172 | Val Acc: 60.53%
+
+[Action] Triggering PDT Pruning at Epoch 200...
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep200_sp0.0.pth
+Epoch 200/400 | Loss: 1.2223 | Val Acc: 58.62%
+Epoch 201/400 | Loss: 0.9704 | Val Acc: 60.34%
+Epoch 202/400 | Loss: 0.9395 | Val Acc: 59.95%
+Epoch 203/400 | Loss: 0.9405 | Val Acc: 61.18%
+Epoch 204/400 | Loss: 0.9297 | Val Acc: 62.52%
+Epoch 205/400 | Loss: 0.9417 | Val Acc: 60.76%
+Epoch 206/400 | Loss: 0.9266 | Val Acc: 57.93%
+Epoch 207/400 | Loss: 0.9284 | Val Acc: 57.73%
+Epoch 208/400 | Loss: 0.9248 | Val Acc: 58.90%
+Epoch 209/400 | Loss: 0.9233 | Val Acc: 60.26%
+Epoch 210/400 | Loss: 0.9320 | Val Acc: 60.26%
+Epoch 211/400 | Loss: 0.9231 | Val Acc: 56.79%
+Epoch 212/400 | Loss: 0.9249 | Val Acc: 58.42%
+Epoch 213/400 | Loss: 0.9251 | Val Acc: 62.20%
+Epoch 214/400 | Loss: 0.9266 | Val Acc: 58.64%
+Epoch 215/400 | Loss: 0.9209 | Val Acc: 63.61%
+Epoch 216/400 | Loss: 0.9238 | Val Acc: 59.71%
+Epoch 217/400 | Loss: 0.9224 | Val Acc: 59.96%
+Epoch 218/400 | Loss: 0.9181 | Val Acc: 55.05%
+Epoch 219/400 | Loss: 0.9282 | Val Acc: 57.29%
+
+[Action] Triggering PDT Pruning at Epoch 220...
+
+[Scientific Metrics - Epoch 220]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep220_sp0.0.pth
+Epoch 220/400 | Loss: 1.2233 | Val Acc: 58.47%
+Epoch 221/400 | Loss: 0.9634 | Val Acc: 62.06%
+Epoch 222/400 | Loss: 0.9268 | Val Acc: 60.01%
+Epoch 223/400 | Loss: 0.9323 | Val Acc: 60.24%
+Epoch 224/400 | Loss: 0.9352 | Val Acc: 60.16%
+Epoch 225/400 | Loss: 0.9312 | Val Acc: 60.07%
+Epoch 226/400 | Loss: 0.9258 | Val Acc: 62.14%
+Epoch 227/400 | Loss: 0.9304 | Val Acc: 57.51%
+Epoch 228/400 | Loss: 0.9278 | Val Acc: 56.88%
+Epoch 229/400 | Loss: 0.9272 | Val Acc: 55.76%
+Epoch 230/400 | Loss: 0.9263 | Val Acc: 61.98%
+Epoch 231/400 | Loss: 0.9171 | Val Acc: 60.83%
+Epoch 232/400 | Loss: 0.9271 | Val Acc: 57.46%
+Epoch 233/400 | Loss: 0.9249 | Val Acc: 61.10%
+Epoch 234/400 | Loss: 0.9171 | Val Acc: 57.08%
+Epoch 235/400 | Loss: 0.9192 | Val Acc: 62.00%
+Epoch 236/400 | Loss: 0.9168 | Val Acc: 62.04%
+Epoch 237/400 | Loss: 0.9261 | Val Acc: 60.27%
+Epoch 238/400 | Loss: 0.9188 | Val Acc: 54.27%
+Epoch 239/400 | Loss: 0.9181 | Val Acc: 57.90%
+
+[Action] Triggering PDT Pruning at Epoch 240...
+
+[Scientific Metrics - Epoch 240]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep240_sp0.0.pth
+Epoch 240/400 | Loss: 1.2156 | Val Acc: 59.06%
+Epoch 241/400 | Loss: 0.9592 | Val Acc: 59.36%
+Epoch 242/400 | Loss: 0.9296 | Val Acc: 61.65%
+Epoch 243/400 | Loss: 0.9369 | Val Acc: 58.67%
+Epoch 244/400 | Loss: 0.9263 | Val Acc: 61.15%
+Epoch 245/400 | Loss: 0.9264 | Val Acc: 56.57%
+Epoch 246/400 | Loss: 0.9317 | Val Acc: 60.60%
+Epoch 247/400 | Loss: 0.9209 | Val Acc: 58.09%
+Epoch 248/400 | Loss: 0.9182 | Val Acc: 58.91%
+Epoch 249/400 | Loss: 0.9181 | Val Acc: 60.91%
+Epoch 250/400 | Loss: 0.9195 | Val Acc: 61.80%
+Epoch 251/400 | Loss: 0.9235 | Val Acc: 63.28%
+Epoch 252/400 | Loss: 0.9146 | Val Acc: 59.75%
+Epoch 253/400 | Loss: 0.9195 | Val Acc: 59.69%
+Epoch 254/400 | Loss: 0.9244 | Val Acc: 61.82%
+Epoch 255/400 | Loss: 0.9207 | Val Acc: 63.23%
+Epoch 256/400 | Loss: 0.9163 | Val Acc: 58.30%
+Epoch 257/400 | Loss: 0.9191 | Val Acc: 59.75%
+Epoch 258/400 | Loss: 0.9117 | Val Acc: 58.55%
+Epoch 259/400 | Loss: 0.9198 | Val Acc: 57.29%
+
+[Action] Triggering PDT Pruning at Epoch 260...
+
+[Scientific Metrics - Epoch 260]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep260_sp0.0.pth
+Epoch 260/400 | Loss: 1.2103 | Val Acc: 58.29%
+Epoch 261/400 | Loss: 0.9678 | Val Acc: 59.21%
+Epoch 262/400 | Loss: 0.9313 | Val Acc: 60.06%
+Epoch 263/400 | Loss: 0.9313 | Val Acc: 60.50%
+Epoch 264/400 | Loss: 0.9263 | Val Acc: 61.81%
+Epoch 265/400 | Loss: 0.9250 | Val Acc: 62.89%
+Epoch 266/400 | Loss: 0.9226 | Val Acc: 60.09%
+Epoch 267/400 | Loss: 0.9292 | Val Acc: 60.20%
+Epoch 268/400 | Loss: 0.9209 | Val Acc: 57.99%
+Epoch 269/400 | Loss: 0.9096 | Val Acc: 58.76%
+Epoch 270/400 | Loss: 0.9143 | Val Acc: 58.29%
+Epoch 271/400 | Loss: 0.9269 | Val Acc: 59.11%
+Epoch 272/400 | Loss: 0.9154 | Val Acc: 62.21%
+Epoch 273/400 | Loss: 0.9190 | Val Acc: 60.30%
+Epoch 274/400 | Loss: 0.9146 | Val Acc: 60.30%
+Epoch 275/400 | Loss: 0.9136 | Val Acc: 61.12%
+Epoch 276/400 | Loss: 0.9099 | Val Acc: 62.04%
+Epoch 277/400 | Loss: 0.9208 | Val Acc: 59.91%
+Epoch 278/400 | Loss: 0.9165 | Val Acc: 58.51%
+Epoch 279/400 | Loss: 0.9089 | Val Acc: 61.77%
+
+[Action] Triggering PDT Pruning at Epoch 280...
+
+[Scientific Metrics - Epoch 280]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep280_sp0.0.pth
+Epoch 280/400 | Loss: 1.2155 | Val Acc: 57.84%
+Epoch 281/400 | Loss: 0.9575 | Val Acc: 63.19%
+Epoch 282/400 | Loss: 0.9348 | Val Acc: 60.91%
+Epoch 283/400 | Loss: 0.9289 | Val Acc: 57.07%
+Epoch 284/400 | Loss: 0.9330 | Val Acc: 59.29%
+Epoch 285/400 | Loss: 0.9263 | Val Acc: 58.96%
+Epoch 286/400 | Loss: 0.9263 | Val Acc: 60.92%
+Epoch 287/400 | Loss: 0.9210 | Val Acc: 63.17%
+Epoch 288/400 | Loss: 0.9119 | Val Acc: 61.35%
+Epoch 289/400 | Loss: 0.9177 | Val Acc: 53.73%
+Epoch 290/400 | Loss: 0.9108 | Val Acc: 57.50%
+Epoch 291/400 | Loss: 0.9221 | Val Acc: 58.93%
+Epoch 292/400 | Loss: 0.9104 | Val Acc: 60.00%
+Epoch 293/400 | Loss: 0.9149 | Val Acc: 58.07%
+Epoch 294/400 | Loss: 0.9139 | Val Acc: 60.75%
+Epoch 295/400 | Loss: 0.9132 | Val Acc: 60.27%
+Epoch 296/400 | Loss: 0.9193 | Val Acc: 62.04%
+Epoch 297/400 | Loss: 0.9102 | Val Acc: 54.28%
+Epoch 298/400 | Loss: 0.9228 | Val Acc: 62.41%
+Epoch 299/400 | Loss: 0.9190 | Val Acc: 63.03%
+
+[Action] Triggering PDT Pruning at Epoch 300...
+
+[Scientific Metrics - Epoch 300]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep300_sp0.0.pth
+Epoch 300/400 | Loss: 1.2079 | Val Acc: 60.00%
+Epoch 301/400 | Loss: 0.9525 | Val Acc: 61.57%
+Epoch 302/400 | Loss: 0.9316 | Val Acc: 58.12%
+Epoch 303/400 | Loss: 0.9383 | Val Acc: 61.58%
+Epoch 304/400 | Loss: 0.9248 | Val Acc: 57.45%
+Epoch 305/400 | Loss: 0.9236 | Val Acc: 60.86%
+Epoch 306/400 | Loss: 0.9177 | Val Acc: 61.67%
+Epoch 307/400 | Loss: 0.9151 | Val Acc: 59.44%
+Epoch 308/400 | Loss: 0.9155 | Val Acc: 59.67%
+Epoch 309/400 | Loss: 0.9214 | Val Acc: 57.36%
+Epoch 310/400 | Loss: 0.9102 | Val Acc: 58.77%
+Epoch 311/400 | Loss: 0.9175 | Val Acc: 59.63%
+Epoch 312/400 | Loss: 0.9192 | Val Acc: 63.19%
+Epoch 313/400 | Loss: 0.9066 | Val Acc: 59.70%
+Epoch 314/400 | Loss: 0.9076 | Val Acc: 58.58%
+Epoch 315/400 | Loss: 0.9122 | Val Acc: 58.35%
+Epoch 316/400 | Loss: 0.9143 | Val Acc: 59.84%
+Epoch 317/400 | Loss: 0.9175 | Val Acc: 60.39%
+Epoch 318/400 | Loss: 0.9107 | Val Acc: 60.03%
+Epoch 319/400 | Loss: 0.9179 | Val Acc: 61.05%
+
+[Action] Triggering PDT Pruning at Epoch 320...
+
+[Scientific Metrics - Epoch 320]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep320_sp0.0.pth
+Epoch 320/400 | Loss: 1.2212 | Val Acc: 60.14%
+Epoch 321/400 | Loss: 0.9593 | Val Acc: 61.06%
+Epoch 322/400 | Loss: 0.9301 | Val Acc: 59.56%
+Epoch 323/400 | Loss: 0.9316 | Val Acc: 62.05%
+Epoch 324/400 | Loss: 0.9318 | Val Acc: 54.76%
+Epoch 325/400 | Loss: 0.9300 | Val Acc: 59.04%
+Epoch 326/400 | Loss: 0.9215 | Val Acc: 53.80%
+Epoch 327/400 | Loss: 0.9151 | Val Acc: 58.92%
+Epoch 328/400 | Loss: 0.9197 | Val Acc: 61.10%
+Epoch 329/400 | Loss: 0.9121 | Val Acc: 60.27%
+Epoch 330/400 | Loss: 0.9202 | Val Acc: 57.31%
+Epoch 331/400 | Loss: 0.9117 | Val Acc: 60.47%
+Epoch 332/400 | Loss: 0.9111 | Val Acc: 61.02%
+Epoch 333/400 | Loss: 0.9133 | Val Acc: 59.80%
+Epoch 334/400 | Loss: 0.9103 | Val Acc: 62.81%
+Epoch 335/400 | Loss: 0.9216 | Val Acc: 59.30%
+Epoch 336/400 | Loss: 0.9141 | Val Acc: 61.73%
+Epoch 337/400 | Loss: 0.9136 | Val Acc: 59.59%
+Epoch 338/400 | Loss: 0.9059 | Val Acc: 58.63%
+Epoch 339/400 | Loss: 0.9258 | Val Acc: 62.81%
+
+[Action] Triggering PDT Pruning at Epoch 340...
+
+[Scientific Metrics - Epoch 340]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep340_sp0.0.pth
+Epoch 340/400 | Loss: 1.2047 | Val Acc: 59.49%
+Epoch 341/400 | Loss: 0.9584 | Val Acc: 58.78%
+Epoch 342/400 | Loss: 0.9223 | Val Acc: 58.11%
+Epoch 343/400 | Loss: 0.9208 | Val Acc: 61.96%
+Epoch 344/400 | Loss: 0.9212 | Val Acc: 60.96%
+Epoch 345/400 | Loss: 0.9258 | Val Acc: 60.46%
+Epoch 346/400 | Loss: 0.9198 | Val Acc: 61.54%
+Epoch 347/400 | Loss: 0.9180 | Val Acc: 59.69%
+Epoch 348/400 | Loss: 0.9138 | Val Acc: 61.08%
+Epoch 349/400 | Loss: 0.9197 | Val Acc: 59.31%
+Epoch 350/400 | Loss: 0.9125 | Val Acc: 60.86%
+Epoch 351/400 | Loss: 0.9054 | Val Acc: 60.51%
+Epoch 352/400 | Loss: 0.9153 | Val Acc: 59.64%
+Epoch 353/400 | Loss: 0.9239 | Val Acc: 60.10%
+Epoch 354/400 | Loss: 0.9122 | Val Acc: 58.61%
+Epoch 355/400 | Loss: 0.9119 | Val Acc: 57.44%
+Epoch 356/400 | Loss: 0.9021 | Val Acc: 57.39%
+Epoch 357/400 | Loss: 0.9053 | Val Acc: 58.53%
+Epoch 358/400 | Loss: 0.9138 | Val Acc: 54.12%
+Epoch 359/400 | Loss: 0.9098 | Val Acc: 61.34%
+
+[Action] Triggering PDT Pruning at Epoch 360...
+
+[Scientific Metrics - Epoch 360]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep360_sp0.0.pth
+Epoch 360/400 | Loss: 1.2020 | Val Acc: 59.73%
+Epoch 361/400 | Loss: 0.9569 | Val Acc: 62.54%
+Epoch 362/400 | Loss: 0.9271 | Val Acc: 59.81%
+Epoch 363/400 | Loss: 0.9293 | Val Acc: 59.69%
+Epoch 364/400 | Loss: 0.9256 | Val Acc: 61.75%
+Epoch 365/400 | Loss: 0.9255 | Val Acc: 59.29%
+Epoch 366/400 | Loss: 0.9262 | Val Acc: 60.63%
+Epoch 367/400 | Loss: 0.9111 | Val Acc: 59.91%
+Epoch 368/400 | Loss: 0.9155 | Val Acc: 61.80%
+Epoch 369/400 | Loss: 0.9155 | Val Acc: 55.77%
+Epoch 370/400 | Loss: 0.9118 | Val Acc: 59.76%
+Epoch 371/400 | Loss: 0.9134 | Val Acc: 61.01%
+Epoch 372/400 | Loss: 0.9179 | Val Acc: 62.89%
+Epoch 373/400 | Loss: 0.9148 | Val Acc: 58.45%
+Epoch 374/400 | Loss: 0.9122 | Val Acc: 59.66%
+Epoch 375/400 | Loss: 0.9105 | Val Acc: 60.56%
+Epoch 376/400 | Loss: 0.9147 | Val Acc: 60.63%
+Epoch 377/400 | Loss: 0.9119 | Val Acc: 58.41%
+Epoch 378/400 | Loss: 0.9169 | Val Acc: 61.34%
+Epoch 379/400 | Loss: 0.9091 | Val Acc: 55.38%
+
+[Action] Triggering PDT Pruning at Epoch 380...
+
+[Scientific Metrics - Epoch 380]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep380_sp0.0.pth
+Epoch 380/400 | Loss: 1.2342 | Val Acc: 58.36%
+Epoch 381/400 | Loss: 0.9596 | Val Acc: 64.08%
+Epoch 382/400 | Loss: 0.9286 | Val Acc: 61.54%
+Epoch 383/400 | Loss: 0.9166 | Val Acc: 61.15%
+Epoch 384/400 | Loss: 0.9201 | Val Acc: 60.89%
+Epoch 385/400 | Loss: 0.9223 | Val Acc: 61.10%
+Epoch 386/400 | Loss: 0.9179 | Val Acc: 59.12%
+Epoch 387/400 | Loss: 0.9178 | Val Acc: 60.55%
+Epoch 388/400 | Loss: 0.9174 | Val Acc: 58.19%
+Epoch 389/400 | Loss: 0.9150 | Val Acc: 62.25%
+Epoch 390/400 | Loss: 0.9095 | Val Acc: 56.56%
+Epoch 391/400 | Loss: 0.9257 | Val Acc: 62.07%
+Epoch 392/400 | Loss: 0.9049 | Val Acc: 58.46%
+Epoch 393/400 | Loss: 0.9212 | Val Acc: 60.20%
+Epoch 394/400 | Loss: 0.9108 | Val Acc: 56.51%
+Epoch 395/400 | Loss: 0.9054 | Val Acc: 58.95%
+Epoch 396/400 | Loss: 0.9117 | Val Acc: 59.51%
+Epoch 397/400 | Loss: 0.9147 | Val Acc: 54.83%
+Epoch 398/400 | Loss: 0.9056 | Val Acc: 56.60%
+Epoch 399/400 | Loss: 0.9131 | Val Acc: 61.86%
+
+[Action] Triggering PDT Pruning at Epoch 400...
+
+[Scientific Metrics - Epoch 400]
+ 🟢 Model Size: 42.76 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet18_pdt_ep400_sp0.0.pth
+Epoch 400/400 | Loss: 1.1917 | Val Acc: 56.86%
+🏁 Final Model Saved: ./exp/checkpoints/resnet18_pdt_final.pth
+
+============================== FINAL PHYSICAL COMPRESSION ==============================

@@ -1,0 +1,204 @@
+📝 Logging started: resnet152_pdt_20260216_085522.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet152 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.bn3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.1.bn3 ... (1 layers)
+ Group  3 | Channels:  256 | Layers: layer1.2.bn3 ... (1 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.bn3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.1.bn3 ... (1 layers)
+ Group  6 | Channels:  512 | Layers: layer2.2.bn3 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer2.3.bn3 ... (1 layers)
+ Group  8 | Channels:  512 | Layers: layer2.4.bn3 ... (1 layers)
+ Group  9 | Channels:  512 | Layers: layer2.5.bn3 ... (1 layers)
+ Group 10 | Channels:  512 | Layers: layer2.6.bn3 ... (1 layers)
+ Group 11 | Channels:  512 | Layers: layer2.7.bn3 ... (1 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.bn3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.1.bn3 ... (1 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.2.bn3 ... (1 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.3.bn3 ... (1 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.4.bn3 ... (1 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.5.bn3 ... (1 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.6.bn3 ... (1 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.7.bn3 ... (1 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.8.bn3 ... (1 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.9.bn3 ... (1 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.10.bn3 ... (1 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.11.bn3 ... (1 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.12.bn3 ... (1 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.13.bn3 ... (1 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.14.bn3 ... (1 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.15.bn3 ... (1 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.16.bn3 ... (1 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.17.bn3 ... (1 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.18.bn3 ... (1 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.19.bn3 ... (1 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.20.bn3 ... (1 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.21.bn3 ... (1 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.22.bn3 ... (1 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.23.bn3 ... (1 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.24.bn3 ... (1 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.25.bn3 ... (1 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.26.bn3 ... (1 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.27.bn3 ... (1 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.28.bn3 ... (1 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.29.bn3 ... (1 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.30.bn3 ... (1 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.31.bn3 ... (1 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.32.bn3 ... (1 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.33.bn3 ... (1 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.34.bn3 ... (1 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.35.bn3 ... (1 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.bn3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.1.bn3 ... (1 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.2.bn3 ... (1 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-50) will be pruned.
+
+>>> [System] Loading pre-trained model: ./exp/checkpoints/resnet152_base.pth
+✅ Success: Weights loaded from resnet152_base.pth
+
+>>> [Pilot Check] Strategy: PDT | Start Epoch: 120 | Target Ratio: 0.2
+
+=== [Stage 1 & 4] Initial State Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                           aten::_batch_norm_impl_index         0.19%     257.643us        12.63%      16.718ms     107.858us       0.000us         0.00%       1.777ms      11.466us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        10.08%      13.351ms        12.43%      16.460ms     106.196us       1.753ms        21.42%       1.777ms      11.466us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         0.93%       1.231ms         1.45%       1.922ms       2.481us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         0.19%     246.385us        12.81%      16.964ms     109.448us       0.000us         0.00%       1.777ms      11.466us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.15%     205.054us         0.95%       1.255ms       8.094us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                           aten::conv2d         0.17%     225.219us        68.67%      90.925ms     586.616us       0.000us         0.00%       6.444ms      41.574us           0 B           0 B       1.32 GB           0 B           155  364767477.760  
+                                      aten::convolution         0.23%     303.386us        68.50%      90.700ms     585.163us       0.000us         0.00%       6.444ms      41.574us           0 B           0 B       1.32 GB           0 B           155            --  
+                                     aten::_convolution         0.73%     967.434us        68.27%      90.397ms     583.206us       0.000us         0.00%       6.444ms      41.574us           0 B           0 B       1.32 GB           0 B           155            --  
+                                aten::cudnn_convolution        61.87%      81.917ms        67.54%      89.429ms     576.964us       5.043ms        61.64%       6.444ms      41.574us           0 B           0 B       1.32 GB       1.32 GB           155            --  
+                                           aten::linear         0.03%      33.639us         0.88%       1.167ms       1.167ms       0.000us         0.00%      17.920us      17.920us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 132.402ms
+Self CUDA time total: 8.182ms
+
+
+[Action] Triggering PDT Pruning at Epoch 120...
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 221.98 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep120_sp0.0.pth
+Epoch 120/200 | Loss: 1.2232 | Val Acc: 56.78%
+Epoch 121/200 | Loss: 0.8642 | Val Acc: 62.11%
+Epoch 122/200 | Loss: 0.8289 | Val Acc: 65.21%
+Epoch 123/200 | Loss: 0.7856 | Val Acc: 64.81%
+Epoch 124/200 | Loss: 0.7598 | Val Acc: 64.51%
+Epoch 125/200 | Loss: 0.7244 | Val Acc: 65.25%
+Epoch 126/200 | Loss: 0.7050 | Val Acc: 66.75%
+Epoch 127/200 | Loss: 0.6714 | Val Acc: 66.05%
+Epoch 128/200 | Loss: 0.6618 | Val Acc: 66.95%
+Epoch 129/200 | Loss: 0.6390 | Val Acc: 66.26%
+Epoch 130/200 | Loss: 0.6313 | Val Acc: 67.11%
+Epoch 131/200 | Loss: 0.6155 | Val Acc: 66.25%
+Epoch 132/200 | Loss: 0.6031 | Val Acc: 66.77%
+Epoch 133/200 | Loss: 0.5942 | Val Acc: 67.74%
+Epoch 134/200 | Loss: 0.5934 | Val Acc: 67.79%
+Epoch 135/200 | Loss: 0.5843 | Val Acc: 66.86%
+Epoch 136/200 | Loss: 0.5716 | Val Acc: 66.52%
+Epoch 137/200 | Loss: 0.5695 | Val Acc: 67.53%
+Epoch 138/200 | Loss: 0.5677 | Val Acc: 66.81%
+Epoch 139/200 | Loss: 0.5555 | Val Acc: 67.53%
+
+[Action] Triggering PDT Pruning at Epoch 140...
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 221.98 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep140_sp0.0.pth
+Epoch 140/200 | Loss: 0.8106 | Val Acc: 62.70%
+Epoch 141/200 | Loss: 0.5510 | Val Acc: 68.92%
+Epoch 142/200 | Loss: 0.5482 | Val Acc: 67.14%
+Epoch 143/200 | Loss: 0.5420 | Val Acc: 65.35%
+Epoch 144/200 | Loss: 0.5477 | Val Acc: 69.03%
+Epoch 145/200 | Loss: 0.5361 | Val Acc: 67.09%
+Epoch 146/200 | Loss: 0.5374 | Val Acc: 68.70%
+Epoch 147/200 | Loss: 0.5328 | Val Acc: 68.92%
+Epoch 148/200 | Loss: 0.5375 | Val Acc: 65.28%
+Epoch 149/200 | Loss: 0.5271 | Val Acc: 67.76%
+Epoch 150/200 | Loss: 0.5219 | Val Acc: 67.43%
+Epoch 151/200 | Loss: 0.5279 | Val Acc: 68.15%
+Epoch 152/200 | Loss: 0.5168 | Val Acc: 67.80%
+Epoch 153/200 | Loss: 0.5263 | Val Acc: 68.83%
+Epoch 154/200 | Loss: 0.5238 | Val Acc: 68.21%
+Epoch 155/200 | Loss: 0.5175 | Val Acc: 66.83%
+Epoch 156/200 | Loss: 0.5130 | Val Acc: 67.70%
+Epoch 157/200 | Loss: 0.5164 | Val Acc: 67.62%
+Epoch 158/200 | Loss: 0.5247 | Val Acc: 68.04%
+Epoch 159/200 | Loss: 0.5144 | Val Acc: 66.93%
+
+[Action] Triggering PDT Pruning at Epoch 160...
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 221.98 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep160_sp0.0.pth
+Epoch 160/200 | Loss: 0.8021 | Val Acc: 66.02%
+Epoch 161/200 | Loss: 0.5116 | Val Acc: 68.40%
+Epoch 162/200 | Loss: 0.5143 | Val Acc: 68.69%
+Epoch 163/200 | Loss: 0.5124 | Val Acc: 68.46%
+Epoch 164/200 | Loss: 0.5151 | Val Acc: 67.22%
+Epoch 165/200 | Loss: 0.5144 | Val Acc: 66.92%
+Epoch 166/200 | Loss: 0.5034 | Val Acc: 67.74%
+Epoch 167/200 | Loss: 0.5039 | Val Acc: 69.17%
+Epoch 168/200 | Loss: 0.5090 | Val Acc: 69.23%
+Epoch 169/200 | Loss: 0.5081 | Val Acc: 66.53%
+Epoch 170/200 | Loss: 0.5119 | Val Acc: 67.93%
+Epoch 171/200 | Loss: 0.5088 | Val Acc: 68.35%
+Epoch 172/200 | Loss: 0.5095 | Val Acc: 67.33%
+Epoch 173/200 | Loss: 0.5022 | Val Acc: 66.47%
+Epoch 174/200 | Loss: 0.5043 | Val Acc: 67.17%
+Epoch 175/200 | Loss: 0.5041 | Val Acc: 67.10%
+Epoch 176/200 | Loss: 0.4959 | Val Acc: 68.66%
+Epoch 177/200 | Loss: 0.4999 | Val Acc: 68.39%
+Epoch 178/200 | Loss: 0.5019 | Val Acc: 67.56%
+Epoch 179/200 | Loss: 0.5008 | Val Acc: 67.67%
+
+[Action] Triggering PDT Pruning at Epoch 180...
+
+[Scientific Metrics - Epoch 180]
+ 🟢 Model Size: 221.98 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep180_sp0.0.pth
+Epoch 180/200 | Loss: 0.7866 | Val Acc: 64.24%
+Epoch 181/200 | Loss: 0.4925 | Val Acc: 68.49%
+Epoch 182/200 | Loss: 0.4949 | Val Acc: 68.02%
+Epoch 183/200 | Loss: 0.5034 | Val Acc: 67.94%
+Epoch 184/200 | Loss: 0.5000 | Val Acc: 68.35%
+Epoch 185/200 | Loss: 0.4975 | Val Acc: 67.66%
+Epoch 186/200 | Loss: 0.5019 | Val Acc: 68.14%
+Epoch 187/200 | Loss: 0.5026 | Val Acc: 68.31%
+Epoch 188/200 | Loss: 0.4917 | Val Acc: 68.66%
+Epoch 189/200 | Loss: 0.5016 | Val Acc: 67.25%
+Epoch 190/200 | Loss: 0.4999 | Val Acc: 67.25%
+Epoch 191/200 | Loss: 0.4977 | Val Acc: 68.17%
+Epoch 192/200 | Loss: 0.4965 | Val Acc: 67.89%
+Epoch 193/200 | Loss: 0.4957 | Val Acc: 67.08%
+Epoch 194/200 | Loss: 0.4998 | Val Acc: 65.91%
+Epoch 195/200 | Loss: 0.4900 | Val Acc: 67.17%
+Epoch 196/200 | Loss: 0.4988 | Val Acc: 67.34%
+Epoch 197/200 | Loss: 0.4885 | Val Acc: 67.03%
+Epoch 198/200 | Loss: 0.4926 | Val Acc: 67.74%
+Epoch 199/200 | Loss: 0.4893 | Val Acc: 67.22%
+
+[Action] Triggering PDT Pruning at Epoch 200...
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 221.98 MB | 🔵 Sparsity: 0.00 % | 🟡 Speedup: 1.00x
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_pdt_ep200_sp0.0.pth
+Epoch 200/200 | Loss: 0.7677 | Val Acc: 66.82%
+🏁 Final Model Saved: ./exp/checkpoints/resnet152_pdt_final.pth
+
+============================== FINAL PHYSICAL COMPRESSION ==============================

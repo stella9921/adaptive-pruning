@@ -1,0 +1,707 @@
+📝 Logging started: resnet152_pat_20260213_235624.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: PAT
+Target Model: resnet152 | Dataset: cifar100
+Downloading: "https://download.pytorch.org/models/resnet152-394f9c45.pth" to /home/stella/.cache/torch/hub/checkpoints/resnet152-394f9c45.pth
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.bn3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.1.bn3 ... (1 layers)
+ Group  3 | Channels:  256 | Layers: layer1.2.bn3 ... (1 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.bn3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.1.bn3 ... (1 layers)
+ Group  6 | Channels:  512 | Layers: layer2.2.bn3 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer2.3.bn3 ... (1 layers)
+ Group  8 | Channels:  512 | Layers: layer2.4.bn3 ... (1 layers)
+ Group  9 | Channels:  512 | Layers: layer2.5.bn3 ... (1 layers)
+ Group 10 | Channels:  512 | Layers: layer2.6.bn3 ... (1 layers)
+ Group 11 | Channels:  512 | Layers: layer2.7.bn3 ... (1 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.bn3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.1.bn3 ... (1 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.2.bn3 ... (1 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.3.bn3 ... (1 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.4.bn3 ... (1 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.5.bn3 ... (1 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.6.bn3 ... (1 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.7.bn3 ... (1 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.8.bn3 ... (1 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.9.bn3 ... (1 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.10.bn3 ... (1 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.11.bn3 ... (1 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.12.bn3 ... (1 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.13.bn3 ... (1 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.14.bn3 ... (1 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.15.bn3 ... (1 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.16.bn3 ... (1 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.17.bn3 ... (1 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.18.bn3 ... (1 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.19.bn3 ... (1 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.20.bn3 ... (1 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.21.bn3 ... (1 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.22.bn3 ... (1 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.23.bn3 ... (1 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.24.bn3 ... (1 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.25.bn3 ... (1 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.26.bn3 ... (1 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.27.bn3 ... (1 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.28.bn3 ... (1 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.29.bn3 ... (1 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.30.bn3 ... (1 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.31.bn3 ... (1 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.32.bn3 ... (1 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.33.bn3 ... (1 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.34.bn3 ... (1 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.35.bn3 ... (1 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.bn3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.1.bn3 ... (1 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.2.bn3 ... (1 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+
+>>> [PAT Pre-train] Base weights not found. Training for 120 epochs first...
+ [Pre-train] Epoch 1/120 | Loss: 4.1335 | Acc: 9.55%
+ [Pre-train] Epoch 10/120 | Loss: 1.9595 | Acc: 43.38%
+ [Pre-train] Epoch 20/120 | Loss: 1.6526 | Acc: 44.28%
+ [Pre-train] Epoch 30/120 | Loss: 1.4994 | Acc: 48.64%
+ [Pre-train] Epoch 40/120 | Loss: 1.3733 | Acc: 50.27%
+ [Pre-train] Epoch 50/120 | Loss: 1.2532 | Acc: 54.25%
+ [Pre-train] Epoch 60/120 | Loss: 1.1112 | Acc: 59.51%
+ [Pre-train] Epoch 70/120 | Loss: 0.9379 | Acc: 60.35%
+ [Pre-train] Epoch 80/120 | Loss: 0.7266 | Acc: 67.13%
+ [Pre-train] Epoch 90/120 | Loss: 0.4539 | Acc: 70.54%
+ [Pre-train] Epoch 100/120 | Loss: 0.1596 | Acc: 74.39%
+ [Pre-train] Epoch 110/120 | Loss: 0.0214 | Acc: 78.16%
+ [Pre-train] Epoch 120/120 | Loss: 0.0123 | Acc: 78.47%
+[resnet152] Base Accuracy: 78.47%
+
+>> Analyzing Block: layer1.0
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 67.59%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.26%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.30%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.32%
+
+>> Analyzing Block: layer1.1
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.71%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.24%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.62%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.28%
+
+>> Analyzing Block: layer1.2
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.82%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.40%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.95%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.22%
+
+>> Analyzing Block: layer2.0
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.88%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.62%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.78%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.63%
+
+>> Analyzing Block: layer2.1
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.75%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.04%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.81%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.76%
+
+>> Analyzing Block: layer2.2
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.84%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.51%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.07%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.03%
+
+>> Analyzing Block: layer2.3
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.71%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.61%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.87%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.76%
+
+>> Analyzing Block: layer2.4
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.15%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.01%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.60%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.71%
+
+>> Analyzing Block: layer2.5
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.40%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.46%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.64%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.08%
+
+>> Analyzing Block: layer2.6
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.08%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.33%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.47%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.58%
+
+>> Analyzing Block: layer2.7
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.83%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.71%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.43%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.72%
+
+>> Analyzing Block: layer3.0
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.80%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.76%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.29%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.28%
+
+>> Analyzing Block: layer3.1
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.77%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.50%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.17%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.39%
+
+>> Analyzing Block: layer3.10
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.85%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.80%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.41%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.63%
+
+>> Analyzing Block: layer3.11
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.02%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.70%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.70%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.81%
+
+>> Analyzing Block: layer3.12
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.49%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.50%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.92%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.55%
+
+>> Analyzing Block: layer3.13
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.02%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.97%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.33%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.03%
+
+>> Analyzing Block: layer3.14
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.96%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.33%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.64%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.37%
+
+>> Analyzing Block: layer3.15
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.85%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.35%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.61%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.32%
+
+>> Analyzing Block: layer3.16
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.46%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.64%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.35%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.48%
+
+>> Analyzing Block: layer3.17
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.81%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.73%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.39%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.80%
+
+>> Analyzing Block: layer3.18
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.88%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.09%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.55%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.66%
+
+>> Analyzing Block: layer3.19
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.89%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.22%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.53%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.85%
+
+>> Analyzing Block: layer3.2
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.79%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.64%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.90%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.62%
+
+>> Analyzing Block: layer3.20
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.62%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.83%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.16%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.49%
+
+>> Analyzing Block: layer3.21
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.86%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.48%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.81%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.11%
+
+>> Analyzing Block: layer3.22
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.23%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.73%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.94%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.78%
+
+>> Analyzing Block: layer3.23
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.51%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.18%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.12%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.75%
+
+>> Analyzing Block: layer3.24
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.69%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.45%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.81%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.93%
+
+>> Analyzing Block: layer3.25
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.12%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.65%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.94%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.66%
+
+>> Analyzing Block: layer3.26
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.85%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.08%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.77%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 72.09%
+
+>> Analyzing Block: layer3.27
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.28%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.93%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.33%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.84%
+
+>> Analyzing Block: layer3.28
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.45%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.82%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.87%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.27%
+
+>> Analyzing Block: layer3.29
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.71%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.79%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.92%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.39%
+
+>> Analyzing Block: layer3.3
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.26%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.05%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.87%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.04%
+
+>> Analyzing Block: layer3.30
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.30%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.48%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.71%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.79%
+
+>> Analyzing Block: layer3.31
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.79%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.50%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.44%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.88%
+
+>> Analyzing Block: layer3.32
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.27%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.99%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.58%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.14%
+
+>> Analyzing Block: layer3.33
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 67.34%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.03%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.41%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.06%
+
+>> Analyzing Block: layer3.34
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.69%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.58%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.77%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.90%
+
+>> Analyzing Block: layer3.35
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.90%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.99%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.08%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.50%
+
+>> Analyzing Block: layer3.4
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.50%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.13%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.09%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.46%
+
+>> Analyzing Block: layer3.5
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.39%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.33%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.08%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.14%
+
+>> Analyzing Block: layer3.6
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.88%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.50%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.76%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.57%
+
+>> Analyzing Block: layer3.7
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.07%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.29%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.73%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.27%
+
+>> Analyzing Block: layer3.8
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.91%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.67%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.67%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.58%
+
+>> Analyzing Block: layer3.9
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.52%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.55%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.16%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.26%
+
+>> Analyzing Block: layer4.0
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.60%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 71.44%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.16%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.43%
+
+>> Analyzing Block: layer4.1
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.50%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.23%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.16%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 68.18%
+
+>> Analyzing Block: layer4.2
+   - Pruning 20% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.14%
+   - Pruning 40% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 69.83%
+   - Pruning 60% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.46%
+   - Pruning 80% ... [*] Physical Pruning Complete. Final FC Input: 2048
+Acc: 70.02%
+[Sensitivity] Saved to ./exp/checkpoints/resnet152_sensitivity.json
+🚀 PATPruner Ready: 50 blocks identified.
+
+--- PAT One-Shot Pruning (Strategy: weighted_sum) ---
+✅ [FORCE ENABLED] Keeping 89.0% channels for all layers.
+[*] Final Synced Target Modules: 309
+[*] Physical Pruning Complete. Final FC Input: 2048
+
+========================================
+📊 [Pruning Result Summary]
+ - Original Params: 58.341 M
+ - Pruned Params:   58.341 M
+ - Compression Ratio: 0.00 %
+========================================
+
+FT Epoch [1/70] | Loss: 0.4651 | Val Acc: 65.45% | LR: 0.00999
+ ⭐ Best model saved with Acc: 65.45%
+FT Epoch [2/70] | Loss: 0.4976 | Val Acc: 69.13% | LR: 0.00998
+ ⭐ Best model saved with Acc: 69.13%
+FT Epoch [3/70] | Loss: 0.4395 | Val Acc: 68.56% | LR: 0.00995
+FT Epoch [4/70] | Loss: 0.3989 | Val Acc: 70.54% | LR: 0.00992
+ ⭐ Best model saved with Acc: 70.54%
+FT Epoch [5/70] | Loss: 0.3830 | Val Acc: 69.19% | LR: 0.00987
+FT Epoch [6/70] | Loss: 0.3716 | Val Acc: 69.70% | LR: 0.00982
+FT Epoch [7/70] | Loss: 0.3585 | Val Acc: 70.97% | LR: 0.00976
+ ⭐ Best model saved with Acc: 70.97%
+FT Epoch [8/70] | Loss: 0.3355 | Val Acc: 70.54% | LR: 0.00968
+FT Epoch [9/70] | Loss: 0.3150 | Val Acc: 69.96% | LR: 0.00960
+FT Epoch [10/70] | Loss: 0.3141 | Val Acc: 71.10% | LR: 0.00950
+ ⭐ Best model saved with Acc: 71.10%
+FT Epoch [11/70] | Loss: 0.3047 | Val Acc: 68.71% | LR: 0.00940
+FT Epoch [12/70] | Loss: 0.2927 | Val Acc: 71.21% | LR: 0.00929
+ ⭐ Best model saved with Acc: 71.21%
+FT Epoch [13/70] | Loss: 0.2915 | Val Acc: 71.13% | LR: 0.00917
+FT Epoch [14/70] | Loss: 0.2726 | Val Acc: 70.19% | LR: 0.00905
+FT Epoch [15/70] | Loss: 0.2585 | Val Acc: 72.14% | LR: 0.00891
+ ⭐ Best model saved with Acc: 72.14%
+FT Epoch [16/70] | Loss: 0.2576 | Val Acc: 70.36% | LR: 0.00877
+FT Epoch [17/70] | Loss: 0.2484 | Val Acc: 71.40% | LR: 0.00861
+FT Epoch [18/70] | Loss: 0.2366 | Val Acc: 71.49% | LR: 0.00846
+FT Epoch [19/70] | Loss: 0.2321 | Val Acc: 71.75% | LR: 0.00829
+FT Epoch [20/70] | Loss: 0.2255 | Val Acc: 71.32% | LR: 0.00812
+FT Epoch [21/70] | Loss: 0.2152 | Val Acc: 71.56% | LR: 0.00794
+FT Epoch [22/70] | Loss: 0.1928 | Val Acc: 71.36% | LR: 0.00775
+FT Epoch [23/70] | Loss: 0.1983 | Val Acc: 72.74% | LR: 0.00756
+ ⭐ Best model saved with Acc: 72.74%
+FT Epoch [24/70] | Loss: 0.1795 | Val Acc: 72.34% | LR: 0.00737
+FT Epoch [25/70] | Loss: 0.1762 | Val Acc: 71.53% | LR: 0.00717
+FT Epoch [26/70] | Loss: 0.1688 | Val Acc: 73.10% | LR: 0.00697
+ ⭐ Best model saved with Acc: 73.10%
+FT Epoch [27/70] | Loss: 0.1517 | Val Acc: 73.42% | LR: 0.00676
+ ⭐ Best model saved with Acc: 73.42%
+FT Epoch [28/70] | Loss: 0.1494 | Val Acc: 72.44% | LR: 0.00655
+FT Epoch [29/70] | Loss: 0.1393 | Val Acc: 73.20% | LR: 0.00633
+FT Epoch [30/70] | Loss: 0.1268 | Val Acc: 73.95% | LR: 0.00611
+ ⭐ Best model saved with Acc: 73.95%
+FT Epoch [31/70] | Loss: 0.1185 | Val Acc: 73.35% | LR: 0.00589
+FT Epoch [32/70] | Loss: 0.1004 | Val Acc: 74.21% | LR: 0.00567
+ ⭐ Best model saved with Acc: 74.21%
+FT Epoch [33/70] | Loss: 0.0961 | Val Acc: 73.46% | LR: 0.00545
+FT Epoch [34/70] | Loss: 0.0975 | Val Acc: 74.18% | LR: 0.00522
+FT Epoch [35/70] | Loss: 0.0789 | Val Acc: 74.79% | LR: 0.00500
+ ⭐ Best model saved with Acc: 74.79%
+FT Epoch [36/70] | Loss: 0.0723 | Val Acc: 75.16% | LR: 0.00478
+ ⭐ Best model saved with Acc: 75.16%
+FT Epoch [37/70] | Loss: 0.0627 | Val Acc: 74.67% | LR: 0.00455
+FT Epoch [38/70] | Loss: 0.0548 | Val Acc: 75.68% | LR: 0.00433
+ ⭐ Best model saved with Acc: 75.68%
+FT Epoch [39/70] | Loss: 0.0494 | Val Acc: 75.76% | LR: 0.00411
+ ⭐ Best model saved with Acc: 75.76%
+FT Epoch [40/70] | Loss: 0.0445 | Val Acc: 75.82% | LR: 0.00389
+ ⭐ Best model saved with Acc: 75.82%
+FT Epoch [41/70] | Loss: 0.0402 | Val Acc: 76.43% | LR: 0.00367
+ ⭐ Best model saved with Acc: 76.43%
+FT Epoch [42/70] | Loss: 0.0303 | Val Acc: 76.92% | LR: 0.00345
+ ⭐ Best model saved with Acc: 76.92%
+FT Epoch [43/70] | Loss: 0.0249 | Val Acc: 77.04% | LR: 0.00324
+ ⭐ Best model saved with Acc: 77.04%
+FT Epoch [44/70] | Loss: 0.0235 | Val Acc: 77.40% | LR: 0.00303
+ ⭐ Best model saved with Acc: 77.40%
+FT Epoch [45/70] | Loss: 0.0193 | Val Acc: 77.55% | LR: 0.00283
+ ⭐ Best model saved with Acc: 77.55%
+FT Epoch [46/70] | Loss: 0.0150 | Val Acc: 77.69% | LR: 0.00263
+ ⭐ Best model saved with Acc: 77.69%
+FT Epoch [47/70] | Loss: 0.0117 | Val Acc: 78.25% | LR: 0.00244
+ ⭐ Best model saved with Acc: 78.25%
+FT Epoch [48/70] | Loss: 0.0110 | Val Acc: 78.05% | LR: 0.00225
+FT Epoch [49/70] | Loss: 0.0099 | Val Acc: 77.98% | LR: 0.00206
+FT Epoch [50/70] | Loss: 0.0093 | Val Acc: 78.57% | LR: 0.00188
+ ⭐ Best model saved with Acc: 78.57%
+FT Epoch [51/70] | Loss: 0.0091 | Val Acc: 78.55% | LR: 0.00171
+FT Epoch [52/70] | Loss: 0.0090 | Val Acc: 78.49% | LR: 0.00154
+FT Epoch [53/70] | Loss: 0.0080 | Val Acc: 78.67% | LR: 0.00139
+ ⭐ Best model saved with Acc: 78.67%
+FT Epoch [54/70] | Loss: 0.0076 | Val Acc: 78.76% | LR: 0.00123
+ ⭐ Best model saved with Acc: 78.76%
+FT Epoch [55/70] | Loss: 0.0073 | Val Acc: 78.60% | LR: 0.00109
+FT Epoch [56/70] | Loss: 0.0075 | Val Acc: 78.54% | LR: 0.00095
+FT Epoch [57/70] | Loss: 0.0067 | Val Acc: 78.67% | LR: 0.00083
+FT Epoch [58/70] | Loss: 0.0067 | Val Acc: 78.74% | LR: 0.00071
+FT Epoch [59/70] | Loss: 0.0066 | Val Acc: 78.71% | LR: 0.00060
+FT Epoch [60/70] | Loss: 0.0066 | Val Acc: 78.91% | LR: 0.00050
+ ⭐ Best model saved with Acc: 78.91%
+FT Epoch [61/70] | Loss: 0.0064 | Val Acc: 78.84% | LR: 0.00040
+FT Epoch [62/70] | Loss: 0.0064 | Val Acc: 78.88% | LR: 0.00032
+FT Epoch [63/70] | Loss: 0.0062 | Val Acc: 78.98% | LR: 0.00024
+ ⭐ Best model saved with Acc: 78.98%
+FT Epoch [64/70] | Loss: 0.0060 | Val Acc: 78.98% | LR: 0.00018
+FT Epoch [65/70] | Loss: 0.0061 | Val Acc: 78.97% | LR: 0.00013
+FT Epoch [66/70] | Loss: 0.0059 | Val Acc: 79.02% | LR: 0.00008
+ ⭐ Best model saved with Acc: 79.02%
+FT Epoch [67/70] | Loss: 0.0062 | Val Acc: 78.75% | LR: 0.00005
+FT Epoch [68/70] | Loss: 0.0065 | Val Acc: 79.10% | LR: 0.00002
+ ⭐ Best model saved with Acc: 79.10%
+FT Epoch [69/70] | Loss: 0.0059 | Val Acc: 78.84% | LR: 0.00001
+FT Epoch [70/70] | Loss: 0.0056 | Val Acc: 78.94% | LR: 0.00000
+
+✅ PAT Experiment (weighted_sum) Finished.
+
+🔍 Evaluating Final Model on Test Set for Table Data...
+
+!!!!!!!!!!!!!!!!!!!!!!!!! FINAL TABLE DATA !!!!!!!!!!!!!!!!!!!!!!!!!
+ 🟢 Model: resnet152
+ 🟢 Strategy: weighted_sum (p=2.5)
+ 🟢 Params (M): 58.341 M
+ 🟢 Compression Ratio: 0.00 %
+ 🟢 Final Test Accuracy: 79.10 %
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
