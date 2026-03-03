@@ -1,0 +1,81 @@
+📝 Logging started: efficientnet_b0_filter_gema_20260222_031214.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: efficientnet_b0 | Dataset: cifar100
+
+[Stage 1] Applying MBConv Block-wise Topology for efficientnet...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   32 | Layers: features.1.0.block.0.0 ... (6 layers)
+ Group  2 | Channels:   96 | Layers: features.2.0.block.0.0 ... (8 layers)
+ Group  3 | Channels:  144 | Layers: features.2.1.block.0.0 ... (8 layers)
+ Group  4 | Channels:  144 | Layers: features.3.0.block.0.0 ... (8 layers)
+ Group  5 | Channels:  240 | Layers: features.3.1.block.0.0 ... (8 layers)
+ Group  6 | Channels:  240 | Layers: features.4.0.block.0.0 ... (8 layers)
+ Group  7 | Channels:  480 | Layers: features.4.1.block.0.0 ... (8 layers)
+ Group  8 | Channels:  480 | Layers: features.4.2.block.0.0 ... (8 layers)
+ Group  9 | Channels:  480 | Layers: features.5.0.block.0.0 ... (8 layers)
+ Group 10 | Channels:  672 | Layers: features.5.1.block.0.0 ... (8 layers)
+ Group 11 | Channels:  672 | Layers: features.5.2.block.0.0 ... (8 layers)
+ Group 12 | Channels:  672 | Layers: features.6.0.block.0.0 ... (8 layers)
+ Group 13 | Channels: 1152 | Layers: features.6.1.block.0.0 ... (8 layers)
+ Group 14 | Channels: 1152 | Layers: features.6.2.block.0.0 ... (8 layers)
+ Group 15 | Channels: 1152 | Layers: features.6.3.block.0.0 ... (8 layers)
+ Group 16 | Channels: 1152 | Layers: features.7.0.block.0.0 ... (8 layers)
+===============================================================
+[*] Total 16 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 20.0%
+[*] Only defined groups (1-16) will be pruned.
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: FILTER_GEMA | Total Epochs: 200
+>>> Pruning starts at Epoch 40, every 20 epochs.
+Epoch 1/200 | Loss: 4.1970 | Val Acc: 19.20% | Peak VRAM: 170.02 MB
+Epoch 2/200 | Loss: 3.0924 | Val Acc: 33.46% | Peak VRAM: 170.02 MB
+Epoch 3/200 | Loss: 2.5235 | Val Acc: 41.27% | Peak VRAM: 170.02 MB
+Epoch 4/200 | Loss: 2.1916 | Val Acc: 47.87% | Peak VRAM: 170.02 MB
+Epoch 5/200 | Loss: 1.9877 | Val Acc: 50.44% | Peak VRAM: 170.02 MB
+Epoch 6/200 | Loss: 1.8359 | Val Acc: 52.37% | Peak VRAM: 170.02 MB
+Epoch 7/200 | Loss: 1.7144 | Val Acc: 54.79% | Peak VRAM: 170.02 MB
+Epoch 8/200 | Loss: 1.6218 | Val Acc: 56.03% | Peak VRAM: 170.02 MB
+Epoch 9/200 | Loss: 1.5329 | Val Acc: 56.89% | Peak VRAM: 170.02 MB
+Epoch 10/200 | Loss: 1.4556 | Val Acc: 57.96% | Peak VRAM: 170.02 MB
+Epoch 11/200 | Loss: 1.3909 | Val Acc: 58.53% | Peak VRAM: 170.02 MB
+Epoch 12/200 | Loss: 1.3325 | Val Acc: 59.74% | Peak VRAM: 170.02 MB
+Epoch 13/200 | Loss: 1.2896 | Val Acc: 60.03% | Peak VRAM: 170.02 MB
+Epoch 14/200 | Loss: 1.2342 | Val Acc: 60.85% | Peak VRAM: 170.02 MB
+Epoch 15/200 | Loss: 1.1914 | Val Acc: 61.55% | Peak VRAM: 170.02 MB
+Epoch 16/200 | Loss: 1.1425 | Val Acc: 60.96% | Peak VRAM: 170.02 MB
+Epoch 17/200 | Loss: 1.1030 | Val Acc: 61.50% | Peak VRAM: 170.02 MB
+Epoch 18/200 | Loss: 1.0685 | Val Acc: 62.21% | Peak VRAM: 170.02 MB
+Epoch 19/200 | Loss: 1.0295 | Val Acc: 62.02% | Peak VRAM: 170.02 MB
+Epoch 20/200 | Loss: 0.9910 | Val Acc: 62.80% | Peak VRAM: 170.02 MB
+Epoch 21/200 | Loss: 0.9717 | Val Acc: 62.80% | Peak VRAM: 170.02 MB
+Epoch 22/200 | Loss: 0.9377 | Val Acc: 62.96% | Peak VRAM: 170.02 MB
+Epoch 23/200 | Loss: 0.9105 | Val Acc: 62.90% | Peak VRAM: 170.02 MB
+Epoch 24/200 | Loss: 0.8799 | Val Acc: 63.20% | Peak VRAM: 170.02 MB
+Epoch 25/200 | Loss: 0.8514 | Val Acc: 62.99% | Peak VRAM: 170.02 MB
+Epoch 26/200 | Loss: 0.8331 | Val Acc: 63.18% | Peak VRAM: 170.02 MB
+Epoch 27/200 | Loss: 0.8067 | Val Acc: 63.87% | Peak VRAM: 170.02 MB
+Epoch 28/200 | Loss: 0.7779 | Val Acc: 63.78% | Peak VRAM: 170.02 MB
+Epoch 29/200 | Loss: 0.7555 | Val Acc: 63.50% | Peak VRAM: 170.02 MB
+Epoch 30/200 | Loss: 0.7331 | Val Acc: 64.23% | Peak VRAM: 170.02 MB
+Epoch 31/200 | Loss: 0.7259 | Val Acc: 63.59% | Peak VRAM: 170.02 MB
+Epoch 32/200 | Loss: 0.7086 | Val Acc: 63.99% | Peak VRAM: 170.02 MB
+Epoch 33/200 | Loss: 0.6841 | Val Acc: 64.22% | Peak VRAM: 170.02 MB
+Epoch 34/200 | Loss: 0.6644 | Val Acc: 64.27% | Peak VRAM: 170.02 MB
+Epoch 35/200 | Loss: 0.6521 | Val Acc: 64.02% | Peak VRAM: 170.02 MB
+Epoch 36/200 | Loss: 0.6361 | Val Acc: 63.77% | Peak VRAM: 170.02 MB
+Epoch 37/200 | Loss: 0.6249 | Val Acc: 64.09% | Peak VRAM: 170.02 MB
+Epoch 38/200 | Loss: 0.6029 | Val Acc: 64.00% | Peak VRAM: 170.02 MB
+Epoch 39/200 | Loss: 0.5960 | Val Acc: 64.29% | Peak VRAM: 170.02 MB
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 64.41%, Size: 15.58 MB
+💾 Saved Baseline: efficientnet_b0_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 40

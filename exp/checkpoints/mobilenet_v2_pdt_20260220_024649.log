@@ -1,0 +1,552 @@
+📝 Logging started: mobilenet_v2_pdt_20260220_024649.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: mobilenet_v2 | Dataset: cifar100
+
+[Stage 1] Analyzing MobileNet InvertedResidual Topology for mobilenetv2...
+[*] MobileNet: 17 inverted residual groups found.
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   32 | Layers: features.1.conv.0.0 ... (2 layers)
+ Group  2 | Channels:   96 | Layers: features.2.conv.0.0 ... (3 layers)
+ Group  3 | Channels:  144 | Layers: features.3.conv.0.0 ... (3 layers)
+ Group  4 | Channels:  144 | Layers: features.4.conv.0.0 ... (3 layers)
+ Group  5 | Channels:  192 | Layers: features.5.conv.0.0 ... (3 layers)
+ Group  6 | Channels:  192 | Layers: features.6.conv.0.0 ... (3 layers)
+ Group  7 | Channels:  192 | Layers: features.7.conv.0.0 ... (3 layers)
+ Group  8 | Channels:  384 | Layers: features.8.conv.0.0 ... (3 layers)
+ Group  9 | Channels:  384 | Layers: features.9.conv.0.0 ... (3 layers)
+ Group 10 | Channels:  384 | Layers: features.10.conv.0.0 ... (3 layers)
+ Group 11 | Channels:  384 | Layers: features.11.conv.0.0 ... (3 layers)
+ Group 12 | Channels:  576 | Layers: features.12.conv.0.0 ... (3 layers)
+ Group 13 | Channels:  576 | Layers: features.13.conv.0.0 ... (3 layers)
+ Group 14 | Channels:  576 | Layers: features.14.conv.0.0 ... (3 layers)
+ Group 15 | Channels:  960 | Layers: features.15.conv.0.0 ... (3 layers)
+ Group 16 | Channels:  960 | Layers: features.16.conv.0.0 ... (3 layers)
+ Group 17 | Channels:  960 | Layers: features.17.conv.0.0 ... (3 layers)
+===============================================================
+[*] Total 17 groups identified.
+
+
+[Pruner Init] Identified 17 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 40, every 20 epochs.
+Epoch 1/200 | Loss: 4.6152 | Val Acc: 2.20% | Peak VRAM: 137.97 MB
+Epoch 2/200 | Loss: 4.3959 | Val Acc: 6.30% | Peak VRAM: 137.97 MB
+Epoch 3/200 | Loss: 4.0433 | Val Acc: 10.32% | Peak VRAM: 137.97 MB
+Epoch 4/200 | Loss: 3.8245 | Val Acc: 13.45% | Peak VRAM: 137.97 MB
+Epoch 5/200 | Loss: 3.6755 | Val Acc: 16.05% | Peak VRAM: 137.97 MB
+Epoch 6/200 | Loss: 3.5513 | Val Acc: 17.78% | Peak VRAM: 137.97 MB
+Epoch 7/200 | Loss: 3.4500 | Val Acc: 20.39% | Peak VRAM: 137.97 MB
+Epoch 8/200 | Loss: 3.3590 | Val Acc: 21.39% | Peak VRAM: 137.97 MB
+Epoch 9/200 | Loss: 3.2731 | Val Acc: 22.47% | Peak VRAM: 137.97 MB
+Epoch 10/200 | Loss: 3.1938 | Val Acc: 23.88% | Peak VRAM: 137.97 MB
+Epoch 11/200 | Loss: 3.1261 | Val Acc: 24.77% | Peak VRAM: 137.97 MB
+Epoch 12/200 | Loss: 3.0701 | Val Acc: 25.85% | Peak VRAM: 137.97 MB
+Epoch 13/200 | Loss: 3.0054 | Val Acc: 27.32% | Peak VRAM: 137.97 MB
+Epoch 14/200 | Loss: 2.9482 | Val Acc: 27.56% | Peak VRAM: 137.97 MB
+Epoch 15/200 | Loss: 2.8949 | Val Acc: 29.12% | Peak VRAM: 137.97 MB
+Epoch 16/200 | Loss: 2.8512 | Val Acc: 30.20% | Peak VRAM: 137.97 MB
+Epoch 17/200 | Loss: 2.7967 | Val Acc: 31.27% | Peak VRAM: 137.97 MB
+Epoch 18/200 | Loss: 2.7525 | Val Acc: 32.23% | Peak VRAM: 137.97 MB
+Epoch 19/200 | Loss: 2.6992 | Val Acc: 31.82% | Peak VRAM: 137.97 MB
+Epoch 20/200 | Loss: 2.6628 | Val Acc: 32.19% | Peak VRAM: 137.97 MB
+Epoch 21/200 | Loss: 2.6153 | Val Acc: 34.23% | Peak VRAM: 137.97 MB
+Epoch 22/200 | Loss: 2.5817 | Val Acc: 34.36% | Peak VRAM: 137.97 MB
+Epoch 23/200 | Loss: 2.5364 | Val Acc: 34.44% | Peak VRAM: 137.97 MB
+Epoch 24/200 | Loss: 2.4960 | Val Acc: 36.06% | Peak VRAM: 137.97 MB
+Epoch 25/200 | Loss: 2.4621 | Val Acc: 34.77% | Peak VRAM: 137.97 MB
+Epoch 26/200 | Loss: 2.4160 | Val Acc: 37.13% | Peak VRAM: 137.97 MB
+Epoch 27/200 | Loss: 2.3874 | Val Acc: 37.78% | Peak VRAM: 137.97 MB
+Epoch 28/200 | Loss: 2.3463 | Val Acc: 38.47% | Peak VRAM: 137.97 MB
+Epoch 29/200 | Loss: 2.3150 | Val Acc: 37.93% | Peak VRAM: 137.97 MB
+Epoch 30/200 | Loss: 2.2870 | Val Acc: 38.73% | Peak VRAM: 137.97 MB
+Epoch 31/200 | Loss: 2.2442 | Val Acc: 40.45% | Peak VRAM: 137.97 MB
+Epoch 32/200 | Loss: 2.2221 | Val Acc: 39.67% | Peak VRAM: 137.97 MB
+Epoch 33/200 | Loss: 2.1878 | Val Acc: 40.09% | Peak VRAM: 137.97 MB
+Epoch 34/200 | Loss: 2.1567 | Val Acc: 40.66% | Peak VRAM: 137.97 MB
+Epoch 35/200 | Loss: 2.1360 | Val Acc: 41.44% | Peak VRAM: 137.97 MB
+Epoch 36/200 | Loss: 2.0999 | Val Acc: 42.10% | Peak VRAM: 137.97 MB
+Epoch 37/200 | Loss: 2.0797 | Val Acc: 42.07% | Peak VRAM: 137.97 MB
+Epoch 38/200 | Loss: 2.0597 | Val Acc: 42.14% | Peak VRAM: 137.97 MB
+Epoch 39/200 | Loss: 2.0326 | Val Acc: 42.15% | Peak VRAM: 137.97 MB
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 42.36%, Size: 8.84 MB
+💾 Saved Baseline: mobilenet_v2_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 40
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 40/200
+
+============================== PDT Pruning Report: Epoch 40 ==============================
+ [*] Pruned this step: 1708 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |   32/  32 |     0.0% | Hessian: 0.182622
+ Group  2 |   96/  96 |     0.0% | Hessian: 0.192876
+ Group  3 |  144/ 144 |     0.0% | Hessian: 0.194561
+ Group  4 |  143/ 144 |     0.7% | Hessian: 0.187187
+ Group  5 |  192/ 192 |     0.0% | Hessian: 0.141397
+ Group  6 |  192/ 192 |     0.0% | Hessian: 0.068577
+ Group  7 |  192/ 192 |     0.0% | Hessian: 0.175945
+ Group  8 |  384/ 384 |     0.0% | Hessian: 0.154210
+ Group  9 |  384/ 384 |     0.0% | Hessian: 0.098482
+ Group 10 |  384/ 384 |     0.0% | Hessian: 0.129408
+ Group 11 |  384/ 384 |     0.0% | Hessian: 0.148718
+ Group 12 |  576/ 576 |     0.0% | Hessian: 0.193265
+ Group 13 |  576/ 576 |     0.0% | Hessian: 0.148386
+ Group 14 |  576/ 576 |     0.0% | Hessian: 0.130290
+ Group 15 |  751/ 960 |    21.8% | Hessian: 0.090034
+ Group 16 |  399/ 960 |    58.4% | Hessian: 0.042383
+ Group 17 |  880/ 960 |     8.3% | Hessian: 0.110248
+
+[Scientific Metrics] 🟢 Size: 8.27MB | 🔵 Sparsity: 6.45% | 🟡 Speedup: 1.07x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 8.84 MB -> 8.27 MB
+ 🔵 Sparsity: 9.96 %
+ 🟡 Speedup: 1.07x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep40_sp9.96.pth
+Epoch 40/200 | Loss: 2.0469 | Val Acc: 40.31% | Peak VRAM: 407.18 MB
+Epoch 41/200 | Loss: 2.0198 | Val Acc: 42.92% | Peak VRAM: 137.97 MB
+Epoch 42/200 | Loss: 1.9891 | Val Acc: 43.00% | Peak VRAM: 137.97 MB
+Epoch 43/200 | Loss: 1.9667 | Val Acc: 43.27% | Peak VRAM: 137.97 MB
+Epoch 44/200 | Loss: 1.9393 | Val Acc: 44.16% | Peak VRAM: 137.97 MB
+Epoch 45/200 | Loss: 1.9164 | Val Acc: 44.70% | Peak VRAM: 137.97 MB
+Epoch 46/200 | Loss: 1.8920 | Val Acc: 43.71% | Peak VRAM: 137.97 MB
+Epoch 47/200 | Loss: 1.8612 | Val Acc: 44.58% | Peak VRAM: 137.97 MB
+Epoch 48/200 | Loss: 1.8481 | Val Acc: 45.54% | Peak VRAM: 137.97 MB
+Epoch 49/200 | Loss: 1.8216 | Val Acc: 43.65% | Peak VRAM: 137.97 MB
+Epoch 50/200 | Loss: 1.8043 | Val Acc: 45.12% | Peak VRAM: 137.97 MB
+Epoch 51/200 | Loss: 1.7846 | Val Acc: 44.41% | Peak VRAM: 137.97 MB
+Epoch 52/200 | Loss: 1.7616 | Val Acc: 45.74% | Peak VRAM: 137.97 MB
+Epoch 53/200 | Loss: 1.7458 | Val Acc: 45.34% | Peak VRAM: 137.97 MB
+Epoch 54/200 | Loss: 1.7190 | Val Acc: 45.87% | Peak VRAM: 137.97 MB
+Epoch 55/200 | Loss: 1.7070 | Val Acc: 46.35% | Peak VRAM: 137.97 MB
+Epoch 56/200 | Loss: 1.6777 | Val Acc: 46.80% | Peak VRAM: 137.97 MB
+Epoch 57/200 | Loss: 1.6653 | Val Acc: 46.66% | Peak VRAM: 137.97 MB
+Epoch 58/200 | Loss: 1.6477 | Val Acc: 46.93% | Peak VRAM: 137.97 MB
+Epoch 59/200 | Loss: 1.6255 | Val Acc: 47.17% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 60
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 60/200
+
+============================== PDT Pruning Report: Epoch 60 ==============================
+ [*] Pruned this step: 1731 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |   32/  32 |     0.0% | Hessian: 0.098484
+ Group  2 |   96/  96 |     0.0% | Hessian: 0.221024
+ Group  3 |  144/ 144 |     0.0% | Hessian: 0.141289
+ Group  4 |  143/ 144 |     0.7% | Hessian: 0.138896
+ Group  5 |  192/ 192 |     0.0% | Hessian: 0.098572
+ Group  6 |  191/ 192 |     0.5% | Hessian: 0.062837
+ Group  7 |  192/ 192 |     0.0% | Hessian: 0.076734
+ Group  8 |  384/ 384 |     0.0% | Hessian: 0.064547
+ Group  9 |  384/ 384 |     0.0% | Hessian: 0.086100
+ Group 10 |  384/ 384 |     0.0% | Hessian: 0.096169
+ Group 11 |  384/ 384 |     0.0% | Hessian: 0.131804
+ Group 12 |  576/ 576 |     0.0% | Hessian: 0.109654
+ Group 13 |  576/ 576 |     0.0% | Hessian: 0.085081
+ Group 14 |  575/ 576 |     0.2% | Hessian: 0.039257
+ Group 15 |  283/ 960 |    70.5% | Hessian: 0.021803
+ Group 16 |  300/ 960 |    68.8% | Hessian: 0.043475
+ Group 17 |  714/ 960 |    25.6% | Hessian: 0.045177
+
+[Scientific Metrics] 🟢 Size: 6.84MB | 🔵 Sparsity: 22.61% | 🟡 Speedup: 1.29x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 8.84 MB -> 6.84 MB
+ 🔵 Sparsity: 20.05 %
+ 🟡 Speedup: 1.29x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep60_sp20.05.pth
+Epoch 60/200 | Loss: 1.8100 | Val Acc: 46.48% | Peak VRAM: 407.18 MB
+Epoch 61/200 | Loss: 1.7265 | Val Acc: 47.83% | Peak VRAM: 137.97 MB
+Epoch 62/200 | Loss: 1.6842 | Val Acc: 46.18% | Peak VRAM: 137.97 MB
+Epoch 63/200 | Loss: 1.6642 | Val Acc: 47.35% | Peak VRAM: 137.97 MB
+Epoch 64/200 | Loss: 1.6362 | Val Acc: 48.13% | Peak VRAM: 137.97 MB
+Epoch 65/200 | Loss: 1.6103 | Val Acc: 48.52% | Peak VRAM: 137.97 MB
+Epoch 66/200 | Loss: 1.5939 | Val Acc: 47.86% | Peak VRAM: 137.97 MB
+Epoch 67/200 | Loss: 1.5738 | Val Acc: 48.79% | Peak VRAM: 137.97 MB
+Epoch 68/200 | Loss: 1.5484 | Val Acc: 46.71% | Peak VRAM: 137.97 MB
+Epoch 69/200 | Loss: 1.5378 | Val Acc: 48.50% | Peak VRAM: 137.97 MB
+Epoch 70/200 | Loss: 1.5115 | Val Acc: 48.94% | Peak VRAM: 137.97 MB
+Epoch 71/200 | Loss: 1.4978 | Val Acc: 48.22% | Peak VRAM: 137.97 MB
+Epoch 72/200 | Loss: 1.4799 | Val Acc: 48.74% | Peak VRAM: 137.97 MB
+Epoch 73/200 | Loss: 1.4652 | Val Acc: 48.87% | Peak VRAM: 137.97 MB
+Epoch 74/200 | Loss: 1.4422 | Val Acc: 49.27% | Peak VRAM: 137.97 MB
+Epoch 75/200 | Loss: 1.4273 | Val Acc: 48.98% | Peak VRAM: 137.97 MB
+Epoch 76/200 | Loss: 1.4147 | Val Acc: 49.58% | Peak VRAM: 137.97 MB
+Epoch 77/200 | Loss: 1.3917 | Val Acc: 49.58% | Peak VRAM: 137.97 MB
+Epoch 78/200 | Loss: 1.3813 | Val Acc: 50.17% | Peak VRAM: 137.97 MB
+Epoch 79/200 | Loss: 1.3723 | Val Acc: 49.94% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 80
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 80/200
+
+============================== PDT Pruning Report: Epoch 80 ==============================
+ [*] Pruned this step: 1462 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |   32/  32 |     0.0% | Hessian: 0.129307
+ Group  2 |   95/  96 |     1.0% | Hessian: 0.180666
+ Group  3 |  144/ 144 |     0.0% | Hessian: 0.192338
+ Group  4 |  143/ 144 |     0.7% | Hessian: 0.225147
+ Group  5 |  192/ 192 |     0.0% | Hessian: 0.140682
+ Group  6 |  191/ 192 |     0.5% | Hessian: 0.185092
+ Group  7 |  192/ 192 |     0.0% | Hessian: 0.195556
+ Group  8 |  384/ 384 |     0.0% | Hessian: 0.188786
+ Group  9 |  384/ 384 |     0.0% | Hessian: 0.152781
+ Group 10 |  384/ 384 |     0.0% | Hessian: 0.114732
+ Group 11 |  384/ 384 |     0.0% | Hessian: 0.173612
+ Group 12 |  576/ 576 |     0.0% | Hessian: 0.167654
+ Group 13 |  576/ 576 |     0.0% | Hessian: 0.160195
+ Group 14 |  575/ 576 |     0.2% | Hessian: 0.151259
+ Group 15 |   56/ 960 |    94.2% | Hessian: 0.036251
+ Group 16 |  130/ 960 |    86.5% | Hessian: 0.046545
+ Group 17 |  485/ 960 |    49.5% | Hessian: 0.065937
+
+[Scientific Metrics] 🟢 Size: 5.68MB | 🔵 Sparsity: 35.79% | 🟡 Speedup: 1.56x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 8.84 MB -> 5.68 MB
+ 🔵 Sparsity: 28.57 %
+ 🟡 Speedup: 1.56x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep80_sp28.57.pth
+Epoch 80/200 | Loss: 1.6000 | Val Acc: 49.55% | Peak VRAM: 407.18 MB
+Epoch 81/200 | Loss: 1.5003 | Val Acc: 49.63% | Peak VRAM: 137.97 MB
+Epoch 82/200 | Loss: 1.4703 | Val Acc: 49.71% | Peak VRAM: 137.97 MB
+Epoch 83/200 | Loss: 1.4284 | Val Acc: 48.95% | Peak VRAM: 137.97 MB
+Epoch 84/200 | Loss: 1.4208 | Val Acc: 50.06% | Peak VRAM: 137.97 MB
+Epoch 85/200 | Loss: 1.3974 | Val Acc: 50.20% | Peak VRAM: 137.97 MB
+Epoch 86/200 | Loss: 1.3761 | Val Acc: 50.28% | Peak VRAM: 137.97 MB
+Epoch 87/200 | Loss: 1.3597 | Val Acc: 50.53% | Peak VRAM: 137.97 MB
+Epoch 88/200 | Loss: 1.3450 | Val Acc: 51.36% | Peak VRAM: 137.97 MB
+Epoch 89/200 | Loss: 1.3297 | Val Acc: 50.92% | Peak VRAM: 137.97 MB
+Epoch 90/200 | Loss: 1.3083 | Val Acc: 50.36% | Peak VRAM: 137.97 MB
+Epoch 91/200 | Loss: 1.2934 | Val Acc: 50.78% | Peak VRAM: 137.97 MB
+Epoch 92/200 | Loss: 1.2916 | Val Acc: 50.30% | Peak VRAM: 137.97 MB
+Epoch 93/200 | Loss: 1.2745 | Val Acc: 50.91% | Peak VRAM: 137.97 MB
+Epoch 94/200 | Loss: 1.2581 | Val Acc: 50.00% | Peak VRAM: 137.97 MB
+Epoch 95/200 | Loss: 1.2467 | Val Acc: 51.45% | Peak VRAM: 137.97 MB
+Epoch 96/200 | Loss: 1.2312 | Val Acc: 50.81% | Peak VRAM: 137.97 MB
+Epoch 97/200 | Loss: 1.2177 | Val Acc: 51.11% | Peak VRAM: 137.97 MB
+Epoch 98/200 | Loss: 1.2052 | Val Acc: 51.48% | Peak VRAM: 137.97 MB
+Epoch 99/200 | Loss: 1.1952 | Val Acc: 50.47% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 100
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 100/200
+
+============================== PDT Pruning Report: Epoch 100 ==============================
+ [*] Pruned this step: 1314 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |   31/  32 |     3.1% | Hessian: 0.111620
+ Group  2 |   95/  96 |     1.0% | Hessian: 0.229798
+ Group  3 |  144/ 144 |     0.0% | Hessian: 0.203959
+ Group  4 |  143/ 144 |     0.7% | Hessian: 0.195432
+ Group  5 |  191/ 192 |     0.5% | Hessian: 0.185754
+ Group  6 |  191/ 192 |     0.5% | Hessian: 0.135477
+ Group  7 |  192/ 192 |     0.0% | Hessian: 0.068165
+ Group  8 |  382/ 384 |     0.5% | Hessian: 0.096858
+ Group  9 |  384/ 384 |     0.0% | Hessian: 0.144935
+ Group 10 |  383/ 384 |     0.3% | Hessian: 0.147123
+ Group 11 |  384/ 384 |     0.0% | Hessian: 0.162039
+ Group 12 |  571/ 576 |     0.9% | Hessian: 0.139849
+ Group 13 |  571/ 576 |     0.9% | Hessian: 0.130721
+ Group 14 |  573/ 576 |     0.5% | Hessian: 0.156215
+ Group 15 |    0/ 960 |   100.0% | Hessian: 0.009213
+ Group 16 |    0/ 960 |   100.0% | Hessian: 0.035539
+ Group 17 |  102/ 960 |    89.4% | Hessian: 0.070571
+
+[Scientific Metrics] 🟢 Size: 4.78MB | 🔵 Sparsity: 45.93% | 🟡 Speedup: 1.85x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 8.84 MB -> 4.78 MB
+ 🔵 Sparsity: 36.23 %
+ 🟡 Speedup: 1.85x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep100_sp36.23.pth
+Epoch 100/200 | Loss: 1.9859 | Val Acc: 47.42% | Peak VRAM: 407.18 MB
+Epoch 101/200 | Loss: 1.7067 | Val Acc: 47.92% | Peak VRAM: 137.97 MB
+Epoch 102/200 | Loss: 1.6400 | Val Acc: 49.48% | Peak VRAM: 137.97 MB
+Epoch 103/200 | Loss: 1.5873 | Val Acc: 48.97% | Peak VRAM: 137.97 MB
+Epoch 104/200 | Loss: 1.5613 | Val Acc: 49.89% | Peak VRAM: 137.97 MB
+Epoch 105/200 | Loss: 1.5358 | Val Acc: 49.76% | Peak VRAM: 137.97 MB
+Epoch 106/200 | Loss: 1.5001 | Val Acc: 48.97% | Peak VRAM: 137.97 MB
+Epoch 107/200 | Loss: 1.4864 | Val Acc: 49.52% | Peak VRAM: 137.97 MB
+Epoch 108/200 | Loss: 1.4725 | Val Acc: 49.90% | Peak VRAM: 137.97 MB
+Epoch 109/200 | Loss: 1.4478 | Val Acc: 49.64% | Peak VRAM: 137.97 MB
+Epoch 110/200 | Loss: 1.4361 | Val Acc: 50.67% | Peak VRAM: 137.97 MB
+Epoch 111/200 | Loss: 1.4205 | Val Acc: 50.32% | Peak VRAM: 137.97 MB
+Epoch 112/200 | Loss: 1.3969 | Val Acc: 50.95% | Peak VRAM: 137.97 MB
+Epoch 113/200 | Loss: 1.3903 | Val Acc: 50.24% | Peak VRAM: 137.97 MB
+Epoch 114/200 | Loss: 1.3773 | Val Acc: 50.31% | Peak VRAM: 137.97 MB
+Epoch 115/200 | Loss: 1.3621 | Val Acc: 50.83% | Peak VRAM: 137.97 MB
+Epoch 116/200 | Loss: 1.3410 | Val Acc: 50.03% | Peak VRAM: 137.97 MB
+Epoch 117/200 | Loss: 1.3466 | Val Acc: 51.40% | Peak VRAM: 137.97 MB
+Epoch 118/200 | Loss: 1.3291 | Val Acc: 50.25% | Peak VRAM: 137.97 MB
+Epoch 119/200 | Loss: 1.3235 | Val Acc: 50.75% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 120
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 120/200
+
+============================== PDT Pruning Report: Epoch 120 ==============================
+ [*] Pruned this step: 1919 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |   31/  32 |     3.1% | Hessian: 0.137125
+ Group  2 |   95/  96 |     1.0% | Hessian: 0.173842
+ Group  3 |  142/ 144 |     1.4% | Hessian: 0.188811
+ Group  4 |  143/ 144 |     0.7% | Hessian: 0.262297
+ Group  5 |  191/ 192 |     0.5% | Hessian: 0.218201
+ Group  6 |  191/ 192 |     0.5% | Hessian: 0.186983
+ Group  7 |  190/ 192 |     1.0% | Hessian: 0.236612
+ Group  8 |  231/ 384 |    39.8% | Hessian: 0.108813
+ Group  9 |  348/ 384 |     9.4% | Hessian: 0.246247
+ Group 10 |  294/ 384 |    23.4% | Hessian: 0.209565
+ Group 11 |  376/ 384 |     2.1% | Hessian: 0.234916
+ Group 12 |  471/ 576 |    18.2% | Hessian: 0.257176
+ Group 13 |  413/ 576 |    28.3% | Hessian: 0.226275
+ Group 14 |  299/ 576 |    48.1% | Hessian: 0.198299
+ Group 15 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 16 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 17 |    0/ 960 |   100.0% | Hessian: 0.028211
+
+[Scientific Metrics] 🟢 Size: 4.23MB | 🔵 Sparsity: 52.14% | 🟡 Speedup: 2.09x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 8.84 MB -> 4.23 MB
+ 🔵 Sparsity: 47.41 %
+ 🟡 Speedup: 2.09x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep120_sp47.41.pth
+Epoch 120/200 | Loss: 4.6107 | Val Acc: 1.00% | Peak VRAM: 407.18 MB
+Epoch 121/200 | Loss: 4.6121 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 122/200 | Loss: 4.6106 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 123/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 124/200 | Loss: 4.6091 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 125/200 | Loss: 4.6086 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 126/200 | Loss: 4.6081 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 127/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 128/200 | Loss: 4.6074 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 129/200 | Loss: 4.6072 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 130/200 | Loss: 4.6070 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 131/200 | Loss: 4.6067 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 132/200 | Loss: 4.6066 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 133/200 | Loss: 4.6066 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 134/200 | Loss: 4.6065 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 135/200 | Loss: 4.6064 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 136/200 | Loss: 4.6063 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 137/200 | Loss: 4.6063 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 138/200 | Loss: 4.6063 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 139/200 | Loss: 4.6063 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 140
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 140/200
+
+============================== PDT Pruning Report: Epoch 140 ==============================
+ [*] Pruned this step: 7239 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |    1/  32 |    96.9% | Hessian: 0.000000
+ Group  2 |   32/  96 |    66.7% | Hessian: 0.000000
+ Group  3 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  6 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  7 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  8 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group  9 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 10 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 11 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 12 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 13 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 14 |  137/ 576 |    76.2% | Hessian: 0.000000
+ Group 15 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 16 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 17 |    0/ 960 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 2.14MB | 🔵 Sparsity: 75.82% | 🟡 Speedup: 4.14x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 8.84 MB -> 2.14 MB
+ 🔵 Sparsity: 89.61 %
+ 🟡 Speedup: 4.14x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep140_sp89.61.pth
+Epoch 140/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 400.73 MB
+Epoch 141/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 142/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 143/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 144/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 145/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 146/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 147/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 148/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 149/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 150/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 151/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 152/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 153/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 154/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 155/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 156/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 157/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 158/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 159/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 160
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 160/200
+
+============================== PDT Pruning Report: Epoch 160 ==============================
+ [*] Pruned this step: 0 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |    1/  32 |    96.9% | Hessian: 0.000000
+ Group  2 |   32/  96 |    66.7% | Hessian: 0.000000
+ Group  3 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  6 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  7 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  8 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group  9 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 10 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 11 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 12 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 13 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 14 |  137/ 576 |    76.2% | Hessian: 0.000000
+ Group 15 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 16 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 17 |    0/ 960 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 2.14MB | 🔵 Sparsity: 75.82% | 🟡 Speedup: 4.14x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 8.84 MB -> 2.14 MB
+ 🔵 Sparsity: 89.61 %
+ 🟡 Speedup: 4.14x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep160_sp89.61.pth
+Epoch 160/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 400.73 MB
+Epoch 161/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 162/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 163/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 164/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 165/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 166/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 167/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 168/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 169/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 170/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 171/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 172/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 173/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 174/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 175/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 176/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 177/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 178/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 179/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 180
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 180/200
+
+============================== PDT Pruning Report: Epoch 180 ==============================
+ [*] Pruned this step: 0 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |    1/  32 |    96.9% | Hessian: 0.000000
+ Group  2 |   32/  96 |    66.7% | Hessian: 0.000000
+ Group  3 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  6 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  7 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  8 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group  9 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 10 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 11 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 12 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 13 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 14 |  137/ 576 |    76.2% | Hessian: 0.000000
+ Group 15 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 16 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 17 |    0/ 960 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 2.14MB | 🔵 Sparsity: 75.82% | 🟡 Speedup: 4.14x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 180]
+ 🟢 Model Size: 8.84 MB -> 2.14 MB
+ 🔵 Sparsity: 89.61 %
+ 🟡 Speedup: 4.14x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep180_sp89.61.pth
+Epoch 180/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 400.73 MB
+Epoch 181/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 182/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 183/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 184/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 185/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 186/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 187/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 188/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 189/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 190/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 191/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 192/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 193/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 194/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 195/200 | Loss: 4.6062 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 196/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 197/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 198/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+Epoch 199/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 137.97 MB
+
+[DEBUG] >>> PRUNING @ Epoch 200
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 200/200
+
+============================== PDT Pruning Report: Epoch 200 ==============================
+ [*] Pruned this step: 355 units | VRAM: 151.4MB -> 151.4MB
+ Group  1 |    0/  32 |   100.0% | Hessian: 0.000000
+ Group  2 |    0/  96 |   100.0% | Hessian: 0.000000
+ Group  3 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 144 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  6 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  7 |    0/ 192 |   100.0% | Hessian: 0.000000
+ Group  8 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group  9 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 10 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 11 |    0/ 384 |   100.0% | Hessian: 0.000000
+ Group 12 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 13 |    0/ 576 |   100.0% | Hessian: 0.000000
+ Group 14 |    8/ 576 |    98.6% | Hessian: 0.000000
+ Group 15 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 16 |    0/ 960 |   100.0% | Hessian: 0.000000
+ Group 17 |    0/ 960 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 2.06MB | 🔵 Sparsity: 76.73% | 🟡 Speedup: 4.30x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 8.84 MB -> 2.06 MB
+ 🔵 Sparsity: 91.68 %
+ 🟡 Speedup: 4.30x
+💾 Checkpoint saved: mobilenet_v2_pdt_ep200_sp91.68.pth
+Epoch 200/200 | Loss: 4.6061 | Val Acc: 1.00% | Peak VRAM: 400.73 MB
+
+🏁 Final Model Saved: ./exp/checkpoints/mobilenet_v2_pdt_final.pth
+
+================ FINAL PHYSICAL COMPRESSION ================
+

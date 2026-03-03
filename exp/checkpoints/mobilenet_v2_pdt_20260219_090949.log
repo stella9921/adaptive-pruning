@@ -1,0 +1,36 @@
+📝 Logging started: mobilenet_v2_pdt_20260219_090949.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: mobilenet_v2 | Dataset: cifar100
+
+[Stage 1] Analyzing MobileNet InvertedResidual Topology for mobilenetv2...
+[*] MobileNet: 17 inverted residual groups found.
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   32 | Layers: features.1.conv.0.0 ... (2 layers)
+ Group  2 | Channels:   96 | Layers: features.2.conv.0.0 ... (3 layers)
+ Group  3 | Channels:  144 | Layers: features.3.conv.0.0 ... (3 layers)
+ Group  4 | Channels:  144 | Layers: features.4.conv.0.0 ... (3 layers)
+ Group  5 | Channels:  192 | Layers: features.5.conv.0.0 ... (3 layers)
+ Group  6 | Channels:  192 | Layers: features.6.conv.0.0 ... (3 layers)
+ Group  7 | Channels:  192 | Layers: features.7.conv.0.0 ... (3 layers)
+ Group  8 | Channels:  384 | Layers: features.8.conv.0.0 ... (3 layers)
+ Group  9 | Channels:  384 | Layers: features.9.conv.0.0 ... (3 layers)
+ Group 10 | Channels:  384 | Layers: features.10.conv.0.0 ... (3 layers)
+ Group 11 | Channels:  384 | Layers: features.11.conv.0.0 ... (3 layers)
+ Group 12 | Channels:  576 | Layers: features.12.conv.0.0 ... (3 layers)
+ Group 13 | Channels:  576 | Layers: features.13.conv.0.0 ... (3 layers)
+ Group 14 | Channels:  576 | Layers: features.14.conv.0.0 ... (3 layers)
+ Group 15 | Channels:  960 | Layers: features.15.conv.0.0 ... (3 layers)
+ Group 16 | Channels:  960 | Layers: features.16.conv.0.0 ... (3 layers)
+ Group 17 | Channels:  960 | Layers: features.17.conv.0.0 ... (3 layers)
+===============================================================
+[*] Total 17 groups identified.
+
+
+[Pruner Init] Identified 17 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 40, every 20 epochs.

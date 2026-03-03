@@ -1,0 +1,28 @@
+# model:
+#   name: mobilenet_v2
+#   num_classes: 100
+#   input_size: 32
+#   base_lr: 0.01
+#   momentum: 0.9
+#   weight_decay: 0.0001
+#   epochs: 200
+
+# dataset:
+#   name: cifar100
+#   batch_size: 128
+
+# strategy:
+#   method: pdt
+#   start_epoch: 60
+#   prune_every: 20
+#   channel_keep_ratio: 0.7
+#   min_survival_ratio: 0.1
+name: "mobilenet_v2"
+num_classes: 100
+base_lr: 0.015
+momentum: 0.9
+weight_decay: 0.0001
+epochs: 100
+batch_size: 64
+input_size: 224
+scheduler: "cosine"

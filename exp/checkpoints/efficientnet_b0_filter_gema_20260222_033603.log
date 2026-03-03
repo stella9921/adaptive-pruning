@@ -1,0 +1,635 @@
+📝 Logging started: efficientnet_b0_filter_gema_20260222_033603.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: efficientnet_b0 | Dataset: cifar100
+
+[Stage 1] Applying MBConv Block-wise Topology for efficientnet...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   32 | Layers: features.1.0.block.0.0 ... (6 layers)
+ Group  2 | Channels:   96 | Layers: features.2.0.block.0.0 ... (8 layers)
+ Group  3 | Channels:  144 | Layers: features.2.1.block.0.0 ... (8 layers)
+ Group  4 | Channels:  144 | Layers: features.3.0.block.0.0 ... (8 layers)
+ Group  5 | Channels:  240 | Layers: features.3.1.block.0.0 ... (8 layers)
+ Group  6 | Channels:  240 | Layers: features.4.0.block.0.0 ... (8 layers)
+ Group  7 | Channels:  480 | Layers: features.4.1.block.0.0 ... (8 layers)
+ Group  8 | Channels:  480 | Layers: features.4.2.block.0.0 ... (8 layers)
+ Group  9 | Channels:  480 | Layers: features.5.0.block.0.0 ... (8 layers)
+ Group 10 | Channels:  672 | Layers: features.5.1.block.0.0 ... (8 layers)
+ Group 11 | Channels:  672 | Layers: features.5.2.block.0.0 ... (8 layers)
+ Group 12 | Channels:  672 | Layers: features.6.0.block.0.0 ... (8 layers)
+ Group 13 | Channels: 1152 | Layers: features.6.1.block.0.0 ... (8 layers)
+ Group 14 | Channels: 1152 | Layers: features.6.2.block.0.0 ... (8 layers)
+ Group 15 | Channels: 1152 | Layers: features.6.3.block.0.0 ... (8 layers)
+ Group 16 | Channels: 1152 | Layers: features.7.0.block.0.0 ... (8 layers)
+===============================================================
+[*] Total 16 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 20.0%
+[*] Only defined groups (1-16) will be pruned.
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: FILTER_GEMA | Total Epochs: 200
+>>> Pruning starts at Epoch 20, every 20 epochs.
+Epoch 1/200 | Loss: 4.2078 | Val Acc: 18.49% | Peak VRAM: 170.02 MB
+Epoch 2/200 | Loss: 3.1469 | Val Acc: 32.82% | Peak VRAM: 170.02 MB
+Epoch 3/200 | Loss: 2.5812 | Val Acc: 40.16% | Peak VRAM: 170.02 MB
+Epoch 4/200 | Loss: 2.2734 | Val Acc: 45.89% | Peak VRAM: 170.02 MB
+Epoch 5/200 | Loss: 2.0540 | Val Acc: 49.55% | Peak VRAM: 170.02 MB
+Epoch 6/200 | Loss: 1.8888 | Val Acc: 51.35% | Peak VRAM: 170.02 MB
+Epoch 7/200 | Loss: 1.7673 | Val Acc: 53.31% | Peak VRAM: 170.02 MB
+Epoch 8/200 | Loss: 1.6614 | Val Acc: 54.82% | Peak VRAM: 170.02 MB
+Epoch 9/200 | Loss: 1.5746 | Val Acc: 56.14% | Peak VRAM: 170.02 MB
+Epoch 10/200 | Loss: 1.4939 | Val Acc: 57.50% | Peak VRAM: 170.02 MB
+Epoch 11/200 | Loss: 1.4254 | Val Acc: 58.29% | Peak VRAM: 170.02 MB
+Epoch 12/200 | Loss: 1.3619 | Val Acc: 59.25% | Peak VRAM: 170.02 MB
+Epoch 13/200 | Loss: 1.3069 | Val Acc: 59.89% | Peak VRAM: 170.02 MB
+Epoch 14/200 | Loss: 1.2625 | Val Acc: 60.01% | Peak VRAM: 170.02 MB
+Epoch 15/200 | Loss: 1.2092 | Val Acc: 60.71% | Peak VRAM: 170.02 MB
+Epoch 16/200 | Loss: 1.1573 | Val Acc: 60.54% | Peak VRAM: 170.02 MB
+Epoch 17/200 | Loss: 1.1180 | Val Acc: 61.21% | Peak VRAM: 170.02 MB
+Epoch 18/200 | Loss: 1.0785 | Val Acc: 61.88% | Peak VRAM: 170.02 MB
+Epoch 19/200 | Loss: 1.0417 | Val Acc: 61.50% | Peak VRAM: 170.02 MB
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 61.58%, Size: 15.58 MB
+💾 Saved Baseline: efficientnet_b0_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 20
+
+============================== PDT Pruning: Epoch 20 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 589
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.209581 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.240271 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.099747 | [TARGET]
+ Group  4      |  144/ 144      |     0.0% |     0.232654 | [TARGET]
+ Group  5      |  240/ 240      |     0.0% |     0.117852 | [TARGET]
+ Group  6      |  240/ 240      |     0.0% |     0.176559 | [TARGET]
+ Group  7      |  480/ 480      |     0.0% |     0.065647 | [TARGET]
+ Group  8      |  480/ 480      |     0.0% |     0.073292 | [TARGET]
+ Group  9      |  480/ 480      |     0.0% |     0.053754 | [TARGET]
+ Group 10      |  672/ 672      |     0.0% |     0.075696 | [TARGET]
+ Group 11      |  672/ 672      |     0.0% |     0.049402 | [TARGET]
+ Group 12      |  672/ 672      |     0.0% |     0.032308 | [TARGET]
+ Group 13      |  922/1152      |    20.0% |     0.006349 | [TARGET]
+ Group 14      | 1073/1152      |     6.9% |     0.026649 | [TARGET]
+ Group 15      |  897/1152      |    22.1% |     0.018231 | [TARGET]
+ Group 16      | 1127/1152      |     2.2% |     0.039366 | [TARGET]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 20]
+ 🟢 Model Size: 15.58 MB -> 14.99 MB (Reduction: 0.59 MB)
+ 🔵 Sparsity (Params/FLOPs): 3.81 %
+ 🟡 Theoretical Speedup: 1.04x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 20]
+ 🟢 Model Size: 15.58 MB -> 14.99 MB
+ 🔵 Sparsity: 5.80 %
+ 🟡 Speedup: 1.04x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep20_sp5.80.pth
+Epoch 20/200 | Loss: 0.9414 | Val Acc: 57.42% | Peak VRAM: 828.37 MB
+Epoch 21/200 | Loss: 1.0015 | Val Acc: 61.75% | Peak VRAM: 170.02 MB
+Epoch 22/200 | Loss: 0.9732 | Val Acc: 63.14% | Peak VRAM: 170.02 MB
+Epoch 23/200 | Loss: 0.9314 | Val Acc: 62.33% | Peak VRAM: 170.02 MB
+Epoch 24/200 | Loss: 0.9037 | Val Acc: 62.59% | Peak VRAM: 170.02 MB
+Epoch 25/200 | Loss: 0.8834 | Val Acc: 63.07% | Peak VRAM: 170.02 MB
+Epoch 26/200 | Loss: 0.8593 | Val Acc: 63.29% | Peak VRAM: 170.02 MB
+Epoch 27/200 | Loss: 0.8237 | Val Acc: 62.84% | Peak VRAM: 170.02 MB
+Epoch 28/200 | Loss: 0.8015 | Val Acc: 63.24% | Peak VRAM: 170.02 MB
+Epoch 29/200 | Loss: 0.7826 | Val Acc: 63.65% | Peak VRAM: 170.02 MB
+Epoch 30/200 | Loss: 0.7505 | Val Acc: 63.89% | Peak VRAM: 170.02 MB
+Epoch 31/200 | Loss: 0.7340 | Val Acc: 64.03% | Peak VRAM: 170.02 MB
+Epoch 32/200 | Loss: 0.7185 | Val Acc: 64.34% | Peak VRAM: 170.02 MB
+Epoch 33/200 | Loss: 0.6955 | Val Acc: 63.93% | Peak VRAM: 170.02 MB
+Epoch 34/200 | Loss: 0.6695 | Val Acc: 63.74% | Peak VRAM: 170.02 MB
+Epoch 35/200 | Loss: 0.6549 | Val Acc: 63.91% | Peak VRAM: 170.02 MB
+Epoch 36/200 | Loss: 0.6453 | Val Acc: 63.53% | Peak VRAM: 170.02 MB
+Epoch 37/200 | Loss: 0.6238 | Val Acc: 64.72% | Peak VRAM: 170.02 MB
+Epoch 38/200 | Loss: 0.6129 | Val Acc: 64.64% | Peak VRAM: 170.02 MB
+Epoch 39/200 | Loss: 0.5912 | Val Acc: 64.61% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 40
+
+============================== PDT Pruning: Epoch 40 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 772
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.171589 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.144392 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.115248 | [TARGET]
+ Group  4      |  144/ 144      |     0.0% |     0.225184 | [TARGET]
+ Group  5      |  240/ 240      |     0.0% |     0.202923 | [TARGET]
+ Group  6      |  240/ 240      |     0.0% |     0.165936 | [TARGET]
+ Group  7      |  479/ 480      |     0.2% |     0.073544 | [TARGET]
+ Group  8      |  480/ 480      |     0.0% |     0.078568 | [TARGET]
+ Group  9      |  480/ 480      |     0.0% |     0.203800 | [TARGET]
+ Group 10      |  672/ 672      |     0.0% |     0.077520 | [TARGET]
+ Group 11      |  670/ 672      |     0.3% |     0.066405 | [TARGET]
+ Group 12      |  672/ 672      |     0.0% |     0.090456 | [TARGET]
+ Group 13      |  742/1152      |    35.6% |     0.003675 | [TARGET]
+ Group 14      |  865/1152      |    24.9% |     0.012038 | [TARGET]
+ Group 15      |  537/1152      |    53.4% |     0.001304 | [TARGET]
+ Group 16      | 1106/1152      |     4.0% |     0.063234 | [TARGET]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 15.58 MB -> 14.20 MB (Reduction: 1.38 MB)
+ 🔵 Sparsity (Params/FLOPs): 8.89 %
+ 🟡 Theoretical Speedup: 1.10x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 15.58 MB -> 14.20 MB
+ 🔵 Sparsity: 13.42 %
+ 🟡 Speedup: 1.10x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep40_sp13.42.pth
+Epoch 40/200 | Loss: 0.6038 | Val Acc: 64.43% | Peak VRAM: 828.37 MB
+Epoch 41/200 | Loss: 0.5941 | Val Acc: 64.45% | Peak VRAM: 170.02 MB
+Epoch 42/200 | Loss: 0.5802 | Val Acc: 64.71% | Peak VRAM: 170.02 MB
+Epoch 43/200 | Loss: 0.5628 | Val Acc: 64.18% | Peak VRAM: 170.02 MB
+Epoch 44/200 | Loss: 0.5531 | Val Acc: 64.70% | Peak VRAM: 170.02 MB
+Epoch 45/200 | Loss: 0.5419 | Val Acc: 64.63% | Peak VRAM: 170.02 MB
+Epoch 46/200 | Loss: 0.5322 | Val Acc: 64.63% | Peak VRAM: 170.02 MB
+Epoch 47/200 | Loss: 0.5182 | Val Acc: 64.82% | Peak VRAM: 170.02 MB
+Epoch 48/200 | Loss: 0.5118 | Val Acc: 64.01% | Peak VRAM: 170.02 MB
+Epoch 49/200 | Loss: 0.5100 | Val Acc: 64.54% | Peak VRAM: 170.02 MB
+Epoch 50/200 | Loss: 0.4946 | Val Acc: 64.87% | Peak VRAM: 170.02 MB
+Epoch 51/200 | Loss: 0.4932 | Val Acc: 64.52% | Peak VRAM: 170.02 MB
+Epoch 52/200 | Loss: 0.4811 | Val Acc: 65.00% | Peak VRAM: 170.02 MB
+Epoch 53/200 | Loss: 0.4790 | Val Acc: 64.64% | Peak VRAM: 170.02 MB
+Epoch 54/200 | Loss: 0.4714 | Val Acc: 64.05% | Peak VRAM: 170.02 MB
+Epoch 55/200 | Loss: 0.4648 | Val Acc: 64.49% | Peak VRAM: 170.02 MB
+Epoch 56/200 | Loss: 0.4571 | Val Acc: 64.74% | Peak VRAM: 170.02 MB
+Epoch 57/200 | Loss: 0.4578 | Val Acc: 65.28% | Peak VRAM: 170.02 MB
+Epoch 58/200 | Loss: 0.4511 | Val Acc: 64.50% | Peak VRAM: 170.02 MB
+Epoch 59/200 | Loss: 0.4452 | Val Acc: 64.16% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 60
+
+============================== PDT Pruning: Epoch 60 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 813
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.054669 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.217661 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.183427 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.271556 | [TARGET]
+ Group  5      |  240/ 240      |     0.0% |     0.109317 | [TARGET]
+ Group  6      |  240/ 240      |     0.0% |     0.161343 | [TARGET]
+ Group  7      |  479/ 480      |     0.2% |     0.099473 | [TARGET]
+ Group  8      |  480/ 480      |     0.0% |     0.107125 | [TARGET]
+ Group  9      |  480/ 480      |     0.0% |     0.160576 | [TARGET]
+ Group 10      |  672/ 672      |     0.0% |     0.166125 | [TARGET]
+ Group 11      |  670/ 672      |     0.3% |     0.121146 | [TARGET]
+ Group 12      |  672/ 672      |     0.0% |     0.158089 | [TARGET]
+ Group 13      |  570/1152      |    50.5% |     0.000872 | [TARGET]
+ Group 14      |  501/1152      |    56.5% |     0.001999 | [TARGET]
+ Group 15      |  267/1152      |    76.8% |     0.001089 | [TARGET]
+ Group 16      | 1100/1152      |     4.5% |     0.068169 | [TARGET]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 15.58 MB -> 12.36 MB (Reduction: 3.22 MB)
+ 🔵 Sparsity (Params/FLOPs): 20.67 %
+ 🟡 Theoretical Speedup: 1.26x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 15.58 MB -> 12.36 MB
+ 🔵 Sparsity: 22.19 %
+ 🟡 Speedup: 1.26x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep60_sp22.19.pth
+Epoch 60/200 | Loss: 0.5247 | Val Acc: 64.31% | Peak VRAM: 828.37 MB
+Epoch 61/200 | Loss: 0.5057 | Val Acc: 64.63% | Peak VRAM: 170.02 MB
+Epoch 62/200 | Loss: 0.4976 | Val Acc: 64.63% | Peak VRAM: 170.02 MB
+Epoch 63/200 | Loss: 0.4866 | Val Acc: 64.38% | Peak VRAM: 170.02 MB
+Epoch 64/200 | Loss: 0.4803 | Val Acc: 64.59% | Peak VRAM: 170.02 MB
+Epoch 65/200 | Loss: 0.4697 | Val Acc: 64.77% | Peak VRAM: 170.02 MB
+Epoch 66/200 | Loss: 0.4656 | Val Acc: 64.69% | Peak VRAM: 170.02 MB
+Epoch 67/200 | Loss: 0.4577 | Val Acc: 64.66% | Peak VRAM: 170.02 MB
+Epoch 68/200 | Loss: 0.4545 | Val Acc: 64.98% | Peak VRAM: 170.02 MB
+Epoch 69/200 | Loss: 0.4564 | Val Acc: 64.38% | Peak VRAM: 170.02 MB
+Epoch 70/200 | Loss: 0.4549 | Val Acc: 64.81% | Peak VRAM: 170.02 MB
+Epoch 71/200 | Loss: 0.4477 | Val Acc: 64.68% | Peak VRAM: 170.02 MB
+Epoch 72/200 | Loss: 0.4404 | Val Acc: 65.13% | Peak VRAM: 170.02 MB
+Epoch 73/200 | Loss: 0.4406 | Val Acc: 64.56% | Peak VRAM: 170.02 MB
+Epoch 74/200 | Loss: 0.4438 | Val Acc: 64.93% | Peak VRAM: 170.02 MB
+Epoch 75/200 | Loss: 0.4390 | Val Acc: 64.86% | Peak VRAM: 170.02 MB
+Epoch 76/200 | Loss: 0.4396 | Val Acc: 64.44% | Peak VRAM: 170.02 MB
+Epoch 77/200 | Loss: 0.4367 | Val Acc: 64.16% | Peak VRAM: 170.02 MB
+Epoch 78/200 | Loss: 0.4341 | Val Acc: 64.48% | Peak VRAM: 170.02 MB
+Epoch 79/200 | Loss: 0.4376 | Val Acc: 64.37% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 80
+
+============================== PDT Pruning: Epoch 80 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 778
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.186090 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.148806 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.106094 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.215827 | [TARGET]
+ Group  5      |  240/ 240      |     0.0% |     0.149237 | [TARGET]
+ Group  6      |  239/ 240      |     0.4% |     0.176463 | [TARGET]
+ Group  7      |  479/ 480      |     0.2% |     0.064425 | [TARGET]
+ Group  8      |  480/ 480      |     0.0% |     0.136073 | [TARGET]
+ Group  9      |  480/ 480      |     0.0% |     0.132308 | [TARGET]
+ Group 10      |  672/ 672      |     0.0% |     0.083273 | [TARGET]
+ Group 11      |  669/ 672      |     0.4% |     0.123870 | [TARGET]
+ Group 12      |  668/ 672      |     0.6% |     0.029549 | [TARGET]
+ Group 13      |  327/1152      |    71.6% |     0.020248 | [TARGET]
+ Group 14      |  171/1152      |    85.2% |     0.013838 | [MIN-SURV]
+ Group 15      |  110/1152      |    90.5% |     0.025951 | [MIN-SURV]
+ Group 16      | 1058/1152      |     8.2% |     0.051174 | [TARGET]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 15.58 MB -> 10.63 MB (Reduction: 4.95 MB)
+ 🔵 Sparsity (Params/FLOPs): 31.75 %
+ 🟡 Theoretical Speedup: 1.47x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 15.58 MB -> 10.63 MB
+ 🔵 Sparsity: 30.56 %
+ 🟡 Speedup: 1.47x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep80_sp30.56.pth
+Epoch 80/200 | Loss: 0.5220 | Val Acc: 64.34% | Peak VRAM: 828.37 MB
+Epoch 81/200 | Loss: 0.5026 | Val Acc: 64.63% | Peak VRAM: 170.02 MB
+Epoch 82/200 | Loss: 0.4911 | Val Acc: 64.62% | Peak VRAM: 170.02 MB
+Epoch 83/200 | Loss: 0.4915 | Val Acc: 64.23% | Peak VRAM: 170.02 MB
+Epoch 84/200 | Loss: 0.4906 | Val Acc: 64.80% | Peak VRAM: 170.02 MB
+Epoch 85/200 | Loss: 0.4809 | Val Acc: 64.21% | Peak VRAM: 170.02 MB
+Epoch 86/200 | Loss: 0.4794 | Val Acc: 64.35% | Peak VRAM: 170.02 MB
+Epoch 87/200 | Loss: 0.4779 | Val Acc: 64.45% | Peak VRAM: 170.02 MB
+Epoch 88/200 | Loss: 0.4759 | Val Acc: 64.47% | Peak VRAM: 170.02 MB
+Epoch 89/200 | Loss: 0.4795 | Val Acc: 64.78% | Peak VRAM: 170.02 MB
+Epoch 90/200 | Loss: 0.4784 | Val Acc: 64.45% | Peak VRAM: 170.02 MB
+Epoch 91/200 | Loss: 0.4726 | Val Acc: 64.89% | Peak VRAM: 170.02 MB
+Epoch 92/200 | Loss: 0.4747 | Val Acc: 64.46% | Peak VRAM: 170.02 MB
+Epoch 93/200 | Loss: 0.4695 | Val Acc: 64.36% | Peak VRAM: 170.02 MB
+Epoch 94/200 | Loss: 0.4720 | Val Acc: 64.64% | Peak VRAM: 170.02 MB
+Epoch 95/200 | Loss: 0.4725 | Val Acc: 64.97% | Peak VRAM: 170.02 MB
+Epoch 96/200 | Loss: 0.4710 | Val Acc: 64.97% | Peak VRAM: 170.02 MB
+Epoch 97/200 | Loss: 0.4721 | Val Acc: 64.55% | Peak VRAM: 170.02 MB
+Epoch 98/200 | Loss: 0.4732 | Val Acc: 63.45% | Peak VRAM: 170.02 MB
+Epoch 99/200 | Loss: 0.4751 | Val Acc: 65.00% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 100
+
+============================== PDT Pruning: Epoch 100 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 730
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.075492 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.135244 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.133548 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.249783 | [TARGET]
+ Group  5      |  240/ 240      |     0.0% |     0.205674 | [TARGET]
+ Group  6      |  239/ 240      |     0.4% |     0.289700 | [TARGET]
+ Group  7      |  476/ 480      |     0.8% |     0.120273 | [TARGET]
+ Group  8      |  472/ 480      |     1.7% |     0.116418 | [TARGET]
+ Group  9      |  480/ 480      |     0.0% |     0.111633 | [TARGET]
+ Group 10      |  659/ 672      |     1.9% |     0.089655 | [TARGET]
+ Group 11      |  603/ 672      |    10.3% |     0.045404 | [TARGET]
+ Group 12      |  668/ 672      |     0.6% |     0.118547 | [TARGET]
+ Group 13      |   10/1152      |    99.1% |     0.021281 | [MIN-SURV]
+ Group 14      |  171/1152      |    85.2% |     0.000000 | [MIN-SURV]
+ Group 15      |  110/1152      |    90.5% |     0.000000 | [MIN-SURV]
+ Group 16      |  735/1152      |    36.2% |     0.064561 | [TARGET]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 15.58 MB -> 9.42 MB (Reduction: 6.16 MB)
+ 🔵 Sparsity (Params/FLOPs): 39.54 %
+ 🟡 Theoretical Speedup: 1.65x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 15.58 MB -> 9.42 MB
+ 🔵 Sparsity: 38.15 %
+ 🟡 Speedup: 1.65x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep100_sp38.15.pth
+Epoch 100/200 | Loss: 0.6168 | Val Acc: 63.83% | Peak VRAM: 828.37 MB
+Epoch 101/200 | Loss: 0.5822 | Val Acc: 63.87% | Peak VRAM: 170.02 MB
+Epoch 102/200 | Loss: 0.5717 | Val Acc: 64.36% | Peak VRAM: 170.02 MB
+Epoch 103/200 | Loss: 0.5653 | Val Acc: 64.11% | Peak VRAM: 170.02 MB
+Epoch 104/200 | Loss: 0.5648 | Val Acc: 63.61% | Peak VRAM: 170.02 MB
+Epoch 105/200 | Loss: 0.5577 | Val Acc: 63.60% | Peak VRAM: 170.02 MB
+Epoch 106/200 | Loss: 0.5502 | Val Acc: 63.70% | Peak VRAM: 170.02 MB
+Epoch 107/200 | Loss: 0.5506 | Val Acc: 63.69% | Peak VRAM: 170.02 MB
+Epoch 108/200 | Loss: 0.5599 | Val Acc: 64.32% | Peak VRAM: 170.02 MB
+Epoch 109/200 | Loss: 0.5538 | Val Acc: 63.36% | Peak VRAM: 170.02 MB
+Epoch 110/200 | Loss: 0.5541 | Val Acc: 64.27% | Peak VRAM: 170.02 MB
+Epoch 111/200 | Loss: 0.5602 | Val Acc: 63.61% | Peak VRAM: 170.02 MB
+Epoch 112/200 | Loss: 0.5603 | Val Acc: 64.12% | Peak VRAM: 170.02 MB
+Epoch 113/200 | Loss: 0.5576 | Val Acc: 64.15% | Peak VRAM: 170.02 MB
+Epoch 114/200 | Loss: 0.5622 | Val Acc: 64.11% | Peak VRAM: 170.02 MB
+Epoch 115/200 | Loss: 0.5579 | Val Acc: 64.20% | Peak VRAM: 170.02 MB
+Epoch 116/200 | Loss: 0.5646 | Val Acc: 63.79% | Peak VRAM: 170.02 MB
+Epoch 117/200 | Loss: 0.5645 | Val Acc: 64.09% | Peak VRAM: 170.02 MB
+Epoch 118/200 | Loss: 0.5652 | Val Acc: 63.43% | Peak VRAM: 170.02 MB
+Epoch 119/200 | Loss: 0.5666 | Val Acc: 63.43% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 120
+
+============================== PDT Pruning: Epoch 120 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 867
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.181072 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.073637 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.129862 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.250537 | [TARGET]
+ Group  5      |  240/ 240      |     0.0% |     0.309572 | [TARGET]
+ Group  6      |  239/ 240      |     0.4% |     0.304843 | [TARGET]
+ Group  7      |  468/ 480      |     2.5% |     0.121236 | [TARGET]
+ Group  8      |  461/ 480      |     4.0% |     0.127201 | [TARGET]
+ Group  9      |  478/ 480      |     0.4% |     0.175635 | [TARGET]
+ Group 10      |  614/ 672      |     8.6% |     0.140046 | [TARGET]
+ Group 11      |  207/ 672      |    69.2% |     0.001526 | [TARGET]
+ Group 12      |  665/ 672      |     1.0% |     0.140543 | [TARGET]
+ Group 13      |   10/1152      |    99.1% |     0.000000 | [MIN-SURV]
+ Group 14      |  171/1152      |    85.2% |     0.000000 | [MIN-SURV]
+ Group 15      |  110/1152      |    90.5% |     0.000000 | [MIN-SURV]
+ Group 16      |  333/1152      |    71.1% |     0.076128 | [TARGET]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 15.58 MB -> 7.75 MB (Reduction: 7.83 MB)
+ 🔵 Sparsity (Params/FLOPs): 50.26 %
+ 🟡 Theoretical Speedup: 2.01x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 15.58 MB -> 7.75 MB
+ 🔵 Sparsity: 47.44 %
+ 🟡 Speedup: 2.01x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep120_sp47.44.pth
+Epoch 120/200 | Loss: 1.1131 | Val Acc: 61.43% | Peak VRAM: 828.37 MB
+Epoch 121/200 | Loss: 0.9328 | Val Acc: 62.32% | Peak VRAM: 170.02 MB
+Epoch 122/200 | Loss: 0.8900 | Val Acc: 63.51% | Peak VRAM: 170.02 MB
+Epoch 123/200 | Loss: 0.8524 | Val Acc: 63.00% | Peak VRAM: 170.02 MB
+Epoch 124/200 | Loss: 0.8351 | Val Acc: 63.13% | Peak VRAM: 170.02 MB
+Epoch 125/200 | Loss: 0.8250 | Val Acc: 63.14% | Peak VRAM: 170.02 MB
+Epoch 126/200 | Loss: 0.8116 | Val Acc: 63.00% | Peak VRAM: 170.02 MB
+Epoch 127/200 | Loss: 0.8047 | Val Acc: 63.34% | Peak VRAM: 170.02 MB
+Epoch 128/200 | Loss: 0.8008 | Val Acc: 63.08% | Peak VRAM: 170.02 MB
+Epoch 129/200 | Loss: 0.7871 | Val Acc: 62.92% | Peak VRAM: 170.02 MB
+Epoch 130/200 | Loss: 0.7861 | Val Acc: 62.61% | Peak VRAM: 170.02 MB
+Epoch 131/200 | Loss: 0.7876 | Val Acc: 63.10% | Peak VRAM: 170.02 MB
+Epoch 132/200 | Loss: 0.7780 | Val Acc: 62.97% | Peak VRAM: 170.02 MB
+Epoch 133/200 | Loss: 0.7768 | Val Acc: 63.17% | Peak VRAM: 170.02 MB
+Epoch 134/200 | Loss: 0.7706 | Val Acc: 63.30% | Peak VRAM: 170.02 MB
+Epoch 135/200 | Loss: 0.7650 | Val Acc: 63.40% | Peak VRAM: 170.02 MB
+Epoch 136/200 | Loss: 0.7675 | Val Acc: 63.12% | Peak VRAM: 170.02 MB
+Epoch 137/200 | Loss: 0.7623 | Val Acc: 63.30% | Peak VRAM: 170.02 MB
+Epoch 138/200 | Loss: 0.7620 | Val Acc: 63.46% | Peak VRAM: 170.02 MB
+Epoch 139/200 | Loss: 0.7651 | Val Acc: 63.41% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 140
+
+============================== PDT Pruning: Epoch 140 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 785
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.162761 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.202256 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.147704 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.286647 | [TARGET]
+ Group  5      |  240/ 240      |     0.0% |     0.119757 | [TARGET]
+ Group  6      |  239/ 240      |     0.4% |     0.189053 | [TARGET]
+ Group  7      |  440/ 480      |     8.3% |     0.113804 | [TARGET]
+ Group  8      |  389/ 480      |    19.0% |     0.112968 | [TARGET]
+ Group  9      |  474/ 480      |     1.2% |     0.082075 | [TARGET]
+ Group 10      |  439/ 672      |    34.7% |     0.049731 | [TARGET]
+ Group 11      |   34/ 672      |    94.9% |     0.025534 | [MIN-SURV]
+ Group 12      |  656/ 672      |     2.4% |     0.138879 | [TARGET]
+ Group 13      |   10/1152      |    99.1% |     0.000000 | [MIN-SURV]
+ Group 14      |  171/1152      |    85.2% |     0.000000 | [MIN-SURV]
+ Group 15      |  110/1152      |    90.5% |     0.000000 | [MIN-SURV]
+ Group 16      |    9/1152      |    99.2% |     0.015259 | [MIN-SURV]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 15.58 MB -> 6.28 MB (Reduction: 9.30 MB)
+ 🔵 Sparsity (Params/FLOPs): 59.66 %
+ 🟡 Theoretical Speedup: 2.48x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 15.58 MB -> 6.28 MB
+ 🔵 Sparsity: 56.00 %
+ 🟡 Speedup: 2.48x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep140_sp56.00.pth
+Epoch 140/200 | Loss: 3.3275 | Val Acc: 21.15% | Peak VRAM: 828.37 MB
+Epoch 141/200 | Loss: 2.9558 | Val Acc: 25.76% | Peak VRAM: 170.02 MB
+Epoch 142/200 | Loss: 2.8487 | Val Acc: 27.15% | Peak VRAM: 170.02 MB
+Epoch 143/200 | Loss: 2.7941 | Val Acc: 29.24% | Peak VRAM: 170.02 MB
+Epoch 144/200 | Loss: 2.7427 | Val Acc: 31.06% | Peak VRAM: 170.02 MB
+Epoch 145/200 | Loss: 2.6947 | Val Acc: 32.42% | Peak VRAM: 170.02 MB
+Epoch 146/200 | Loss: 2.6654 | Val Acc: 32.19% | Peak VRAM: 170.02 MB
+Epoch 147/200 | Loss: 2.6413 | Val Acc: 33.90% | Peak VRAM: 170.02 MB
+Epoch 148/200 | Loss: 2.6168 | Val Acc: 35.04% | Peak VRAM: 170.02 MB
+Epoch 149/200 | Loss: 2.6001 | Val Acc: 34.19% | Peak VRAM: 170.02 MB
+Epoch 150/200 | Loss: 2.5801 | Val Acc: 35.32% | Peak VRAM: 170.02 MB
+Epoch 151/200 | Loss: 2.5568 | Val Acc: 36.20% | Peak VRAM: 170.02 MB
+Epoch 152/200 | Loss: 2.5461 | Val Acc: 35.96% | Peak VRAM: 170.02 MB
+Epoch 153/200 | Loss: 2.5327 | Val Acc: 36.41% | Peak VRAM: 170.02 MB
+Epoch 154/200 | Loss: 2.5209 | Val Acc: 37.18% | Peak VRAM: 170.02 MB
+Epoch 155/200 | Loss: 2.5090 | Val Acc: 36.14% | Peak VRAM: 170.02 MB
+Epoch 156/200 | Loss: 2.5088 | Val Acc: 36.43% | Peak VRAM: 170.02 MB
+Epoch 157/200 | Loss: 2.5025 | Val Acc: 36.72% | Peak VRAM: 170.02 MB
+Epoch 158/200 | Loss: 2.4836 | Val Acc: 36.45% | Peak VRAM: 170.02 MB
+Epoch 159/200 | Loss: 2.4685 | Val Acc: 38.09% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 160
+
+============================== PDT Pruning: Epoch 160 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 900
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.143244 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.219022 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.139262 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.227126 | [TARGET]
+ Group  5      |  239/ 240      |     0.4% |     0.319472 | [TARGET]
+ Group  6      |  239/ 240      |     0.4% |     0.224553 | [TARGET]
+ Group  7      |  339/ 480      |    29.4% |     0.135853 | [TARGET]
+ Group  8      |  256/ 480      |    46.7% |     0.073176 | [TARGET]
+ Group  9      |  465/ 480      |     3.1% |     0.193517 | [TARGET]
+ Group 10      |  124/ 672      |    81.5% |     0.079469 | [MIN-SURV]
+ Group 11      |   34/ 672      |    94.9% |     0.000000 | [MIN-SURV]
+ Group 12      |  315/ 672      |    53.1% |     0.136426 | [TARGET]
+ Group 13      |   10/1152      |    99.1% |     0.000000 | [MIN-SURV]
+ Group 14      |  171/1152      |    85.2% |     0.000000 | [MIN-SURV]
+ Group 15      |  110/1152      |    90.5% |     0.000000 | [MIN-SURV]
+ Group 16      |    9/1152      |    99.2% |     0.000000 | [MIN-SURV]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 15.58 MB -> 5.28 MB (Reduction: 10.30 MB)
+ 🔵 Sparsity (Params/FLOPs): 66.11 %
+ 🟡 Theoretical Speedup: 2.95x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 15.58 MB -> 5.28 MB
+ 🔵 Sparsity: 65.52 %
+ 🟡 Speedup: 2.95x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep160_sp65.52.pth
+Epoch 160/200 | Loss: 2.5686 | Val Acc: 36.51% | Peak VRAM: 828.37 MB
+Epoch 161/200 | Loss: 2.5327 | Val Acc: 36.32% | Peak VRAM: 170.02 MB
+Epoch 162/200 | Loss: 2.5116 | Val Acc: 37.26% | Peak VRAM: 170.02 MB
+Epoch 163/200 | Loss: 2.5003 | Val Acc: 37.43% | Peak VRAM: 170.02 MB
+Epoch 164/200 | Loss: 2.4937 | Val Acc: 37.33% | Peak VRAM: 170.02 MB
+Epoch 165/200 | Loss: 2.4811 | Val Acc: 37.02% | Peak VRAM: 170.02 MB
+Epoch 166/200 | Loss: 2.4922 | Val Acc: 37.46% | Peak VRAM: 170.02 MB
+Epoch 167/200 | Loss: 2.4678 | Val Acc: 38.21% | Peak VRAM: 170.02 MB
+Epoch 168/200 | Loss: 2.4588 | Val Acc: 38.04% | Peak VRAM: 170.02 MB
+Epoch 169/200 | Loss: 2.4599 | Val Acc: 38.10% | Peak VRAM: 170.02 MB
+Epoch 170/200 | Loss: 2.4556 | Val Acc: 38.31% | Peak VRAM: 170.02 MB
+Epoch 171/200 | Loss: 2.4477 | Val Acc: 38.55% | Peak VRAM: 170.02 MB
+Epoch 172/200 | Loss: 2.4426 | Val Acc: 39.02% | Peak VRAM: 170.02 MB
+Epoch 173/200 | Loss: 2.4398 | Val Acc: 39.34% | Peak VRAM: 170.02 MB
+Epoch 174/200 | Loss: 2.4228 | Val Acc: 38.70% | Peak VRAM: 170.02 MB
+Epoch 175/200 | Loss: 2.4222 | Val Acc: 39.70% | Peak VRAM: 170.02 MB
+Epoch 176/200 | Loss: 2.4176 | Val Acc: 38.50% | Peak VRAM: 170.02 MB
+Epoch 177/200 | Loss: 2.4181 | Val Acc: 39.35% | Peak VRAM: 170.02 MB
+Epoch 178/200 | Loss: 2.4128 | Val Acc: 40.90% | Peak VRAM: 170.02 MB
+Epoch 179/200 | Loss: 2.4070 | Val Acc: 40.15% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 180
+
+============================== PDT Pruning: Epoch 180 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 730
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.133674 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.271429 | [TARGET]
+ Group  3      |  144/ 144      |     0.0% |     0.114316 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.143196 | [TARGET]
+ Group  5      |  239/ 240      |     0.4% |     0.192955 | [TARGET]
+ Group  6      |  239/ 240      |     0.4% |     0.216196 | [TARGET]
+ Group  7      |  143/ 480      |    70.2% |     0.070672 | [TARGET]
+ Group  8      |  107/ 480      |    77.7% |     0.063708 | [TARGET]
+ Group  9      |  341/ 480      |    29.0% |     0.072605 | [TARGET]
+ Group 10      |  124/ 672      |    81.5% |     0.000000 | [MIN-SURV]
+ Group 11      |   34/ 672      |    94.9% |     0.000000 | [MIN-SURV]
+ Group 12      |   54/ 672      |    92.0% |     0.052822 | [MIN-SURV]
+ Group 13      |   10/1152      |    99.1% |     0.000000 | [MIN-SURV]
+ Group 14      |  171/1152      |    85.2% |     0.000000 | [MIN-SURV]
+ Group 15      |  110/1152      |    90.5% |     0.000000 | [MIN-SURV]
+ Group 16      |    9/1152      |    99.2% |     0.000000 | [MIN-SURV]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 180]
+ 🟢 Model Size: 15.58 MB -> 4.35 MB (Reduction: 11.23 MB)
+ 🔵 Sparsity (Params/FLOPs): 72.06 %
+ 🟡 Theoretical Speedup: 3.58x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 180]
+ 🟢 Model Size: 15.58 MB -> 4.35 MB
+ 🔵 Sparsity: 73.53 %
+ 🟡 Speedup: 3.58x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep180_sp73.53.pth
+Epoch 180/200 | Loss: 2.8696 | Val Acc: 33.45% | Peak VRAM: 828.37 MB
+Epoch 181/200 | Loss: 2.6283 | Val Acc: 34.47% | Peak VRAM: 170.02 MB
+Epoch 182/200 | Loss: 2.5830 | Val Acc: 35.40% | Peak VRAM: 170.02 MB
+Epoch 183/200 | Loss: 2.5686 | Val Acc: 36.66% | Peak VRAM: 170.02 MB
+Epoch 184/200 | Loss: 2.5572 | Val Acc: 35.98% | Peak VRAM: 170.02 MB
+Epoch 185/200 | Loss: 2.5493 | Val Acc: 36.78% | Peak VRAM: 170.02 MB
+Epoch 186/200 | Loss: 2.5317 | Val Acc: 36.60% | Peak VRAM: 170.02 MB
+Epoch 187/200 | Loss: 2.5256 | Val Acc: 37.21% | Peak VRAM: 170.02 MB
+Epoch 188/200 | Loss: 2.5204 | Val Acc: 35.72% | Peak VRAM: 170.02 MB
+Epoch 189/200 | Loss: 2.5126 | Val Acc: 37.75% | Peak VRAM: 170.02 MB
+Epoch 190/200 | Loss: 2.4925 | Val Acc: 38.27% | Peak VRAM: 170.02 MB
+Epoch 191/200 | Loss: 2.4956 | Val Acc: 37.79% | Peak VRAM: 170.02 MB
+Epoch 192/200 | Loss: 2.4848 | Val Acc: 37.75% | Peak VRAM: 170.02 MB
+Epoch 193/200 | Loss: 2.4781 | Val Acc: 38.35% | Peak VRAM: 170.02 MB
+Epoch 194/200 | Loss: 2.4748 | Val Acc: 38.03% | Peak VRAM: 170.02 MB
+Epoch 195/200 | Loss: 2.4743 | Val Acc: 38.31% | Peak VRAM: 170.02 MB
+Epoch 196/200 | Loss: 2.4610 | Val Acc: 38.72% | Peak VRAM: 170.02 MB
+Epoch 197/200 | Loss: 2.4537 | Val Acc: 39.26% | Peak VRAM: 170.02 MB
+Epoch 198/200 | Loss: 2.4554 | Val Acc: 38.65% | Peak VRAM: 170.02 MB
+Epoch 199/200 | Loss: 2.4435 | Val Acc: 38.64% | Peak VRAM: 170.02 MB
+
+[DEBUG] >>> PRUNING @ Epoch 200
+
+============================== PDT Pruning: Epoch 200 ==============================
+ [*] Cut-off Threshold: 0.000000 | Pruned: 608
+ Group ID   |  Alive/Total | Sparsity | Hessian(avg) | Status
+ ---------------------------------------------------------------------------------------
+ Group  1      |   32/  32      |     0.0% |     0.179858 | [TARGET]
+ Group  2      |   96/  96      |     0.0% |     0.145174 | [TARGET]
+ Group  3      |  143/ 144      |     0.7% |     0.155698 | [TARGET]
+ Group  4      |  143/ 144      |     0.7% |     0.269282 | [TARGET]
+ Group  5      |  204/ 240      |    15.0% |     0.128761 | [TARGET]
+ Group  6      |  236/ 240      |     1.7% |     0.254219 | [TARGET]
+ Group  7      |    3/ 480      |    99.4% |     0.067120 | [MIN-SURV]
+ Group  8      |    0/ 480      |   100.0% |     0.056751 | [MIN-SURV]
+ Group  9      |   19/ 480      |    96.0% |     0.096274 | [MIN-SURV]
+ Group 10      |  124/ 672      |    81.5% |     0.000000 | [MIN-SURV]
+ Group 11      |   34/ 672      |    94.9% |     0.000000 | [MIN-SURV]
+ Group 12      |   54/ 672      |    92.0% |     0.000000 | [MIN-SURV]
+ Group 13      |   10/1152      |    99.1% |     0.000000 | [MIN-SURV]
+ Group 14      |  171/1152      |    85.2% |     0.000000 | [MIN-SURV]
+ Group 15      |  110/1152      |    90.5% |     0.000000 | [MIN-SURV]
+ Group 16      |    9/1152      |    99.2% |     0.000000 | [MIN-SURV]
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 15.58 MB -> 3.73 MB (Reduction: 11.85 MB)
+ 🔵 Sparsity (Params/FLOPs): 76.03 %
+ 🟡 Theoretical Speedup: 4.17x
+ 🟠 Current GPU Mem (Allocated): 197.36 MB
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 15.58 MB -> 3.73 MB
+ 🔵 Sparsity: 80.16 %
+ 🟡 Speedup: 4.17x
+💾 Checkpoint saved: efficientnet_b0_filter_gema_ep200_sp80.16.pth
+Epoch 200/200 | Loss: 3.4012 | Val Acc: 23.90% | Peak VRAM: 828.37 MB
+
+🏁 Final Model Saved: ./exp/checkpoints/efficientnet_b0_filter_gema_final.pth
+
+================ FINAL PHYSICAL COMPRESSION ================
+

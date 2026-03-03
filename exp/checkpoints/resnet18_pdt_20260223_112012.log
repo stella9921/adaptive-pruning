@@ -1,0 +1,479 @@
+📝 Logging started: resnet18_pdt_20260223_112012.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet18 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: conv1 ... (2 layers)
+ Group  2 | Channels:   64 | Layers: conv1 ... (3 layers)
+ Group  3 | Channels:  128 | Layers: layer2.0.conv2 ... (2 layers)
+ Group  4 | Channels:  128 | Layers: layer2.0.conv2 ... (3 layers)
+ Group  5 | Channels:  256 | Layers: layer3.0.conv2 ... (2 layers)
+ Group  6 | Channels:  256 | Layers: layer3.0.conv2 ... (3 layers)
+ Group  7 | Channels:  512 | Layers: layer4.0.conv2 ... (2 layers)
+ Group  8 | Channels:  512 | Layers: layer4.0.conv2 ... (3 layers)
+===============================================================
+[*] Total 8 groups identified.
+
+
+[Pruner Init] Identified 8 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 40, every 20 epochs.
+Epoch 1/200 | Loss: 3.8577 | Val Acc: 17.75% | Peak VRAM: 732.63 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep1.pth
+Epoch 2/200 | Loss: 3.0787 | Val Acc: 24.80% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep2.pth
+Epoch 3/200 | Loss: 2.5294 | Val Acc: 37.53% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep3.pth
+Epoch 4/200 | Loss: 2.1556 | Val Acc: 41.42% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep4.pth
+Epoch 5/200 | Loss: 1.9169 | Val Acc: 41.61% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep5.pth
+Epoch 6/200 | Loss: 1.7455 | Val Acc: 44.98% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep6.pth
+Epoch 7/200 | Loss: 1.6229 | Val Acc: 50.87% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep7.pth
+Epoch 8/200 | Loss: 1.5222 | Val Acc: 53.02% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep8.pth
+Epoch 9/200 | Loss: 1.4499 | Val Acc: 51.10% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep9.pth
+Epoch 10/200 | Loss: 1.4013 | Val Acc: 55.07% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep10.pth
+Epoch 11/200 | Loss: 1.3549 | Val Acc: 53.69% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep11.pth
+Epoch 12/200 | Loss: 1.3237 | Val Acc: 55.61% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep12.pth
+Epoch 13/200 | Loss: 1.2910 | Val Acc: 49.23% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep13.pth
+Epoch 14/200 | Loss: 1.2654 | Val Acc: 54.66% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep14.pth
+Epoch 15/200 | Loss: 1.2403 | Val Acc: 54.34% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep15.pth
+Epoch 16/200 | Loss: 1.2193 | Val Acc: 52.09% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep16.pth
+Epoch 17/200 | Loss: 1.2073 | Val Acc: 55.38% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep17.pth
+Epoch 18/200 | Loss: 1.1888 | Val Acc: 56.08% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep18.pth
+Epoch 19/200 | Loss: 1.1783 | Val Acc: 53.19% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep19.pth
+Epoch 20/200 | Loss: 1.1592 | Val Acc: 54.87% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep20.pth
+Epoch 21/200 | Loss: 1.1486 | Val Acc: 56.32% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep21.pth
+Epoch 22/200 | Loss: 1.1334 | Val Acc: 57.10% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep22.pth
+Epoch 23/200 | Loss: 1.1366 | Val Acc: 57.19% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep23.pth
+Epoch 24/200 | Loss: 1.1155 | Val Acc: 55.45% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep24.pth
+Epoch 25/200 | Loss: 1.1056 | Val Acc: 53.08% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep25.pth
+Epoch 26/200 | Loss: 1.1034 | Val Acc: 49.98% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep26.pth
+Epoch 27/200 | Loss: 1.0973 | Val Acc: 58.25% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep27.pth
+Epoch 28/200 | Loss: 1.0879 | Val Acc: 55.81% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep28.pth
+Epoch 29/200 | Loss: 1.0784 | Val Acc: 52.10% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep29.pth
+Epoch 30/200 | Loss: 1.0801 | Val Acc: 57.61% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep30.pth
+Epoch 31/200 | Loss: 1.0735 | Val Acc: 53.40% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep31.pth
+Epoch 32/200 | Loss: 1.0681 | Val Acc: 59.89% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep32.pth
+Epoch 33/200 | Loss: 1.0639 | Val Acc: 59.40% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep33.pth
+Epoch 34/200 | Loss: 1.0596 | Val Acc: 57.29% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep34.pth
+Epoch 35/200 | Loss: 1.0604 | Val Acc: 58.16% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep35.pth
+Epoch 36/200 | Loss: 1.0511 | Val Acc: 56.29% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep36.pth
+Epoch 37/200 | Loss: 1.0449 | Val Acc: 55.44% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep37.pth
+Epoch 38/200 | Loss: 1.0451 | Val Acc: 54.95% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep38.pth
+Epoch 39/200 | Loss: 1.0388 | Val Acc: 60.54% | Peak VRAM: 732.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep39.pth
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 61.13%, Size: 42.76 MB
+💾 Saved Baseline: resnet18_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 40
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 40/200
+
+============================== PDT Pruning Report: Epoch 40 ==============================
+ [*] Pruned this step: 559 units | VRAM: 750.2MB -> 750.2MB
+ Group  1 |   64/  64 |     0.0% | Hessian: 0.086967
+ Group  2 |   64/  64 |     0.0% | Hessian: 0.086967
+ Group  3 |  128/ 128 |     0.0% | Hessian: 0.150064
+ Group  4 |  128/ 128 |     0.0% | Hessian: 0.150064
+ Group  5 |  256/ 256 |     0.0% | Hessian: 0.195821
+ Group  6 |  256/ 256 |     0.0% | Hessian: 0.195821
+ Group  7 |  329/ 512 |    35.7% | Hessian: 0.163716
+ Group  8 |  329/ 512 |    35.7% | Hessian: 0.163716
+
+[Scientific Metrics] 🟢 Size: 36.15MB | 🔵 Sparsity: 15.46% | 🟡 Speedup: 1.18x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 42.76 MB -> 36.15 MB
+ 🔵 Sparsity: 11.20 %
+ 🟡 Speedup: 1.18x
+💾 Checkpoint saved: resnet18_pdt_ep40_sp11.20.pth
+Epoch 40/200 | Loss: 1.3938 | Val Acc: 58.13% | Peak VRAM: 2661.72 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep40.pth
+Epoch 41/200 | Loss: 1.1614 | Val Acc: 59.01% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep41.pth
+Epoch 42/200 | Loss: 1.0944 | Val Acc: 56.23% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep42.pth
+Epoch 43/200 | Loss: 1.0742 | Val Acc: 56.06% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep43.pth
+Epoch 44/200 | Loss: 1.0670 | Val Acc: 56.54% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep44.pth
+Epoch 45/200 | Loss: 1.0587 | Val Acc: 60.42% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep45.pth
+Epoch 46/200 | Loss: 1.0484 | Val Acc: 59.86% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep46.pth
+Epoch 47/200 | Loss: 1.0479 | Val Acc: 58.90% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep47.pth
+Epoch 48/200 | Loss: 1.0395 | Val Acc: 58.50% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep48.pth
+Epoch 49/200 | Loss: 1.0442 | Val Acc: 59.68% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep49.pth
+Epoch 50/200 | Loss: 1.0418 | Val Acc: 58.64% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep50.pth
+Epoch 51/200 | Loss: 1.0323 | Val Acc: 59.02% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep51.pth
+Epoch 52/200 | Loss: 1.0248 | Val Acc: 57.14% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep52.pth
+Epoch 53/200 | Loss: 1.0325 | Val Acc: 59.89% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep53.pth
+Epoch 54/200 | Loss: 1.0192 | Val Acc: 57.75% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep54.pth
+Epoch 55/200 | Loss: 1.0199 | Val Acc: 59.90% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep55.pth
+Epoch 56/200 | Loss: 1.0142 | Val Acc: 57.21% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep56.pth
+Epoch 57/200 | Loss: 1.0151 | Val Acc: 59.63% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep57.pth
+Epoch 58/200 | Loss: 1.0228 | Val Acc: 59.08% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep58.pth
+Epoch 59/200 | Loss: 1.0212 | Val Acc: 54.55% | Peak VRAM: 733.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep59.pth
+
+[DEBUG] >>> PRUNING @ Epoch 60
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 60/200
+
+============================== PDT Pruning Report: Epoch 60 ==============================
+ [*] Pruned this step: 407 units | VRAM: 752.2MB -> 752.2MB
+ Group  1 |   63/  64 |     1.6% | Hessian: 0.040645
+ Group  2 |   63/  64 |     1.6% | Hessian: 0.040645
+ Group  3 |  128/ 128 |     0.0% | Hessian: 0.234874
+ Group  4 |  128/ 128 |     0.0% | Hessian: 0.234874
+ Group  5 |  256/ 256 |     0.0% | Hessian: 0.147645
+ Group  6 |  256/ 256 |     0.0% | Hessian: 0.147645
+ Group  7 |  196/ 512 |    61.7% | Hessian: 0.113732
+ Group  8 |  196/ 512 |    61.7% | Hessian: 0.113732
+
+[Scientific Metrics] 🟢 Size: 31.34MB | 🔵 Sparsity: 26.71% | 🟡 Speedup: 1.36x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 42.76 MB -> 31.34 MB
+ 🔵 Sparsity: 19.39 %
+ 🟡 Speedup: 1.36x
+💾 Checkpoint saved: resnet18_pdt_ep60_sp19.39.pth
+Epoch 60/200 | Loss: 1.1577 | Val Acc: 57.46% | Peak VRAM: 2661.47 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep60.pth
+Epoch 61/200 | Loss: 1.0884 | Val Acc: 56.39% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep61.pth
+Epoch 62/200 | Loss: 1.0736 | Val Acc: 56.92% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep62.pth
+Epoch 63/200 | Loss: 1.0612 | Val Acc: 53.92% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep63.pth
+Epoch 64/200 | Loss: 1.0582 | Val Acc: 58.10% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep64.pth
+Epoch 65/200 | Loss: 1.0506 | Val Acc: 59.15% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep65.pth
+Epoch 66/200 | Loss: 1.0538 | Val Acc: 58.77% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep66.pth
+Epoch 67/200 | Loss: 1.0403 | Val Acc: 56.86% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep67.pth
+Epoch 68/200 | Loss: 1.0374 | Val Acc: 58.39% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep68.pth
+Epoch 69/200 | Loss: 1.0270 | Val Acc: 55.99% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep69.pth
+Epoch 70/200 | Loss: 1.0360 | Val Acc: 58.53% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep70.pth
+Epoch 71/200 | Loss: 1.0302 | Val Acc: 59.74% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep71.pth
+Epoch 72/200 | Loss: 1.0270 | Val Acc: 57.27% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep72.pth
+Epoch 73/200 | Loss: 1.0302 | Val Acc: 53.15% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep73.pth
+Epoch 74/200 | Loss: 1.0268 | Val Acc: 58.90% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep74.pth
+Epoch 75/200 | Loss: 1.0281 | Val Acc: 56.55% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep75.pth
+Epoch 76/200 | Loss: 1.0121 | Val Acc: 56.53% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep76.pth
+Epoch 77/200 | Loss: 1.0119 | Val Acc: 57.65% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep77.pth
+Epoch 78/200 | Loss: 1.0160 | Val Acc: 58.48% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep78.pth
+Epoch 79/200 | Loss: 1.0177 | Val Acc: 58.25% | Peak VRAM: 735.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep79.pth
+
+[DEBUG] >>> PRUNING @ Epoch 80
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 80/200
+
+============================== PDT Pruning Report: Epoch 80 ==============================
+ [*] Pruned this step: 361 units | VRAM: 752.0MB -> 752.0MB
+ Group  1 |   63/  64 |     1.6% | Hessian: 0.055709
+ Group  2 |   63/  64 |     1.6% | Hessian: 0.055709
+ Group  3 |  128/ 128 |     0.0% | Hessian: 0.267751
+ Group  4 |  128/ 128 |     0.0% | Hessian: 0.267751
+ Group  5 |  245/ 256 |     4.3% | Hessian: 0.146749
+ Group  6 |  245/ 256 |     4.3% | Hessian: 0.146749
+ Group  7 |   87/ 512 |    83.0% | Hessian: 0.095386
+ Group  8 |   87/ 512 |    83.0% | Hessian: 0.095386
+
+[Scientific Metrics] 🟢 Size: 27.25MB | 🔵 Sparsity: 36.28% | 🟡 Speedup: 1.57x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 42.76 MB -> 27.25 MB
+ 🔵 Sparsity: 26.63 %
+ 🟡 Speedup: 1.57x
+💾 Checkpoint saved: resnet18_pdt_ep80_sp26.63.pth
+Epoch 80/200 | Loss: 1.3001 | Val Acc: 56.14% | Peak VRAM: 2663.22 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep80.pth
+Epoch 81/200 | Loss: 1.1501 | Val Acc: 54.95% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep81.pth
+Epoch 82/200 | Loss: 1.1263 | Val Acc: 54.91% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep82.pth
+Epoch 83/200 | Loss: 1.1054 | Val Acc: 51.90% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep83.pth
+Epoch 84/200 | Loss: 1.0843 | Val Acc: 58.59% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep84.pth
+Epoch 85/200 | Loss: 1.0849 | Val Acc: 59.37% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep85.pth
+Epoch 86/200 | Loss: 1.0783 | Val Acc: 56.57% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep86.pth
+Epoch 87/200 | Loss: 1.0744 | Val Acc: 56.52% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep87.pth
+Epoch 88/200 | Loss: 1.0609 | Val Acc: 59.43% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep88.pth
+Epoch 89/200 | Loss: 1.0652 | Val Acc: 61.20% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep89.pth
+Epoch 90/200 | Loss: 1.0491 | Val Acc: 58.30% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep90.pth
+Epoch 91/200 | Loss: 1.0517 | Val Acc: 57.48% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep91.pth
+Epoch 92/200 | Loss: 1.0604 | Val Acc: 58.65% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep92.pth
+Epoch 93/200 | Loss: 1.0574 | Val Acc: 54.98% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep93.pth
+Epoch 94/200 | Loss: 1.0512 | Val Acc: 59.34% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep94.pth
+Epoch 95/200 | Loss: 1.0544 | Val Acc: 55.92% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep95.pth
+Epoch 96/200 | Loss: 1.0489 | Val Acc: 58.02% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep96.pth
+Epoch 97/200 | Loss: 1.0529 | Val Acc: 56.73% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep97.pth
+Epoch 98/200 | Loss: 1.0405 | Val Acc: 54.77% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep98.pth
+Epoch 99/200 | Loss: 1.0522 | Val Acc: 57.93% | Peak VRAM: 734.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep99.pth
+
+[DEBUG] >>> PRUNING @ Epoch 100
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 100/200
+
+============================== PDT Pruning Report: Epoch 100 ==============================
+ [*] Pruned this step: 317 units | VRAM: 751.5MB -> 751.5MB
+ Group  1 |   61/  64 |     4.7% | Hessian: 0.050174
+ Group  2 |   61/  64 |     4.7% | Hessian: 0.050174
+ Group  3 |  128/ 128 |     0.0% | Hessian: 0.373644
+ Group  4 |  128/ 128 |     0.0% | Hessian: 0.373644
+ Group  5 |  232/ 256 |     9.4% | Hessian: 0.101486
+ Group  6 |  232/ 256 |     9.4% | Hessian: 0.101486
+ Group  7 |    9/ 512 |    98.2% | Hessian: 0.048362
+ Group  8 |    9/ 512 |    98.2% | Hessian: 0.048362
+
+[Scientific Metrics] 🟢 Size: 24.19MB | 🔵 Sparsity: 43.43% | 🟡 Speedup: 1.77x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 42.76 MB -> 24.19 MB
+ 🔵 Sparsity: 32.29 %
+ 🟡 Speedup: 1.77x
+💾 Checkpoint saved: resnet18_pdt_ep100_sp32.29.pth
+Epoch 100/200 | Loss: 2.4509 | Val Acc: 35.30% | Peak VRAM: 2665.48 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep100.pth
+Epoch 101/200 | Loss: 1.8402 | Val Acc: 44.50% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep101.pth
+Epoch 102/200 | Loss: 1.6985 | Val Acc: 46.19% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep102.pth
+Epoch 103/200 | Loss: 1.6457 | Val Acc: 46.05% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep103.pth
+Epoch 104/200 | Loss: 1.6050 | Val Acc: 46.56% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep104.pth
+Epoch 105/200 | Loss: 1.5809 | Val Acc: 51.19% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep105.pth
+Epoch 106/200 | Loss: 1.5689 | Val Acc: 49.39% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep106.pth
+Epoch 107/200 | Loss: 1.5582 | Val Acc: 48.58% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep107.pth
+Epoch 108/200 | Loss: 1.5358 | Val Acc: 49.64% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep108.pth
+Epoch 109/200 | Loss: 1.5217 | Val Acc: 48.25% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep109.pth
+Epoch 110/200 | Loss: 1.5142 | Val Acc: 48.60% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep110.pth
+Epoch 111/200 | Loss: 1.5219 | Val Acc: 48.82% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep111.pth
+Epoch 112/200 | Loss: 1.5077 | Val Acc: 51.02% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep112.pth
+Epoch 113/200 | Loss: 1.4908 | Val Acc: 47.79% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep113.pth
+Epoch 114/200 | Loss: 1.4997 | Val Acc: 47.71% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep114.pth
+Epoch 115/200 | Loss: 1.5076 | Val Acc: 49.43% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep115.pth
+Epoch 116/200 | Loss: 1.5086 | Val Acc: 50.50% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep116.pth
+Epoch 117/200 | Loss: 1.4979 | Val Acc: 52.50% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep117.pth
+Epoch 118/200 | Loss: 1.4830 | Val Acc: 51.66% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep118.pth
+Epoch 119/200 | Loss: 1.4823 | Val Acc: 51.34% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep119.pth
+
+[DEBUG] >>> PRUNING @ Epoch 120
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 120/200
+
+============================== PDT Pruning Report: Epoch 120 ==============================
+ [*] Pruned this step: 456 units | VRAM: 751.0MB -> 751.0MB
+ Group  1 |   60/  64 |     6.2% | Hessian: 0.051280
+ Group  2 |   60/  64 |     6.2% | Hessian: 0.051280
+ Group  3 |  128/ 128 |     0.0% | Hessian: 0.211705
+ Group  4 |  128/ 128 |     0.0% | Hessian: 0.211705
+ Group  5 |  109/ 256 |    57.4% | Hessian: 0.054756
+ Group  6 |  109/ 256 |    57.4% | Hessian: 0.054756
+ Group  7 |    0/ 512 |   100.0% | Hessian: 0.014140
+ Group  8 |    0/ 512 |   100.0% | Hessian: 0.014140
+
+[Scientific Metrics] 🟢 Size: 21.66MB | 🔵 Sparsity: 49.35% | 🟡 Speedup: 1.97x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 42.76 MB -> 21.66 MB
+ 🔵 Sparsity: 40.37 %
+ 🟡 Speedup: 1.97x
+💾 Checkpoint saved: resnet18_pdt_ep120_sp40.37.pth
+Epoch 120/200 | Loss: 4.6261 | Val Acc: 1.00% | Peak VRAM: 2661.48 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep120.pth
+Epoch 121/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep121.pth
+Epoch 122/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep122.pth
+Epoch 123/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep123.pth
+Epoch 124/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep124.pth
+Epoch 125/200 | Loss: 4.6075 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep125.pth
+Epoch 126/200 | Loss: 4.6079 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep126.pth
+Epoch 127/200 | Loss: 4.6075 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep127.pth
+Epoch 128/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep128.pth
+Epoch 129/200 | Loss: 4.6079 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep129.pth
+Epoch 130/200 | Loss: 4.6079 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep130.pth
+Epoch 131/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep131.pth
+Epoch 132/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep132.pth
+Epoch 133/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep133.pth
+Epoch 134/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep134.pth
+Epoch 135/200 | Loss: 4.6079 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep135.pth
+Epoch 136/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep136.pth
+Epoch 137/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep137.pth
+Epoch 138/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep138.pth
+Epoch 139/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep139.pth
+
+[DEBUG] >>> PRUNING @ Epoch 140
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 140/200
+
+============================== PDT Pruning Report: Epoch 140 ==============================
+ [*] Pruned this step: 1410 units | VRAM: 751.7MB -> 751.7MB
+ Group  1 |    0/  64 |   100.0% | Hessian: 0.000000
+ Group  2 |    0/  64 |   100.0% | Hessian: 0.000000
+ Group  3 |    0/ 128 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 128 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  6 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  7 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  8 |    0/ 512 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 18.42MB | 🔵 Sparsity: 56.94% | 🟡 Speedup: 2.32x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 42.76 MB -> 18.42 MB
+ 🔵 Sparsity: 58.20 %
+ 🟡 Speedup: 2.32x
+💾 Checkpoint saved: resnet18_pdt_ep140_sp58.20.pth
+Epoch 140/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 2637.40 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep140.pth
+Epoch 141/200 | Loss: 4.6079 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep141.pth
+Epoch 142/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep142.pth
+Epoch 143/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep143.pth
+Epoch 144/200 | Loss: 4.6076 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep144.pth
+Epoch 145/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep145.pth
+Epoch 146/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep146.pth
+Epoch 147/200 | Loss: 4.6078 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep147.pth
+Epoch 148/200 | Loss: 4.6077 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep148.pth
+Epoch 149/200 | Loss: 4.6076 | Val Acc: 1.00% | Peak VRAM: 736.00 MB
+💾 Epoch Checkpoint Saved: resnet18_pdt_ep149.pth

@@ -1,0 +1,477 @@
+📝 Logging started: resnet152_st_20260217_063333.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet152 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.bn3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.1.bn3 ... (1 layers)
+ Group  3 | Channels:  256 | Layers: layer1.2.bn3 ... (1 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.bn3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.1.bn3 ... (1 layers)
+ Group  6 | Channels:  512 | Layers: layer2.2.bn3 ... (1 layers)
+ Group  7 | Channels:  512 | Layers: layer2.3.bn3 ... (1 layers)
+ Group  8 | Channels:  512 | Layers: layer2.4.bn3 ... (1 layers)
+ Group  9 | Channels:  512 | Layers: layer2.5.bn3 ... (1 layers)
+ Group 10 | Channels:  512 | Layers: layer2.6.bn3 ... (1 layers)
+ Group 11 | Channels:  512 | Layers: layer2.7.bn3 ... (1 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.bn3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.1.bn3 ... (1 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.2.bn3 ... (1 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.3.bn3 ... (1 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.4.bn3 ... (1 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.5.bn3 ... (1 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.6.bn3 ... (1 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.7.bn3 ... (1 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.8.bn3 ... (1 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.9.bn3 ... (1 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.10.bn3 ... (1 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.11.bn3 ... (1 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.12.bn3 ... (1 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.13.bn3 ... (1 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.14.bn3 ... (1 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.15.bn3 ... (1 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.16.bn3 ... (1 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.17.bn3 ... (1 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.18.bn3 ... (1 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.19.bn3 ... (1 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.20.bn3 ... (1 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.21.bn3 ... (1 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.22.bn3 ... (1 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.23.bn3 ... (1 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.24.bn3 ... (1 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.25.bn3 ... (1 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.26.bn3 ... (1 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.27.bn3 ... (1 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.28.bn3 ... (1 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.29.bn3 ... (1 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.30.bn3 ... (1 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.31.bn3 ... (1 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.32.bn3 ... (1 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.33.bn3 ... (1 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.34.bn3 ... (1 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.35.bn3 ... (1 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.bn3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.1.bn3 ... (1 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.2.bn3 ... (1 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+
+[Pruner Init] Strict Conv-Topology Mode Activated
+[*] Applied Min Survival Guarantee: 10.0%
+[*] Only defined groups (1-50) will be pruned.
+[System] Initializing STPruner (SuperTickets Strategy)
+
+>>> [Pilot Check] Strategy: ST | Pruning starts at Epoch 40, every 20 epochs.
+
+=== [Stage 1 & 4] Baseline Before Pruning Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                           aten::_batch_norm_impl_index         0.16%     238.999us        19.71%      30.214ms     194.932us       0.000us         0.00%       1.810ms      11.680us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm         9.12%      13.970ms        19.56%      29.975ms     193.390us       1.786ms        21.76%       1.810ms      11.680us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         0.78%       1.192ms         9.64%      14.770ms      19.058us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         0.16%     239.701us        19.87%      30.454ms     196.478us       0.000us         0.00%       1.810ms      11.680us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.12%     179.369us         9.20%      14.102ms      90.978us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                           aten::conv2d         0.14%     218.177us        64.47%      98.811ms     637.493us       0.000us         0.00%       6.443ms      41.568us           0 B           0 B       1.32 GB           0 B           155  364767477.760  
+                                      aten::convolution         0.20%     305.352us        64.33%      98.593ms     636.086us       0.000us         0.00%       6.443ms      41.568us           0 B           0 B       1.32 GB           0 B           155            --  
+                                     aten::_convolution         0.67%       1.026ms        64.13%      98.288ms     634.116us       0.000us         0.00%       6.443ms      41.568us           0 B           0 B       1.32 GB           0 B           155            --  
+                                aten::cudnn_convolution        57.35%      87.889ms        63.46%      97.262ms     627.499us       5.034ms        61.33%       6.443ms      41.568us           0 B           0 B       1.32 GB       1.32 GB           155            --  
+                                           aten::linear         0.02%      30.495us         0.77%       1.179ms       1.179ms       0.000us         0.00%      18.432us      18.432us           0 B           0 B       9.13 MB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 153.261ms
+Self CUDA time total: 8.207ms
+
+Epoch 1/200 | Loss: 4.4200 | Val Acc: 8.30%
+Epoch 2/200 | Loss: 3.6506 | Val Acc: 17.37%
+Epoch 3/200 | Loss: 3.0884 | Val Acc: 26.90%
+Epoch 4/200 | Loss: 2.5595 | Val Acc: 39.10%
+Epoch 5/200 | Loss: 2.1636 | Val Acc: 44.66%
+Epoch 6/200 | Loss: 1.8990 | Val Acc: 46.11%
+Epoch 7/200 | Loss: 1.6935 | Val Acc: 48.94%
+Epoch 8/200 | Loss: 1.5575 | Val Acc: 51.23%
+Epoch 9/200 | Loss: 1.4395 | Val Acc: 53.27%
+Epoch 10/200 | Loss: 1.3423 | Val Acc: 56.00%
+Epoch 11/200 | Loss: 1.2572 | Val Acc: 58.89%
+Epoch 12/200 | Loss: 1.1865 | Val Acc: 60.55%
+Epoch 13/200 | Loss: 1.1338 | Val Acc: 61.05%
+Epoch 14/200 | Loss: 1.0845 | Val Acc: 61.53%
+Epoch 15/200 | Loss: 1.0299 | Val Acc: 62.70%
+Epoch 16/200 | Loss: 0.9925 | Val Acc: 61.66%
+Epoch 17/200 | Loss: 0.9511 | Val Acc: 63.99%
+Epoch 18/200 | Loss: 0.9135 | Val Acc: 62.53%
+Epoch 19/200 | Loss: 0.8861 | Val Acc: 63.02%
+Epoch 20/200 | Loss: 0.8580 | Val Acc: 63.79%
+Epoch 21/200 | Loss: 0.8323 | Val Acc: 65.47%
+Epoch 22/200 | Loss: 0.8040 | Val Acc: 66.35%
+Epoch 23/200 | Loss: 0.7805 | Val Acc: 65.65%
+Epoch 24/200 | Loss: 0.7597 | Val Acc: 65.07%
+Epoch 25/200 | Loss: 0.7428 | Val Acc: 65.53%
+Epoch 26/200 | Loss: 0.7207 | Val Acc: 65.82%
+Epoch 27/200 | Loss: 0.7126 | Val Acc: 65.58%
+Epoch 28/200 | Loss: 0.6955 | Val Acc: 65.26%
+Epoch 29/200 | Loss: 0.6815 | Val Acc: 62.89%
+Epoch 30/200 | Loss: 0.6817 | Val Acc: 65.91%
+Epoch 31/200 | Loss: 0.6665 | Val Acc: 64.35%
+Epoch 32/200 | Loss: 0.6588 | Val Acc: 66.54%
+Epoch 33/200 | Loss: 0.6460 | Val Acc: 66.55%
+Epoch 34/200 | Loss: 0.6404 | Val Acc: 62.06%
+Epoch 35/200 | Loss: 0.6325 | Val Acc: 66.00%
+Epoch 36/200 | Loss: 0.6326 | Val Acc: 64.93%
+Epoch 37/200 | Loss: 0.6192 | Val Acc: 64.32%
+Epoch 38/200 | Loss: 0.6190 | Val Acc: 67.21%
+Epoch 39/200 | Loss: 0.6080 | Val Acc: 64.24%
+
+[DEBUG] === ST Emergency Pruning: Epoch 40 ===
+[DEBUG] ST: Found 75812 candidates to prune.
+
+============================== ST Global Pruning: Epoch 40 ==============================
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 221.98 MB -> 164.32 MB
+ 🔵 Sparsity: 25.97 %
+ 🟡 Theoretical Speedup: 1.35x
+=========================================================================================
+
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_st_ep40_sp16.0.pth
+
+=== [Stage 1 & 4] ST Epoch 40 Update Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         1.36%     183.615us        29.25%       3.950ms      25.485us       0.000us         0.00%       4.999ms      32.253us           0 B           0 B       1.38 GB           0 B           155  364767477.760  
+                                      aten::convolution         1.72%     232.087us        27.89%       3.767ms      24.301us       0.000us         0.00%       4.999ms      32.253us           0 B           0 B       1.38 GB           0 B           155            --  
+                                     aten::_convolution         3.70%     499.504us        26.18%       3.535ms      22.803us       0.000us         0.00%       4.999ms      32.253us           0 B           0 B       1.38 GB           0 B           155            --  
+                                aten::cudnn_convolution        12.47%       1.684ms        22.48%       3.035ms      19.581us       4.976ms        60.98%       4.999ms      32.253us           0 B           0 B       1.38 GB       1.38 GB           155            --  
+                           aten::_batch_norm_impl_index         1.16%     156.427us        28.71%       3.877ms      25.010us       0.000us         0.00%       1.801ms      11.621us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        11.46%       1.548ms        27.55%       3.720ms      24.001us       1.801ms        22.07%       1.801ms      11.621us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         8.15%       1.100ms        10.71%       1.447ms       1.867us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         1.44%     194.902us        30.15%       4.072ms      26.268us       0.000us         0.00%       1.801ms      11.621us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         1.03%     139.621us         5.56%     750.331us       4.841us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                              aten::adaptive_avg_pool2d         0.02%       2.985us         0.18%      24.206us      24.206us       0.000us         0.00%       3.232us       3.232us           0 B           0 B       8.00 KB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 13.503ms
+Self CUDA time total: 8.161ms
+
+Epoch 40/200 | Loss: 0.6705 | Val Acc: 66.64%
+Epoch 41/200 | Loss: 0.6556 | Val Acc: 64.58%
+Epoch 42/200 | Loss: 0.6485 | Val Acc: 67.04%
+Epoch 43/200 | Loss: 0.6315 | Val Acc: 64.96%
+Epoch 44/200 | Loss: 0.6161 | Val Acc: 65.54%
+Epoch 45/200 | Loss: 0.6163 | Val Acc: 66.33%
+Epoch 46/200 | Loss: 0.5952 | Val Acc: 65.84%
+Epoch 47/200 | Loss: 0.5910 | Val Acc: 64.42%
+Epoch 48/200 | Loss: 0.5873 | Val Acc: 67.47%
+Epoch 49/200 | Loss: 0.5771 | Val Acc: 65.60%
+Epoch 50/200 | Loss: 0.5647 | Val Acc: 67.16%
+Epoch 51/200 | Loss: 0.5643 | Val Acc: 66.20%
+Epoch 52/200 | Loss: 0.5535 | Val Acc: 66.92%
+Epoch 53/200 | Loss: 0.5504 | Val Acc: 67.10%
+Epoch 54/200 | Loss: 0.5497 | Val Acc: 67.41%
+Epoch 55/200 | Loss: 0.5388 | Val Acc: 67.60%
+Epoch 56/200 | Loss: 0.5294 | Val Acc: 66.36%
+Epoch 57/200 | Loss: 0.5251 | Val Acc: 66.75%
+Epoch 58/200 | Loss: 0.5295 | Val Acc: 65.58%
+Epoch 59/200 | Loss: 0.5223 | Val Acc: 68.21%
+
+[DEBUG] === ST Emergency Pruning: Epoch 60 ===
+[DEBUG] ST: Found 63683 candidates to prune.
+
+============================== ST Global Pruning: Epoch 60 ==============================
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 221.98 MB -> 134.71 MB
+ 🔵 Sparsity: 39.31 %
+ 🟡 Theoretical Speedup: 1.65x
+=========================================================================================
+
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_st_ep60_sp36.2.pth
+
+=== [Stage 1 & 4] ST Epoch 60 Update Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                           aten::_batch_norm_impl_index         1.21%     176.734us        26.88%       3.939ms      25.410us       0.000us         0.00%       1.786ms      11.525us           0 B           0 B       1.38 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        11.25%       1.649ms        25.68%       3.762ms      24.270us       1.786ms        21.90%       1.786ms      11.525us           0 B           0 B       1.38 GB           0 B           155            --  
+                                            aten::empty         8.01%       1.173ms         8.81%       1.291ms       1.666us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB       1.38 GB           775            --  
+                                       aten::batch_norm         1.29%     188.601us        28.17%       4.127ms      26.627us       0.000us         0.00%       1.786ms      11.525us           0 B           0 B       1.38 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.97%     141.548us         3.52%     515.021us       3.323us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB           0 B           155            --  
+                                           aten::conv2d         1.46%     214.428us        31.21%       4.572ms      29.497us       0.000us         0.00%       5.013ms      32.345us           0 B           0 B       1.36 GB           0 B           155  364767477.760  
+                                      aten::convolution         1.70%     248.844us        29.74%       4.358ms      28.113us       0.000us         0.00%       5.013ms      32.345us           0 B           0 B       1.36 GB           0 B           155            --  
+                                     aten::_convolution         3.82%     559.435us        28.05%       4.109ms      26.508us       0.000us         0.00%       5.013ms      32.345us           0 B           0 B       1.36 GB           0 B           155            --  
+                                aten::cudnn_convolution        13.44%       1.968ms        24.23%       3.549ms      22.899us       4.990ms        61.17%       5.013ms      32.345us           0 B           0 B       1.36 GB       1.36 GB           155            --  
+                              aten::adaptive_avg_pool2d         0.03%       4.437us         0.28%      41.171us      41.171us       0.000us         0.00%       3.200us       3.200us           0 B           0 B       8.00 KB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 14.650ms
+Self CUDA time total: 8.158ms
+
+Epoch 60/200 | Loss: 0.5649 | Val Acc: 67.56%
+Epoch 61/200 | Loss: 0.5466 | Val Acc: 65.74%
+Epoch 62/200 | Loss: 0.5365 | Val Acc: 67.15%
+Epoch 63/200 | Loss: 0.5265 | Val Acc: 67.29%
+Epoch 64/200 | Loss: 0.5295 | Val Acc: 67.83%
+Epoch 65/200 | Loss: 0.5156 | Val Acc: 68.29%
+Epoch 66/200 | Loss: 0.5151 | Val Acc: 67.94%
+Epoch 67/200 | Loss: 0.5035 | Val Acc: 68.43%
+Epoch 68/200 | Loss: 0.5061 | Val Acc: 65.53%
+Epoch 69/200 | Loss: 0.4958 | Val Acc: 68.57%
+Epoch 70/200 | Loss: 0.4909 | Val Acc: 67.10%
+Epoch 71/200 | Loss: 0.4920 | Val Acc: 67.07%
+Epoch 72/200 | Loss: 0.4886 | Val Acc: 67.77%
+Epoch 73/200 | Loss: 0.4881 | Val Acc: 66.85%
+Epoch 74/200 | Loss: 0.4861 | Val Acc: 68.72%
+Epoch 75/200 | Loss: 0.4764 | Val Acc: 66.32%
+Epoch 76/200 | Loss: 0.4769 | Val Acc: 68.74%
+Epoch 77/200 | Loss: 0.4737 | Val Acc: 69.63%
+Epoch 78/200 | Loss: 0.4673 | Val Acc: 67.55%
+Epoch 79/200 | Loss: 0.4696 | Val Acc: 68.07%
+
+[DEBUG] === ST Emergency Pruning: Epoch 80 ===
+[DEBUG] ST: Found 48400 candidates to prune.
+
+============================== ST Global Pruning: Epoch 80 ==============================
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 221.98 MB -> 82.91 MB
+ 🔵 Sparsity: 62.65 %
+ 🟡 Theoretical Speedup: 2.68x
+=========================================================================================
+
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_st_ep80_sp56.6.pth
+
+=== [Stage 1 & 4] ST Epoch 80 Update Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         1.64%     280.409us        36.05%       6.160ms      39.743us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB           0 B           155  364767477.760  
+                                      aten::convolution         1.87%     320.191us        34.41%       5.880ms      37.934us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB           0 B           155            --  
+                                     aten::_convolution         4.33%     739.674us        32.53%       5.560ms      35.868us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB           0 B           155            --  
+                                aten::cudnn_convolution        11.43%       1.954ms        28.21%       4.820ms      31.096us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB       1.38 GB           155            --  
+                           aten::_batch_norm_impl_index         1.08%     184.790us        26.40%       4.511ms      29.101us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        11.17%       1.909ms        25.31%       4.326ms      27.909us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         7.30%       1.247ms         9.35%       1.598ms       2.062us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         1.12%     190.691us        27.51%       4.701ms      30.331us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.94%     160.571us         4.61%     787.217us       5.079us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                              aten::adaptive_avg_pool2d         0.02%       3.645us         0.19%      32.608us      32.608us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       8.00 KB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 17.088ms
+Self CUDA time total: 8.095ms
+
+Epoch 80/200 | Loss: 0.6837 | Val Acc: 64.95%
+Epoch 81/200 | Loss: 0.6305 | Val Acc: 65.95%
+Epoch 82/200 | Loss: 0.6038 | Val Acc: 67.49%
+Epoch 83/200 | Loss: 0.5927 | Val Acc: 64.37%
+Epoch 84/200 | Loss: 0.5656 | Val Acc: 67.33%
+Epoch 85/200 | Loss: 0.5598 | Val Acc: 67.00%
+Epoch 86/200 | Loss: 0.5409 | Val Acc: 67.28%
+Epoch 87/200 | Loss: 0.5319 | Val Acc: 69.11%
+Epoch 88/200 | Loss: 0.5185 | Val Acc: 68.25%
+Epoch 89/200 | Loss: 0.5099 | Val Acc: 68.09%
+Epoch 90/200 | Loss: 0.5075 | Val Acc: 68.59%
+Epoch 91/200 | Loss: 0.4984 | Val Acc: 67.25%
+Epoch 92/200 | Loss: 0.4889 | Val Acc: 67.96%
+Epoch 93/200 | Loss: 0.4886 | Val Acc: 68.50%
+Epoch 94/200 | Loss: 0.4796 | Val Acc: 67.04%
+Epoch 95/200 | Loss: 0.4758 | Val Acc: 67.24%
+Epoch 96/200 | Loss: 0.4684 | Val Acc: 69.26%
+Epoch 97/200 | Loss: 0.4646 | Val Acc: 67.91%
+Epoch 98/200 | Loss: 0.4643 | Val Acc: 68.45%
+Epoch 99/200 | Loss: 0.4614 | Val Acc: 68.30%
+
+[DEBUG] === ST Emergency Pruning: Epoch 100 ===
+[DEBUG] ST: Found 32912 candidates to prune.
+
+============================== ST Global Pruning: Epoch 100 ==============================
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 221.98 MB -> 50.42 MB
+ 🔵 Sparsity: 77.28 %
+ 🟡 Theoretical Speedup: 4.40x
+=========================================================================================
+
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_st_ep100_sp74.0.pth
+
+=== [Stage 1 & 4] ST Epoch 100 Update Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         1.47%     267.397us        42.12%       7.642ms      49.302us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.40 GB           0 B           155  364767477.760  
+                                      aten::convolution         1.50%     272.434us        40.64%       7.374ms      47.577us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.40 GB           0 B           155            --  
+                                     aten::_convolution         3.37%     612.359us        39.14%       7.102ms      45.820us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.40 GB           0 B           155            --  
+                                aten::cudnn_convolution        10.16%       1.844ms        35.77%       6.490ms      41.869us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.40 GB       1.40 GB           155            --  
+                           aten::_batch_norm_impl_index         0.95%     172.105us        23.37%       4.241ms      27.361us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.33 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm         9.56%       1.735ms        22.42%       4.069ms      26.250us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.33 GB           0 B           155            --  
+                                            aten::empty         6.54%       1.186ms         8.23%       1.494ms       1.928us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.33 GB       1.33 GB           775            --  
+                                       aten::batch_norm         1.06%     192.286us        24.43%       4.433ms      28.601us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.33 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.83%     151.264us         4.03%     731.078us       4.717us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.33 GB           0 B           155            --  
+                              aten::adaptive_avg_pool2d         0.03%       4.917us         0.24%      43.294us      43.294us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       8.00 KB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 18.145ms
+Self CUDA time total: 8.074ms
+
+Epoch 100/200 | Loss: 0.8453 | Val Acc: 63.59%
+Epoch 101/200 | Loss: 0.7520 | Val Acc: 65.52%
+Epoch 102/200 | Loss: 0.7108 | Val Acc: 63.89%
+Epoch 103/200 | Loss: 0.6788 | Val Acc: 68.12%
+Epoch 104/200 | Loss: 0.6537 | Val Acc: 67.01%
+Epoch 105/200 | Loss: 0.6268 | Val Acc: 67.40%
+Epoch 106/200 | Loss: 0.6133 | Val Acc: 67.11%
+Epoch 107/200 | Loss: 0.5980 | Val Acc: 66.75%
+Epoch 108/200 | Loss: 0.5858 | Val Acc: 67.71%
+Epoch 109/200 | Loss: 0.5633 | Val Acc: 67.99%
+Epoch 110/200 | Loss: 0.5608 | Val Acc: 69.00%
+Epoch 111/200 | Loss: 0.5481 | Val Acc: 67.87%
+Epoch 112/200 | Loss: 0.5382 | Val Acc: 69.16%
+Epoch 113/200 | Loss: 0.5362 | Val Acc: 67.70%
+Epoch 114/200 | Loss: 0.5247 | Val Acc: 66.77%
+Epoch 115/200 | Loss: 0.5290 | Val Acc: 68.66%
+Epoch 116/200 | Loss: 0.5223 | Val Acc: 68.74%
+Epoch 117/200 | Loss: 0.5097 | Val Acc: 66.56%
+Epoch 118/200 | Loss: 0.5096 | Val Acc: 68.72%
+Epoch 119/200 | Loss: 0.5009 | Val Acc: 68.83%
+
+[DEBUG] === ST Emergency Pruning: Epoch 120 ===
+[DEBUG] ST: Found 19748 candidates to prune.
+
+============================== ST Global Pruning: Epoch 120 ==============================
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 221.98 MB -> 30.46 MB
+ 🔵 Sparsity: 86.28 %
+ 🟡 Theoretical Speedup: 7.29x
+=========================================================================================
+
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_st_ep120_sp86.5.pth
+
+=== [Stage 1 & 4] ST Epoch 120 Update Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         1.59%     273.779us        38.70%       6.655ms      42.934us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB           0 B           155  364767477.760  
+                                      aten::convolution         1.69%     290.872us        37.11%       6.381ms      41.168us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB           0 B           155            --  
+                                     aten::_convolution         3.94%     676.931us        35.41%       6.090ms      39.291us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB           0 B           155            --  
+                                aten::cudnn_convolution        10.83%       1.863ms        31.48%       5.413ms      34.924us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.38 GB       1.38 GB           155            --  
+                           aten::_batch_norm_impl_index         0.99%     171.105us        25.53%       4.390ms      28.323us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm        10.69%       1.838ms        24.53%       4.219ms      27.219us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         7.19%       1.237ms         9.14%       1.573ms       2.029us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         1.09%     187.483us        26.62%       4.578ms      29.532us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.87%     149.610us         4.34%     746.304us       4.815us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                              aten::adaptive_avg_pool2d         0.02%       3.445us         0.18%      30.144us      30.144us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       8.00 KB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 17.197ms
+Self CUDA time total: 8.019ms
+
+Epoch 120/200 | Loss: 1.0630 | Val Acc: 61.98%
+Epoch 121/200 | Loss: 0.9059 | Val Acc: 61.53%
+Epoch 122/200 | Loss: 0.8218 | Val Acc: 64.48%
+Epoch 123/200 | Loss: 0.7733 | Val Acc: 65.86%
+Epoch 124/200 | Loss: 0.7443 | Val Acc: 64.39%
+Epoch 125/200 | Loss: 0.7156 | Val Acc: 65.41%
+Epoch 126/200 | Loss: 0.7037 | Val Acc: 65.39%
+Epoch 127/200 | Loss: 0.6778 | Val Acc: 67.05%
+Epoch 128/200 | Loss: 0.6610 | Val Acc: 66.07%
+Epoch 129/200 | Loss: 0.6448 | Val Acc: 65.89%
+Epoch 130/200 | Loss: 0.6360 | Val Acc: 63.90%
+Epoch 131/200 | Loss: 0.6199 | Val Acc: 67.94%
+Epoch 132/200 | Loss: 0.6133 | Val Acc: 68.27%
+Epoch 133/200 | Loss: 0.6008 | Val Acc: 67.03%
+Epoch 134/200 | Loss: 0.5950 | Val Acc: 66.25%
+Epoch 135/200 | Loss: 0.5973 | Val Acc: 70.11%
+Epoch 136/200 | Loss: 0.5781 | Val Acc: 66.87%
+Epoch 137/200 | Loss: 0.5800 | Val Acc: 66.81%
+Epoch 138/200 | Loss: 0.5680 | Val Acc: 67.86%
+Epoch 139/200 | Loss: 0.5683 | Val Acc: 68.86%
+
+[DEBUG] === ST Emergency Pruning: Epoch 140 ===
+[DEBUG] ST: Found 10269 candidates to prune.
+
+============================== ST Global Pruning: Epoch 140 ==============================
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 221.98 MB -> 9.85 MB
+ 🔵 Sparsity: 95.56 %
+ 🟡 Theoretical Speedup: 22.54x
+=========================================================================================
+
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_st_ep140_sp94.0.pth
+
+=== [Stage 1 & 4] ST Epoch 140 Update Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         1.63%     310.216us        41.67%       7.931ms      51.165us       0.000us         0.00%       4.975ms      32.097us           0 B           0 B       1.38 GB           0 B           155  364767477.760  
+                                      aten::convolution         1.79%     339.980us        40.04%       7.620ms      49.164us       0.000us         0.00%       4.975ms      32.097us           0 B           0 B       1.38 GB           0 B           155            --  
+                                     aten::_convolution         3.59%     684.066us        38.25%       7.280ms      46.970us       0.000us         0.00%       4.975ms      32.097us           0 B           0 B       1.38 GB           0 B           155            --  
+                                aten::cudnn_convolution        10.26%       1.953ms        34.66%       6.596ms      42.557us       4.952ms        61.43%       4.975ms      32.097us           0 B           0 B       1.38 GB       1.38 GB           155            --  
+                           aten::_batch_norm_impl_index         0.98%     186.903us        23.18%       4.413ms      28.469us       0.000us         0.00%       1.754ms      11.318us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm         9.60%       1.828ms        22.20%       4.226ms      27.263us       1.754ms        21.76%       1.754ms      11.318us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         6.65%       1.266ms         8.06%       1.535ms       1.981us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         1.00%     190.916us        24.19%       4.604ms      29.701us       0.000us         0.00%       1.754ms      11.318us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         0.90%     171.490us         3.70%     704.152us       4.543us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                              aten::adaptive_avg_pool2d         0.02%       4.637us         0.21%      40.119us      40.119us       0.000us         0.00%       3.232us       3.232us           0 B           0 B       8.00 KB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 19.033ms
+Self CUDA time total: 8.060ms
+
+Epoch 140/200 | Loss: 3.2664 | Val Acc: 26.72%
+Epoch 141/200 | Loss: 2.8839 | Val Acc: 27.12%
+Epoch 142/200 | Loss: 2.7392 | Val Acc: 31.56%
+Epoch 143/200 | Loss: 2.6385 | Val Acc: 32.81%
+Epoch 144/200 | Loss: 2.5716 | Val Acc: 32.61%
+Epoch 145/200 | Loss: 2.5136 | Val Acc: 33.09%
+Epoch 146/200 | Loss: 2.4721 | Val Acc: 34.05%
+Epoch 147/200 | Loss: 2.4349 | Val Acc: 33.98%
+Epoch 148/200 | Loss: 2.4083 | Val Acc: 33.83%
+Epoch 149/200 | Loss: 2.3762 | Val Acc: 35.99%
+Epoch 150/200 | Loss: 2.3534 | Val Acc: 36.32%
+Epoch 151/200 | Loss: 2.3289 | Val Acc: 36.05%
+Epoch 152/200 | Loss: 2.3087 | Val Acc: 36.70%
+Epoch 153/200 | Loss: 2.2938 | Val Acc: 37.47%
+Epoch 154/200 | Loss: 2.2852 | Val Acc: 38.53%
+Epoch 155/200 | Loss: 2.2695 | Val Acc: 37.88%
+Epoch 156/200 | Loss: 2.2526 | Val Acc: 36.82%
+Epoch 157/200 | Loss: 2.2433 | Val Acc: 36.76%
+Epoch 158/200 | Loss: 2.2308 | Val Acc: 37.21%
+Epoch 159/200 | Loss: 2.2254 | Val Acc: 38.06%
+
+[DEBUG] === ST Emergency Pruning: Epoch 160 ===
+[DEBUG] ST: Found 4519 candidates to prune.
+
+============================== ST Global Pruning: Epoch 160 ==============================
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 221.98 MB -> 3.33 MB
+ 🔵 Sparsity: 98.50 %
+ 🟡 Theoretical Speedup: 66.56x
+=========================================================================================
+
+💾 Checkpoint saved: ./exp/checkpoints/resnet152_st_ep160_sp97.9.pth
+
+=== [Stage 1 & 4] ST Epoch 160 Update Analysis ===
+[*] Topology Status: 517 nodes currently in graph.
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                                   Name    Self CPU %      Self CPU   CPU total %     CPU total  CPU time avg     Self CUDA   Self CUDA %    CUDA total  CUDA time avg       CPU Mem  Self CPU Mem      CUDA Mem  Self CUDA Mem    # of Calls  Total KFLOPs  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+                                           aten::conv2d         1.75%     333.870us        41.17%       7.856ms      50.683us       0.000us         0.00%       4.907ms      31.656us           0 B           0 B       1.38 GB           0 B           155  364767477.760  
+                                      aten::convolution         1.79%     341.861us        39.42%       7.522ms      48.529us       0.000us         0.00%       4.907ms      31.656us           0 B           0 B       1.38 GB           0 B           155            --  
+                                     aten::_convolution         3.41%     649.729us        37.63%       7.180ms      46.323us       0.000us         0.00%       4.907ms      31.656us           0 B           0 B       1.38 GB           0 B           155            --  
+                                aten::cudnn_convolution        10.25%       1.955ms        34.23%       6.530ms      42.131us       4.884ms        61.16%       4.907ms      31.656us           0 B           0 B       1.38 GB       1.38 GB           155            --  
+                           aten::_batch_norm_impl_index         1.01%     193.327us        24.00%       4.579ms      29.542us       0.000us         0.00%       1.741ms      11.233us           0 B           0 B       1.32 GB           0 B           155            --  
+                                 aten::cudnn_batch_norm         9.66%       1.842ms        22.99%       4.386ms      28.295us       1.741ms        21.80%       1.741ms      11.233us           0 B           0 B       1.32 GB           0 B           155            --  
+                                            aten::empty         6.72%       1.282ms         8.58%       1.637ms       2.112us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB       1.32 GB           775            --  
+                                       aten::batch_norm         1.09%     207.424us        25.09%       4.786ms      30.880us       0.000us         0.00%       1.741ms      11.233us           0 B           0 B       1.32 GB    -595.00 KB           155            --  
+                                       aten::empty_like         1.10%     210.158us         4.40%     840.036us       5.420us       0.000us         0.00%       0.000us       0.000us           0 B           0 B       1.32 GB           0 B           155            --  
+                              aten::adaptive_avg_pool2d         0.03%       5.127us         0.25%      47.570us      47.570us       0.000us         0.00%       3.232us       3.232us           0 B           0 B       8.00 KB           0 B             1            --  
+-------------------------------------------------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  ------------  
+Self CPU time total: 19.080ms
+Self CUDA time total: 7.985ms
+
+Epoch 160/200 | Loss: 4.5684 | Val Acc: 3.54%
+Epoch 161/200 | Loss: 4.5503 | Val Acc: 3.27%
+Epoch 162/200 | Loss: 4.5468 | Val Acc: 3.32%
+Epoch 163/200 | Loss: 4.5440 | Val Acc: 3.48%
+Epoch 164/200 | Loss: 4.5442 | Val Acc: 3.45%
+Epoch 165/200 | Loss: 4.5423 | Val Acc: 3.40%

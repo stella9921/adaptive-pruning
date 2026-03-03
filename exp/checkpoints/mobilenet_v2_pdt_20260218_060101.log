@@ -1,0 +1,44 @@
+📝 Logging started: mobilenet_v2_pdt_20260218_060101.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: mobilenet_v2 | Dataset: cifar100
+
+[Stage 1] Analyzing MobileNet InvertedResidual Topology for mobilenetv2...
+[*] MobileNet: 17 inverted residual groups found.
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   32 | Layers: features.1.conv.0.0 ... (2 layers)
+ Group  2 | Channels:   96 | Layers: features.2.conv.0.0 ... (3 layers)
+ Group  3 | Channels:  144 | Layers: features.3.conv.0.0 ... (3 layers)
+ Group  4 | Channels:  144 | Layers: features.4.conv.0.0 ... (3 layers)
+ Group  5 | Channels:  192 | Layers: features.5.conv.0.0 ... (3 layers)
+ Group  6 | Channels:  192 | Layers: features.6.conv.0.0 ... (3 layers)
+ Group  7 | Channels:  192 | Layers: features.7.conv.0.0 ... (3 layers)
+ Group  8 | Channels:  384 | Layers: features.8.conv.0.0 ... (3 layers)
+ Group  9 | Channels:  384 | Layers: features.9.conv.0.0 ... (3 layers)
+ Group 10 | Channels:  384 | Layers: features.10.conv.0.0 ... (3 layers)
+ Group 11 | Channels:  384 | Layers: features.11.conv.0.0 ... (3 layers)
+ Group 12 | Channels:  576 | Layers: features.12.conv.0.0 ... (3 layers)
+ Group 13 | Channels:  576 | Layers: features.13.conv.0.0 ... (3 layers)
+ Group 14 | Channels:  576 | Layers: features.14.conv.0.0 ... (3 layers)
+ Group 15 | Channels:  960 | Layers: features.15.conv.0.0 ... (3 layers)
+ Group 16 | Channels:  960 | Layers: features.16.conv.0.0 ... (3 layers)
+ Group 17 | Channels:  960 | Layers: features.17.conv.0.0 ... (3 layers)
+===============================================================
+[*] Total 17 groups identified.
+
+
+[Pruner Init] Identified 17 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 60, every 10 epochs.
+Epoch 1/200 | Loss: 4.6073 | Val Acc: 2.75% | Peak VRAM: 137.97 MB
+Epoch 2/200 | Loss: 4.4023 | Val Acc: 5.65% | Peak VRAM: 137.97 MB
+Epoch 3/200 | Loss: 4.0921 | Val Acc: 9.24% | Peak VRAM: 137.97 MB
+Epoch 4/200 | Loss: 3.8695 | Val Acc: 12.78% | Peak VRAM: 137.97 MB
+Epoch 5/200 | Loss: 3.6980 | Val Acc: 14.54% | Peak VRAM: 137.97 MB
+Epoch 6/200 | Loss: 3.5674 | Val Acc: 17.88% | Peak VRAM: 137.97 MB
+Epoch 7/200 | Loss: 3.4436 | Val Acc: 20.30% | Peak VRAM: 137.97 MB
+Epoch 8/200 | Loss: 3.3488 | Val Acc: 21.49% | Peak VRAM: 137.97 MB

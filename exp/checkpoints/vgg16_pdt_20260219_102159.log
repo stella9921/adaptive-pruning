@@ -1,0 +1,26 @@
+📝 Logging started: vgg16_pdt_20260219_102159.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: vgg16 | Dataset: cifar100
+
+[Stage 1] Analyzing VGG-style Topology (Conv + Classifier) for vgg...
+[Stage 1] Adding Classifier Linear layers to VGG groups...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: features.0 ... (2 layers)
+ Group  2 | Channels:  128 | Layers: features.10 ... (2 layers)
+ Group  3 | Channels:  256 | Layers: features.14 ... (3 layers)
+ Group  4 | Channels:  512 | Layers: features.24 ... (3 layers)
+ Group  5 | Channels:  512 | Layers: features.34 ... (3 layers)
+ Group  6 | Channels: 4096 | Layers: classifier.0 ... (1 layers)
+ Group  7 | Channels: 4096 | Layers: classifier.3 ... (1 layers)
+===============================================================
+[*] Total 7 groups identified.
+
+
+[Pruner Init] Identified 7 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 40, every 20 epochs.

@@ -1,0 +1,876 @@
+📝 Logging started: resnet152_pdt_20260219_093420.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: resnet152 | Dataset: cifar100
+
+[Stage 1] Analyzing Residual Topology for resnet via PyTorch FX...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  256 | Layers: layer1.0.conv3 ... (2 layers)
+ Group  2 | Channels:  256 | Layers: layer1.0.conv3 ... (3 layers)
+ Group  3 | Channels:  256 | Layers: layer1.0.conv3 ... (4 layers)
+ Group  4 | Channels:  512 | Layers: layer2.0.conv3 ... (2 layers)
+ Group  5 | Channels:  512 | Layers: layer2.0.conv3 ... (3 layers)
+ Group  6 | Channels:  512 | Layers: layer2.0.conv3 ... (4 layers)
+ Group  7 | Channels:  512 | Layers: layer2.0.conv3 ... (5 layers)
+ Group  8 | Channels:  512 | Layers: layer2.0.conv3 ... (6 layers)
+ Group  9 | Channels:  512 | Layers: layer2.0.conv3 ... (7 layers)
+ Group 10 | Channels:  512 | Layers: layer2.0.conv3 ... (8 layers)
+ Group 11 | Channels:  512 | Layers: layer2.0.conv3 ... (9 layers)
+ Group 12 | Channels: 1024 | Layers: layer3.0.conv3 ... (2 layers)
+ Group 13 | Channels: 1024 | Layers: layer3.0.conv3 ... (3 layers)
+ Group 14 | Channels: 1024 | Layers: layer3.0.conv3 ... (4 layers)
+ Group 15 | Channels: 1024 | Layers: layer3.0.conv3 ... (5 layers)
+ Group 16 | Channels: 1024 | Layers: layer3.0.conv3 ... (6 layers)
+ Group 17 | Channels: 1024 | Layers: layer3.0.conv3 ... (7 layers)
+ Group 18 | Channels: 1024 | Layers: layer3.0.conv3 ... (8 layers)
+ Group 19 | Channels: 1024 | Layers: layer3.0.conv3 ... (9 layers)
+ Group 20 | Channels: 1024 | Layers: layer3.0.conv3 ... (10 layers)
+ Group 21 | Channels: 1024 | Layers: layer3.0.conv3 ... (11 layers)
+ Group 22 | Channels: 1024 | Layers: layer3.0.conv3 ... (12 layers)
+ Group 23 | Channels: 1024 | Layers: layer3.0.conv3 ... (13 layers)
+ Group 24 | Channels: 1024 | Layers: layer3.0.conv3 ... (14 layers)
+ Group 25 | Channels: 1024 | Layers: layer3.0.conv3 ... (15 layers)
+ Group 26 | Channels: 1024 | Layers: layer3.0.conv3 ... (16 layers)
+ Group 27 | Channels: 1024 | Layers: layer3.0.conv3 ... (17 layers)
+ Group 28 | Channels: 1024 | Layers: layer3.0.conv3 ... (18 layers)
+ Group 29 | Channels: 1024 | Layers: layer3.0.conv3 ... (19 layers)
+ Group 30 | Channels: 1024 | Layers: layer3.0.conv3 ... (20 layers)
+ Group 31 | Channels: 1024 | Layers: layer3.0.conv3 ... (21 layers)
+ Group 32 | Channels: 1024 | Layers: layer3.0.conv3 ... (22 layers)
+ Group 33 | Channels: 1024 | Layers: layer3.0.conv3 ... (23 layers)
+ Group 34 | Channels: 1024 | Layers: layer3.0.conv3 ... (24 layers)
+ Group 35 | Channels: 1024 | Layers: layer3.0.conv3 ... (25 layers)
+ Group 36 | Channels: 1024 | Layers: layer3.0.conv3 ... (26 layers)
+ Group 37 | Channels: 1024 | Layers: layer3.0.conv3 ... (27 layers)
+ Group 38 | Channels: 1024 | Layers: layer3.0.conv3 ... (28 layers)
+ Group 39 | Channels: 1024 | Layers: layer3.0.conv3 ... (29 layers)
+ Group 40 | Channels: 1024 | Layers: layer3.0.conv3 ... (30 layers)
+ Group 41 | Channels: 1024 | Layers: layer3.0.conv3 ... (31 layers)
+ Group 42 | Channels: 1024 | Layers: layer3.0.conv3 ... (32 layers)
+ Group 43 | Channels: 1024 | Layers: layer3.0.conv3 ... (33 layers)
+ Group 44 | Channels: 1024 | Layers: layer3.0.conv3 ... (34 layers)
+ Group 45 | Channels: 1024 | Layers: layer3.0.conv3 ... (35 layers)
+ Group 46 | Channels: 1024 | Layers: layer3.0.conv3 ... (36 layers)
+ Group 47 | Channels: 1024 | Layers: layer3.0.conv3 ... (37 layers)
+ Group 48 | Channels: 2048 | Layers: layer4.0.conv3 ... (2 layers)
+ Group 49 | Channels: 2048 | Layers: layer4.0.conv3 ... (3 layers)
+ Group 50 | Channels: 2048 | Layers: layer4.0.conv3 ... (4 layers)
+===============================================================
+[*] Total 50 groups identified.
+
+
+[Pruner Init] Identified 50 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 40, every 20 epochs.
+Epoch 1/200 | Loss: 4.3815 | Val Acc: 7.57% | Peak VRAM: 3895.78 MB
+Epoch 2/200 | Loss: 3.6340 | Val Acc: 18.19% | Peak VRAM: 3893.78 MB
+Epoch 3/200 | Loss: 3.0791 | Val Acc: 28.13% | Peak VRAM: 3893.78 MB
+Epoch 4/200 | Loss: 2.5741 | Val Acc: 36.85% | Peak VRAM: 3893.78 MB
+Epoch 5/200 | Loss: 2.1757 | Val Acc: 42.84% | Peak VRAM: 3893.78 MB
+Epoch 6/200 | Loss: 1.8958 | Val Acc: 46.88% | Peak VRAM: 3893.78 MB
+Epoch 7/200 | Loss: 1.6932 | Val Acc: 49.33% | Peak VRAM: 3893.78 MB
+Epoch 8/200 | Loss: 1.5513 | Val Acc: 53.37% | Peak VRAM: 3893.78 MB
+Epoch 9/200 | Loss: 1.4366 | Val Acc: 56.19% | Peak VRAM: 3893.78 MB
+Epoch 10/200 | Loss: 1.3337 | Val Acc: 53.82% | Peak VRAM: 3893.78 MB
+Epoch 11/200 | Loss: 1.2540 | Val Acc: 56.91% | Peak VRAM: 3893.78 MB
+Epoch 12/200 | Loss: 1.1944 | Val Acc: 59.11% | Peak VRAM: 3893.78 MB
+Epoch 13/200 | Loss: 1.1352 | Val Acc: 60.91% | Peak VRAM: 3893.78 MB
+Epoch 14/200 | Loss: 1.0819 | Val Acc: 62.44% | Peak VRAM: 3893.78 MB
+Epoch 15/200 | Loss: 1.0370 | Val Acc: 60.72% | Peak VRAM: 3893.78 MB
+Epoch 16/200 | Loss: 0.9876 | Val Acc: 62.84% | Peak VRAM: 3893.78 MB
+Epoch 17/200 | Loss: 0.9554 | Val Acc: 63.05% | Peak VRAM: 3893.78 MB
+Epoch 18/200 | Loss: 0.9119 | Val Acc: 62.63% | Peak VRAM: 3893.78 MB
+Epoch 19/200 | Loss: 0.8870 | Val Acc: 63.73% | Peak VRAM: 3893.78 MB
+Epoch 20/200 | Loss: 0.8576 | Val Acc: 64.47% | Peak VRAM: 3893.78 MB
+Epoch 21/200 | Loss: 0.8285 | Val Acc: 64.27% | Peak VRAM: 3893.78 MB
+Epoch 22/200 | Loss: 0.8044 | Val Acc: 65.32% | Peak VRAM: 3893.78 MB
+Epoch 23/200 | Loss: 0.7809 | Val Acc: 66.40% | Peak VRAM: 3893.78 MB
+Epoch 24/200 | Loss: 0.7585 | Val Acc: 64.64% | Peak VRAM: 3893.78 MB
+Epoch 25/200 | Loss: 0.7449 | Val Acc: 65.34% | Peak VRAM: 3893.78 MB
+Epoch 26/200 | Loss: 0.7211 | Val Acc: 65.25% | Peak VRAM: 3893.78 MB
+Epoch 27/200 | Loss: 0.7142 | Val Acc: 65.64% | Peak VRAM: 3893.78 MB
+Epoch 28/200 | Loss: 0.6948 | Val Acc: 65.40% | Peak VRAM: 3893.78 MB
+Epoch 29/200 | Loss: 0.6836 | Val Acc: 65.47% | Peak VRAM: 3893.78 MB
+Epoch 30/200 | Loss: 0.6750 | Val Acc: 65.99% | Peak VRAM: 3893.78 MB
+Epoch 31/200 | Loss: 0.6657 | Val Acc: 65.39% | Peak VRAM: 3893.78 MB
+Epoch 32/200 | Loss: 0.6534 | Val Acc: 65.83% | Peak VRAM: 3893.78 MB
+Epoch 33/200 | Loss: 0.6530 | Val Acc: 65.81% | Peak VRAM: 3893.78 MB
+Epoch 34/200 | Loss: 0.6427 | Val Acc: 63.95% | Peak VRAM: 3893.78 MB
+Epoch 35/200 | Loss: 0.6317 | Val Acc: 66.83% | Peak VRAM: 3893.78 MB
+Epoch 36/200 | Loss: 0.6239 | Val Acc: 66.70% | Peak VRAM: 3893.78 MB
+Epoch 37/200 | Loss: 0.6136 | Val Acc: 66.76% | Peak VRAM: 3893.78 MB
+Epoch 38/200 | Loss: 0.6176 | Val Acc: 65.60% | Peak VRAM: 3893.78 MB
+Epoch 39/200 | Loss: 0.6064 | Val Acc: 65.77% | Peak VRAM: 3893.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 40
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 40/200
+
+============================== PDT Pruning Report: Epoch 40 ==============================
+ [*] Pruned this step: 138743 units | VRAM: 4139.3MB -> 4139.3MB
+ Group  1 |  255/ 256 |     0.4% | Hessian: 0.083256
+ Group  2 |  255/ 256 |     0.4% | Hessian: 0.083256
+ Group  3 |  255/ 256 |     0.4% | Hessian: 0.083256
+ Group  4 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group  5 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group  6 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group  7 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group  8 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group  9 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group 10 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group 11 |  512/ 512 |     0.0% | Hessian: 0.121082
+ Group 12 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 13 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 14 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 15 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 16 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 17 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 18 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 19 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 20 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 21 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 22 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 23 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 24 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 25 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 26 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 27 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 28 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 29 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 30 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 31 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 32 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 33 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 34 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 35 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 36 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 37 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 38 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 39 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 40 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 41 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 42 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 43 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 44 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 45 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 46 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 47 |  553/1024 |    46.0% | Hessian: 0.126787
+ Group 48 | 1580/2048 |    22.9% | Hessian: 0.113739
+ Group 49 | 1580/2048 |    22.9% | Hessian: 0.113739
+ Group 50 | 1580/2048 |    22.9% | Hessian: 0.113739
+
+[Scientific Metrics] 🟢 Size: 199.96MB | 🔵 Sparsity: 9.92% | 🟡 Speedup: 1.11x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 221.98 MB -> 199.96 MB
+ 🔵 Sparsity: 25.41 %
+ 🟡 Speedup: 1.11x
+💾 Checkpoint saved: resnet152_pdt_ep40_sp25.41.pth
+Epoch 40/200 | Loss: 0.7815 | Val Acc: 61.99% | Peak VRAM: 15868.99 MB
+Epoch 41/200 | Loss: 0.7504 | Val Acc: 64.95% | Peak VRAM: 3893.78 MB
+Epoch 42/200 | Loss: 0.7281 | Val Acc: 62.93% | Peak VRAM: 3893.78 MB
+Epoch 43/200 | Loss: 0.6971 | Val Acc: 63.47% | Peak VRAM: 3893.78 MB
+Epoch 44/200 | Loss: 0.6911 | Val Acc: 64.90% | Peak VRAM: 3893.78 MB
+Epoch 45/200 | Loss: 0.6785 | Val Acc: 63.90% | Peak VRAM: 3893.78 MB
+Epoch 46/200 | Loss: 0.6622 | Val Acc: 63.74% | Peak VRAM: 3893.78 MB
+Epoch 47/200 | Loss: 0.6467 | Val Acc: 66.91% | Peak VRAM: 3893.78 MB
+Epoch 48/200 | Loss: 0.6368 | Val Acc: 66.29% | Peak VRAM: 3893.78 MB
+Epoch 49/200 | Loss: 0.6297 | Val Acc: 66.59% | Peak VRAM: 3893.78 MB
+Epoch 50/200 | Loss: 0.6233 | Val Acc: 64.56% | Peak VRAM: 3893.78 MB
+Epoch 51/200 | Loss: 0.6191 | Val Acc: 67.28% | Peak VRAM: 3893.78 MB
+Epoch 52/200 | Loss: 0.6119 | Val Acc: 64.61% | Peak VRAM: 3893.78 MB
+Epoch 53/200 | Loss: 0.5965 | Val Acc: 66.13% | Peak VRAM: 3893.78 MB
+Epoch 54/200 | Loss: 0.5933 | Val Acc: 66.75% | Peak VRAM: 3893.78 MB
+Epoch 55/200 | Loss: 0.5866 | Val Acc: 65.18% | Peak VRAM: 3893.78 MB
+Epoch 56/200 | Loss: 0.5818 | Val Acc: 65.32% | Peak VRAM: 3893.78 MB
+Epoch 57/200 | Loss: 0.5782 | Val Acc: 66.92% | Peak VRAM: 3893.78 MB
+Epoch 58/200 | Loss: 0.5739 | Val Acc: 62.93% | Peak VRAM: 3893.78 MB
+Epoch 59/200 | Loss: 0.5746 | Val Acc: 65.57% | Peak VRAM: 3893.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 60
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 60/200
+
+============================== PDT Pruning Report: Epoch 60 ==============================
+ [*] Pruned this step: 9078 units | VRAM: 4140.3MB -> 4140.3MB
+ Group  1 |  244/ 256 |     4.7% | Hessian: 0.152776
+ Group  2 |  244/ 256 |     4.7% | Hessian: 0.152776
+ Group  3 |  244/ 256 |     4.7% | Hessian: 0.152776
+ Group  4 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group  5 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group  6 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group  7 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group  8 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group  9 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group 10 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group 11 |  512/ 512 |     0.0% | Hessian: 0.103344
+ Group 12 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 13 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 14 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 15 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 16 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 17 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 18 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 19 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 20 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 21 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 22 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 23 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 24 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 25 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 26 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 27 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 28 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 29 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 30 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 31 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 32 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 33 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 34 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 35 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 36 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 37 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 38 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 39 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 40 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 41 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 42 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 43 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 44 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 45 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 46 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 47 |  500/1024 |    51.2% | Hessian: 0.086075
+ Group 48 | 1521/2048 |    25.7% | Hessian: 0.080933
+ Group 49 | 1521/2048 |    25.7% | Hessian: 0.080933
+ Group 50 | 1521/2048 |    25.7% | Hessian: 0.080933
+
+[Scientific Metrics] 🟢 Size: 197.42MB | 🔵 Sparsity: 11.06% | 🟡 Speedup: 1.12x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 221.98 MB -> 197.42 MB
+ 🔵 Sparsity: 28.33 %
+ 🟡 Speedup: 1.12x
+💾 Checkpoint saved: resnet152_pdt_ep60_sp28.33.pth
+Epoch 60/200 | Loss: 0.5996 | Val Acc: 64.85% | Peak VRAM: 15869.24 MB
+Epoch 61/200 | Loss: 0.5893 | Val Acc: 64.77% | Peak VRAM: 3895.78 MB
+Epoch 62/200 | Loss: 0.5835 | Val Acc: 65.64% | Peak VRAM: 3895.78 MB
+Epoch 63/200 | Loss: 0.5757 | Val Acc: 67.87% | Peak VRAM: 3895.78 MB
+Epoch 64/200 | Loss: 0.5745 | Val Acc: 63.80% | Peak VRAM: 3895.78 MB
+Epoch 65/200 | Loss: 0.5704 | Val Acc: 66.37% | Peak VRAM: 3895.78 MB
+Epoch 66/200 | Loss: 0.5649 | Val Acc: 64.63% | Peak VRAM: 3895.78 MB
+Epoch 67/200 | Loss: 0.5558 | Val Acc: 67.11% | Peak VRAM: 3895.78 MB
+Epoch 68/200 | Loss: 0.5584 | Val Acc: 66.93% | Peak VRAM: 3895.78 MB
+Epoch 69/200 | Loss: 0.5468 | Val Acc: 67.01% | Peak VRAM: 3895.78 MB
+Epoch 70/200 | Loss: 0.5480 | Val Acc: 65.01% | Peak VRAM: 3895.78 MB
+Epoch 71/200 | Loss: 0.5449 | Val Acc: 67.38% | Peak VRAM: 3895.78 MB
+Epoch 72/200 | Loss: 0.5436 | Val Acc: 68.04% | Peak VRAM: 3895.78 MB
+Epoch 73/200 | Loss: 0.5391 | Val Acc: 65.62% | Peak VRAM: 3895.78 MB
+Epoch 74/200 | Loss: 0.5407 | Val Acc: 66.65% | Peak VRAM: 3895.78 MB
+Epoch 75/200 | Loss: 0.5324 | Val Acc: 67.09% | Peak VRAM: 3895.78 MB
+Epoch 76/200 | Loss: 0.5349 | Val Acc: 65.28% | Peak VRAM: 3895.78 MB
+Epoch 77/200 | Loss: 0.5351 | Val Acc: 65.95% | Peak VRAM: 3895.78 MB
+Epoch 78/200 | Loss: 0.5272 | Val Acc: 65.31% | Peak VRAM: 3895.78 MB
+Epoch 79/200 | Loss: 0.5252 | Val Acc: 66.02% | Peak VRAM: 3895.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 80
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 80/200
+
+============================== PDT Pruning Report: Epoch 80 ==============================
+ [*] Pruned this step: 41398 units | VRAM: 4142.8MB -> 4142.8MB
+ Group  1 |  234/ 256 |     8.6% | Hessian: 0.149404
+ Group  2 |  234/ 256 |     8.6% | Hessian: 0.149404
+ Group  3 |  234/ 256 |     8.6% | Hessian: 0.149404
+ Group  4 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group  5 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group  6 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group  7 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group  8 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group  9 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group 10 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group 11 |  506/ 512 |     1.2% | Hessian: 0.102949
+ Group 12 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 13 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 14 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 15 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 16 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 17 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 18 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 19 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 20 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 21 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 22 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 23 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 24 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 25 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 26 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 27 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 28 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 29 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 30 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 31 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 32 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 33 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 34 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 35 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 36 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 37 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 38 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 39 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 40 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 41 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 42 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 43 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 44 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 45 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 46 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 47 |  343/1024 |    66.5% | Hessian: 0.024679
+ Group 48 | 1240/2048 |    39.5% | Hessian: 0.059133
+ Group 49 | 1240/2048 |    39.5% | Hessian: 0.059133
+ Group 50 | 1240/2048 |    39.5% | Hessian: 0.059133
+
+[Scientific Metrics] 🟢 Size: 188.87MB | 🔵 Sparsity: 14.91% | 🟡 Speedup: 1.18x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 221.98 MB -> 188.87 MB
+ 🔵 Sparsity: 37.48 %
+ 🟡 Speedup: 1.18x
+💾 Checkpoint saved: resnet152_pdt_ep80_sp37.48.pth
+Epoch 80/200 | Loss: 0.6647 | Val Acc: 65.03% | Peak VRAM: 15872.49 MB
+Epoch 81/200 | Loss: 0.6296 | Val Acc: 64.69% | Peak VRAM: 3897.78 MB
+Epoch 82/200 | Loss: 0.6181 | Val Acc: 64.08% | Peak VRAM: 3897.78 MB
+Epoch 83/200 | Loss: 0.6112 | Val Acc: 64.97% | Peak VRAM: 3897.78 MB
+Epoch 84/200 | Loss: 0.5974 | Val Acc: 67.67% | Peak VRAM: 3897.78 MB
+Epoch 85/200 | Loss: 0.5908 | Val Acc: 68.07% | Peak VRAM: 3897.78 MB
+Epoch 86/200 | Loss: 0.5828 | Val Acc: 66.76% | Peak VRAM: 3897.78 MB
+Epoch 87/200 | Loss: 0.5801 | Val Acc: 66.91% | Peak VRAM: 3897.78 MB
+Epoch 88/200 | Loss: 0.5657 | Val Acc: 65.33% | Peak VRAM: 3897.78 MB
+Epoch 89/200 | Loss: 0.5654 | Val Acc: 67.16% | Peak VRAM: 3897.78 MB
+Epoch 90/200 | Loss: 0.5616 | Val Acc: 65.26% | Peak VRAM: 3897.78 MB
+Epoch 91/200 | Loss: 0.5600 | Val Acc: 65.75% | Peak VRAM: 3897.78 MB
+Epoch 92/200 | Loss: 0.5539 | Val Acc: 66.42% | Peak VRAM: 3897.78 MB
+Epoch 93/200 | Loss: 0.5511 | Val Acc: 67.80% | Peak VRAM: 3897.78 MB
+Epoch 94/200 | Loss: 0.5481 | Val Acc: 67.75% | Peak VRAM: 3897.78 MB
+Epoch 95/200 | Loss: 0.5481 | Val Acc: 67.96% | Peak VRAM: 3897.78 MB
+Epoch 96/200 | Loss: 0.5304 | Val Acc: 64.98% | Peak VRAM: 3897.78 MB
+Epoch 97/200 | Loss: 0.5449 | Val Acc: 68.47% | Peak VRAM: 3897.78 MB
+Epoch 98/200 | Loss: 0.5444 | Val Acc: 65.64% | Peak VRAM: 3897.78 MB
+Epoch 99/200 | Loss: 0.5379 | Val Acc: 65.01% | Peak VRAM: 3897.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 100
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 100/200
+
+============================== PDT Pruning Report: Epoch 100 ==============================
+ [*] Pruned this step: 34152 units | VRAM: 4143.1MB -> 4143.1MB
+ Group  1 |  233/ 256 |     9.0% | Hessian: 0.169468
+ Group  2 |  233/ 256 |     9.0% | Hessian: 0.169468
+ Group  3 |  233/ 256 |     9.0% | Hessian: 0.169468
+ Group  4 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group  5 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group  6 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group  7 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group  8 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group  9 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group 10 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group 11 |  497/ 512 |     2.9% | Hessian: 0.079860
+ Group 12 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 13 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 14 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 15 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 16 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 17 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 18 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 19 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 20 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 21 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 22 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 23 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 24 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 25 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 26 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 27 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 28 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 29 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 30 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 31 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 32 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 33 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 34 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 35 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 36 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 37 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 38 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 39 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 40 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 41 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 42 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 43 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 44 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 45 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 46 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 47 |  193/1024 |    81.2% | Hessian: 0.057059
+ Group 48 | 1175/2048 |    42.6% | Hessian: 0.071507
+ Group 49 | 1175/2048 |    42.6% | Hessian: 0.071507
+ Group 50 | 1175/2048 |    42.6% | Hessian: 0.071507
+
+[Scientific Metrics] 🟢 Size: 182.66MB | 🔵 Sparsity: 17.71% | 🟡 Speedup: 1.22x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 221.98 MB -> 182.66 MB
+ 🔵 Sparsity: 45.17 %
+ 🟡 Speedup: 1.22x
+💾 Checkpoint saved: resnet152_pdt_ep100_sp45.17.pth
+Epoch 100/200 | Loss: 0.7664 | Val Acc: 62.55% | Peak VRAM: 15871.99 MB
+Epoch 101/200 | Loss: 0.7038 | Val Acc: 64.82% | Peak VRAM: 3896.78 MB
+Epoch 102/200 | Loss: 0.6778 | Val Acc: 65.06% | Peak VRAM: 3896.78 MB
+Epoch 103/200 | Loss: 0.6600 | Val Acc: 66.14% | Peak VRAM: 3896.78 MB
+Epoch 104/200 | Loss: 0.6484 | Val Acc: 66.71% | Peak VRAM: 3896.78 MB
+Epoch 105/200 | Loss: 0.6294 | Val Acc: 67.14% | Peak VRAM: 3896.78 MB
+Epoch 106/200 | Loss: 0.6182 | Val Acc: 64.44% | Peak VRAM: 3896.78 MB
+Epoch 107/200 | Loss: 0.6149 | Val Acc: 66.21% | Peak VRAM: 3896.78 MB
+Epoch 108/200 | Loss: 0.6049 | Val Acc: 67.19% | Peak VRAM: 3896.78 MB
+Epoch 109/200 | Loss: 0.5954 | Val Acc: 66.04% | Peak VRAM: 3896.78 MB
+Epoch 110/200 | Loss: 0.5939 | Val Acc: 66.16% | Peak VRAM: 3896.78 MB
+Epoch 111/200 | Loss: 0.5879 | Val Acc: 66.71% | Peak VRAM: 3896.78 MB
+Epoch 112/200 | Loss: 0.5867 | Val Acc: 65.11% | Peak VRAM: 3896.78 MB
+Epoch 113/200 | Loss: 0.5854 | Val Acc: 66.37% | Peak VRAM: 3896.78 MB
+Epoch 114/200 | Loss: 0.5784 | Val Acc: 68.44% | Peak VRAM: 3896.78 MB
+Epoch 115/200 | Loss: 0.5685 | Val Acc: 66.53% | Peak VRAM: 3896.78 MB
+Epoch 116/200 | Loss: 0.5717 | Val Acc: 69.10% | Peak VRAM: 3896.78 MB
+Epoch 117/200 | Loss: 0.5663 | Val Acc: 65.66% | Peak VRAM: 3896.78 MB
+Epoch 118/200 | Loss: 0.5710 | Val Acc: 67.46% | Peak VRAM: 3896.78 MB
+Epoch 119/200 | Loss: 0.5610 | Val Acc: 65.53% | Peak VRAM: 3896.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 120
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 120/200
+
+============================== PDT Pruning Report: Epoch 120 ==============================
+ [*] Pruned this step: 25398 units | VRAM: 4142.3MB -> 4142.3MB
+ Group  1 |  231/ 256 |     9.8% | Hessian: 0.174038
+ Group  2 |  231/ 256 |     9.8% | Hessian: 0.174038
+ Group  3 |  231/ 256 |     9.8% | Hessian: 0.174038
+ Group  4 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group  5 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group  6 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group  7 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group  8 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group  9 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group 10 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group 11 |  484/ 512 |     5.5% | Hessian: 0.051810
+ Group 12 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 13 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 14 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 15 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 16 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 17 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 18 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 19 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 20 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 21 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 22 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 23 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 24 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 25 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 26 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 27 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 28 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 29 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 30 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 31 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 32 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 33 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 34 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 35 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 36 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 37 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 38 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 39 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 40 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 41 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 42 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 43 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 44 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 45 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 46 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 47 |   86/1024 |    91.6% | Hessian: 0.022375
+ Group 48 |  772/2048 |    62.3% | Hessian: 0.055984
+ Group 49 |  772/2048 |    62.3% | Hessian: 0.055984
+ Group 50 |  772/2048 |    62.3% | Hessian: 0.055984
+
+[Scientific Metrics] 🟢 Size: 174.72MB | 🔵 Sparsity: 21.29% | 🟡 Speedup: 1.27x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 221.98 MB -> 174.72 MB
+ 🔵 Sparsity: 52.58 %
+ 🟡 Speedup: 1.27x
+💾 Checkpoint saved: resnet152_pdt_ep120_sp52.58.pth
+Epoch 120/200 | Loss: 1.0231 | Val Acc: 62.28% | Peak VRAM: 15872.24 MB
+Epoch 121/200 | Loss: 0.8574 | Val Acc: 63.13% | Peak VRAM: 3895.78 MB
+Epoch 122/200 | Loss: 0.8104 | Val Acc: 66.31% | Peak VRAM: 3895.78 MB
+Epoch 123/200 | Loss: 0.7675 | Val Acc: 64.88% | Peak VRAM: 3895.78 MB
+Epoch 124/200 | Loss: 0.7473 | Val Acc: 65.31% | Peak VRAM: 3895.78 MB
+Epoch 125/200 | Loss: 0.7273 | Val Acc: 64.29% | Peak VRAM: 3895.78 MB
+Epoch 126/200 | Loss: 0.7089 | Val Acc: 64.56% | Peak VRAM: 3895.78 MB
+Epoch 127/200 | Loss: 0.6951 | Val Acc: 64.17% | Peak VRAM: 3895.78 MB
+Epoch 128/200 | Loss: 0.6809 | Val Acc: 65.81% | Peak VRAM: 3895.78 MB
+Epoch 129/200 | Loss: 0.6750 | Val Acc: 64.40% | Peak VRAM: 3895.78 MB
+Epoch 130/200 | Loss: 0.6570 | Val Acc: 65.97% | Peak VRAM: 3895.78 MB
+Epoch 131/200 | Loss: 0.6502 | Val Acc: 65.96% | Peak VRAM: 3895.78 MB
+Epoch 132/200 | Loss: 0.6454 | Val Acc: 66.54% | Peak VRAM: 3895.78 MB
+Epoch 133/200 | Loss: 0.6377 | Val Acc: 65.77% | Peak VRAM: 3895.78 MB
+Epoch 134/200 | Loss: 0.6356 | Val Acc: 67.08% | Peak VRAM: 3895.78 MB
+Epoch 135/200 | Loss: 0.6312 | Val Acc: 66.37% | Peak VRAM: 3895.78 MB
+Epoch 136/200 | Loss: 0.6291 | Val Acc: 65.27% | Peak VRAM: 3895.78 MB
+Epoch 137/200 | Loss: 0.6159 | Val Acc: 67.16% | Peak VRAM: 3895.78 MB
+Epoch 138/200 | Loss: 0.6226 | Val Acc: 66.01% | Peak VRAM: 3895.78 MB
+Epoch 139/200 | Loss: 0.6075 | Val Acc: 67.11% | Peak VRAM: 3895.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 140
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 140/200
+
+============================== PDT Pruning Report: Epoch 140 ==============================
+ [*] Pruned this step: 19524 units | VRAM: 4141.8MB -> 4141.8MB
+ Group  1 |  229/ 256 |    10.5% | Hessian: 0.108221
+ Group  2 |  229/ 256 |    10.5% | Hessian: 0.108221
+ Group  3 |  229/ 256 |    10.5% | Hessian: 0.108221
+ Group  4 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group  5 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group  6 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group  7 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group  8 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group  9 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group 10 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group 11 |  477/ 512 |     6.8% | Hessian: 0.078480
+ Group 12 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 13 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 14 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 15 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 16 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 17 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 18 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 19 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 20 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 21 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 22 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 23 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 24 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 25 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 26 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 27 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 28 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 29 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 30 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 31 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 32 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 33 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 34 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 35 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 36 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 37 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 38 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 39 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 40 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 41 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 42 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 43 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 44 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 45 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 46 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 47 |   17/1024 |    98.3% | Hessian: 0.024579
+ Group 48 |  658/2048 |    67.9% | Hessian: 0.066917
+ Group 49 |  658/2048 |    67.9% | Hessian: 0.066917
+ Group 50 |  658/2048 |    67.9% | Hessian: 0.066917
+
+[Scientific Metrics] 🟢 Size: 171.03MB | 🔵 Sparsity: 22.95% | 🟡 Speedup: 1.30x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 221.98 MB -> 171.03 MB
+ 🔵 Sparsity: 56.58 %
+ 🟡 Speedup: 1.30x
+💾 Checkpoint saved: resnet152_pdt_ep140_sp56.58.pth
+Epoch 140/200 | Loss: 1.7655 | Val Acc: 52.52% | Peak VRAM: 15871.24 MB
+Epoch 141/200 | Loss: 1.3213 | Val Acc: 56.82% | Peak VRAM: 3895.78 MB
+Epoch 142/200 | Loss: 1.1926 | Val Acc: 59.14% | Peak VRAM: 3895.78 MB
+Epoch 143/200 | Loss: 1.1203 | Val Acc: 59.34% | Peak VRAM: 3895.78 MB
+Epoch 144/200 | Loss: 1.0585 | Val Acc: 60.16% | Peak VRAM: 3895.78 MB
+Epoch 145/200 | Loss: 1.0114 | Val Acc: 62.05% | Peak VRAM: 3895.78 MB
+Epoch 146/200 | Loss: 0.9800 | Val Acc: 63.62% | Peak VRAM: 3895.78 MB
+Epoch 147/200 | Loss: 0.9519 | Val Acc: 56.43% | Peak VRAM: 3895.78 MB
+Epoch 148/200 | Loss: 0.9260 | Val Acc: 62.74% | Peak VRAM: 3895.78 MB
+Epoch 149/200 | Loss: 0.9053 | Val Acc: 63.74% | Peak VRAM: 3895.78 MB
+Epoch 150/200 | Loss: 0.8831 | Val Acc: 62.34% | Peak VRAM: 3895.78 MB
+Epoch 151/200 | Loss: 0.8713 | Val Acc: 61.16% | Peak VRAM: 3895.78 MB
+Epoch 152/200 | Loss: 0.8513 | Val Acc: 61.23% | Peak VRAM: 3895.78 MB
+Epoch 153/200 | Loss: 0.8344 | Val Acc: 63.85% | Peak VRAM: 3895.78 MB
+Epoch 154/200 | Loss: 0.8224 | Val Acc: 62.92% | Peak VRAM: 3895.78 MB
+Epoch 155/200 | Loss: 0.8170 | Val Acc: 62.40% | Peak VRAM: 3895.78 MB
+Epoch 156/200 | Loss: 0.8006 | Val Acc: 62.74% | Peak VRAM: 3895.78 MB
+Epoch 157/200 | Loss: 0.7923 | Val Acc: 63.94% | Peak VRAM: 3895.78 MB
+Epoch 158/200 | Loss: 0.7850 | Val Acc: 63.07% | Peak VRAM: 3895.78 MB
+Epoch 159/200 | Loss: 0.7820 | Val Acc: 64.84% | Peak VRAM: 3895.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 160
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 160/200
+
+============================== PDT Pruning Report: Epoch 160 ==============================
+ [*] Pruned this step: 11051 units | VRAM: 4144.6MB -> 4144.6MB
+ Group  1 |  226/ 256 |    11.7% | Hessian: 0.104721
+ Group  2 |  226/ 256 |    11.7% | Hessian: 0.104721
+ Group  3 |  226/ 256 |    11.7% | Hessian: 0.104721
+ Group  4 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group  5 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group  6 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group  7 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group  8 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group  9 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group 10 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group 11 |  469/ 512 |     8.4% | Hessian: 0.055396
+ Group 12 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 13 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 14 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 15 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 16 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 17 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 18 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 19 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 20 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 21 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 22 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 23 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 24 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 25 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 26 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 27 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 28 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 29 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 30 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 31 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 32 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 33 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 34 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 35 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 36 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 37 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 38 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 39 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 40 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 41 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 42 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 43 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 44 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 45 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 46 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 47 |    0/1024 |   100.0% | Hessian: 0.009374
+ Group 48 |  351/2048 |    82.9% | Hessian: 0.022313
+ Group 49 |  351/2048 |    82.9% | Hessian: 0.022313
+ Group 50 |  351/2048 |    82.9% | Hessian: 0.022313
+
+[Scientific Metrics] 🟢 Size: 167.59MB | 🔵 Sparsity: 24.50% | 🟡 Speedup: 1.32x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 221.98 MB -> 167.59 MB
+ 🔵 Sparsity: 58.94 %
+ 🟡 Speedup: 1.32x
+💾 Checkpoint saved: resnet152_pdt_ep160_sp58.94.pth
+Epoch 160/200 | Loss: 4.6188 | Val Acc: 1.00% | Peak VRAM: 15875.49 MB
+Epoch 161/200 | Loss: 4.6106 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 162/200 | Loss: 4.6104 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 163/200 | Loss: 4.6102 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 164/200 | Loss: 4.6101 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 165/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 166/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 167/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 168/200 | Loss: 4.6100 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 169/200 | Loss: 4.6101 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 170/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 171/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 172/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 173/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 174/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 175/200 | Loss: 4.6096 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 176/200 | Loss: 4.6101 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 177/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 178/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 179/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 180
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 180/200
+
+============================== PDT Pruning Report: Epoch 180 ==============================
+ [*] Pruned this step: 24799 units | VRAM: 4144.6MB -> 4144.6MB
+ Group  1 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  2 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  3 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  6 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  7 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  8 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  9 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group 10 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group 11 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group 12 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 13 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 14 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 15 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 16 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 17 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 18 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 19 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 20 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 21 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 22 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 23 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 24 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 25 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 26 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 27 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 28 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 29 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 30 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 31 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 32 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 33 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 34 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 35 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 36 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 37 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 38 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 39 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 40 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 41 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 42 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 43 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 44 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 45 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 46 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 47 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 48 |    0/2048 |   100.0% | Hessian: 0.000000
+ Group 49 |    0/2048 |   100.0% | Hessian: 0.000000
+ Group 50 |    0/2048 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 162.12MB | 🔵 Sparsity: 26.96% | 🟡 Speedup: 1.37x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 180]
+ 🟢 Model Size: 221.98 MB -> 162.12 MB
+ 🔵 Sparsity: 67.24 %
+ 🟡 Speedup: 1.37x
+💾 Checkpoint saved: resnet152_pdt_ep180_sp67.24.pth
+Epoch 180/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 15814.74 MB
+Epoch 181/200 | Loss: 4.6102 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 182/200 | Loss: 4.6096 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 183/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 184/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 185/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 186/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 187/200 | Loss: 4.6101 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 188/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 189/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 190/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 191/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 192/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 193/200 | Loss: 4.6097 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 194/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 195/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 196/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 197/200 | Loss: 4.6099 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 198/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+Epoch 199/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 3895.78 MB
+
+[DEBUG] >>> PRUNING @ Epoch 200
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 200/200
+
+============================== PDT Pruning Report: Epoch 200 ==============================
+ [*] Pruned this step: 0 units | VRAM: 4144.6MB -> 4144.6MB
+ Group  1 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  2 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  3 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  6 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  7 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  8 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  9 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group 10 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group 11 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group 12 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 13 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 14 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 15 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 16 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 17 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 18 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 19 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 20 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 21 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 22 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 23 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 24 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 25 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 26 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 27 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 28 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 29 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 30 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 31 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 32 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 33 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 34 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 35 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 36 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 37 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 38 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 39 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 40 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 41 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 42 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 43 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 44 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 45 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 46 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 47 |    0/1024 |   100.0% | Hessian: 0.000000
+ Group 48 |    0/2048 |   100.0% | Hessian: 0.000000
+ Group 49 |    0/2048 |   100.0% | Hessian: 0.000000
+ Group 50 |    0/2048 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 162.12MB | 🔵 Sparsity: 26.96% | 🟡 Speedup: 1.37x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 221.98 MB -> 162.12 MB
+ 🔵 Sparsity: 67.24 %
+ 🟡 Speedup: 1.37x
+💾 Checkpoint saved: resnet152_pdt_ep200_sp67.24.pth
+Epoch 200/200 | Loss: 4.6098 | Val Acc: 1.00% | Peak VRAM: 15814.74 MB
+
+🏁 Final Model Saved: ./exp/checkpoints/resnet152_pdt_final.pth
+
+================ FINAL PHYSICAL COMPRESSION ================
+

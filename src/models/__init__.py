@@ -2,6 +2,8 @@ import torch.nn as nn
 from .resnet import get_resnet, prune_resnet_blockwise
 from .vgg import get_vgg16, prune_vgg_blockwise
 from .efficientnet import get_efficientnet, prune_efficientnet_blockwise
+from .mobilenet import get_mobilenet, prune_mobilenet_blockwise
+
 
 def get_model(model_cfg):
     """YAML의 model 섹션 설정을 받아 모델 객체를 생성함"""
@@ -14,6 +16,8 @@ def get_model(model_cfg):
         return get_vgg16(num_classes)
     elif "efficientnet" in name:
         return get_efficientnet(num_classes)
+    elif "mobilenet" in name:
+        return get_mobilenet(name, num_classes)
     else:
         raise ValueError(f"지원하지 않는 모델 이름입니다: {name}")
 
@@ -26,6 +30,8 @@ def get_prune_fn(model_name):
         return prune_vgg_blockwise
     elif "efficientnet" in name:
         return prune_efficientnet_blockwise
+    elif "mobilenet" in name:
+        return prune_mobilenet_blockwise
     else:
         raise ValueError(f"물리적 프루닝 함수를 찾을 수 없습니다: {name}")
 
@@ -71,5 +77,10 @@ def find_prunable_blocks(model, model_name, topology_groups=None):
         for n, m in model.named_modules():
             if isinstance(m, nn.Conv2d) and (".conv" in n or ".pw" in n or ".dw" in n):
                 blocks[n] = m
+    elif "mobilenet" in name:
+        for n, m in model.named_modules():
+            if isinstance(m, nn.Conv2d):
+                blocks[n] = m
+
                 
     return blocks

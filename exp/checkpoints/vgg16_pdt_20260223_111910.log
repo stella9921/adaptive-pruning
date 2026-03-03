@@ -1,0 +1,549 @@
+📝 Logging started: vgg16_pdt_20260223_111910.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: vgg16 | Dataset: cifar100
+
+[Stage 1] Analyzing VGG-style Topology (Conv + Classifier) for vgg...
+[Stage 1] Adding Classifier Linear layers to VGG groups...
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:   64 | Layers: features.0 ... (2 layers)
+ Group  2 | Channels:  128 | Layers: features.10 ... (2 layers)
+ Group  3 | Channels:  256 | Layers: features.14 ... (3 layers)
+ Group  4 | Channels:  512 | Layers: features.24 ... (3 layers)
+ Group  5 | Channels:  512 | Layers: features.34 ... (3 layers)
+ Group  6 | Channels: 4096 | Layers: classifier.0 ... (1 layers)
+ Group  7 | Channels: 4096 | Layers: classifier.3 ... (1 layers)
+===============================================================
+[*] Total 7 groups identified.
+
+
+[Pruner Init] Identified 7 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing PDTPruner (Stable Version)
+
+>>> Strategy: PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 40, every 20 epochs.
+Epoch 1/200 | Loss: 4.4356 | Val Acc: 7.17% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep1.pth
+Epoch 2/200 | Loss: 3.9114 | Val Acc: 12.36% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep2.pth
+Epoch 3/200 | Loss: 3.6166 | Val Acc: 16.10% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep3.pth
+Epoch 4/200 | Loss: 3.4315 | Val Acc: 19.36% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep4.pth
+Epoch 5/200 | Loss: 3.2532 | Val Acc: 20.67% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep5.pth
+Epoch 6/200 | Loss: 3.0987 | Val Acc: 24.62% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep6.pth
+Epoch 7/200 | Loss: 2.9552 | Val Acc: 27.87% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep7.pth
+Epoch 8/200 | Loss: 2.8360 | Val Acc: 29.31% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep8.pth
+Epoch 9/200 | Loss: 2.7263 | Val Acc: 32.38% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep9.pth
+Epoch 10/200 | Loss: 2.6189 | Val Acc: 32.40% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep10.pth
+Epoch 11/200 | Loss: 2.5362 | Val Acc: 36.02% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep11.pth
+Epoch 12/200 | Loss: 2.4429 | Val Acc: 36.46% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep12.pth
+Epoch 13/200 | Loss: 2.3759 | Val Acc: 39.18% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep13.pth
+Epoch 14/200 | Loss: 2.2883 | Val Acc: 40.67% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep14.pth
+Epoch 15/200 | Loss: 2.2172 | Val Acc: 40.86% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep15.pth
+Epoch 16/200 | Loss: 2.1530 | Val Acc: 42.06% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep16.pth
+Epoch 17/200 | Loss: 2.0852 | Val Acc: 43.67% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep17.pth
+Epoch 18/200 | Loss: 2.0273 | Val Acc: 44.92% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep18.pth
+Epoch 19/200 | Loss: 1.9660 | Val Acc: 44.52% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep19.pth
+Epoch 20/200 | Loss: 1.9146 | Val Acc: 46.54% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep20.pth
+Epoch 21/200 | Loss: 1.8623 | Val Acc: 47.47% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep21.pth
+Epoch 22/200 | Loss: 1.8155 | Val Acc: 48.98% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep22.pth
+Epoch 23/200 | Loss: 1.7674 | Val Acc: 49.81% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep23.pth
+Epoch 24/200 | Loss: 1.7151 | Val Acc: 49.03% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep24.pth
+Epoch 25/200 | Loss: 1.6704 | Val Acc: 48.89% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep25.pth
+Epoch 26/200 | Loss: 1.6341 | Val Acc: 48.95% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep26.pth
+Epoch 27/200 | Loss: 1.5888 | Val Acc: 51.11% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep27.pth
+Epoch 28/200 | Loss: 1.5479 | Val Acc: 50.98% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep28.pth
+Epoch 29/200 | Loss: 1.5043 | Val Acc: 52.24% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep29.pth
+Epoch 30/200 | Loss: 1.4676 | Val Acc: 52.30% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep30.pth
+Epoch 31/200 | Loss: 1.4249 | Val Acc: 52.05% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep31.pth
+Epoch 32/200 | Loss: 1.3928 | Val Acc: 52.93% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep32.pth
+Epoch 33/200 | Loss: 1.3518 | Val Acc: 54.00% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep33.pth
+Epoch 34/200 | Loss: 1.3192 | Val Acc: 52.21% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep34.pth
+Epoch 35/200 | Loss: 1.2872 | Val Acc: 53.18% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep35.pth
+Epoch 36/200 | Loss: 1.2541 | Val Acc: 55.10% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep36.pth
+Epoch 37/200 | Loss: 1.2174 | Val Acc: 55.51% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep37.pth
+Epoch 38/200 | Loss: 1.1842 | Val Acc: 54.65% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep38.pth
+Epoch 39/200 | Loss: 1.1441 | Val Acc: 55.56% | Peak VRAM: 742.45 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep39.pth
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 55.67%, Size: 129.68 MB
+💾 Saved Baseline: vgg16_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 40
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 40/200
+
+============================== PDT Pruning Report: Epoch 40 ==============================
+ [*] Pruned this step: 1935 units | VRAM: 871.0MB -> 871.0MB
+ Group  1 |   64/  64 |     0.0% | Hessian: 0.083674
+ Group  2 |  128/ 128 |     0.0% | Hessian: 0.160314
+ Group  3 |  256/ 256 |     0.0% | Hessian: 0.181706
+ Group  4 |  512/ 512 |     0.0% | Hessian: 0.241979
+ Group  5 |  512/ 512 |     0.0% | Hessian: 0.156960
+ Group  6 | 3573/4096 |    12.8% | Hessian: 0.098086
+ Group  7 | 2684/4096 |    34.5% | Hessian: 0.068307
+
+[Scientific Metrics] 🟢 Size: 106.59MB | 🔵 Sparsity: 17.80% | 🟡 Speedup: 1.22x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 129.68 MB -> 106.59 MB
+ 🔵 Sparsity: 15.46 %
+ 🟡 Speedup: 1.22x
+💾 Checkpoint saved: vgg16_pdt_ep40_sp15.46.pth
+Epoch 40/200 | Loss: 1.1917 | Val Acc: 54.15% | Peak VRAM: 2496.67 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep40.pth
+Epoch 41/200 | Loss: 1.1708 | Val Acc: 55.04% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep41.pth
+Epoch 42/200 | Loss: 1.1027 | Val Acc: 56.14% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep42.pth
+Epoch 43/200 | Loss: 1.0634 | Val Acc: 55.82% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep43.pth
+Epoch 44/200 | Loss: 1.0259 | Val Acc: 54.95% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep44.pth
+Epoch 45/200 | Loss: 0.9956 | Val Acc: 56.36% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep45.pth
+Epoch 46/200 | Loss: 0.9719 | Val Acc: 57.10% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep46.pth
+Epoch 47/200 | Loss: 0.9315 | Val Acc: 56.28% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep47.pth
+Epoch 48/200 | Loss: 0.9046 | Val Acc: 56.53% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep48.pth
+Epoch 49/200 | Loss: 0.8737 | Val Acc: 55.51% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep49.pth
+Epoch 50/200 | Loss: 0.8501 | Val Acc: 56.32% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep50.pth
+Epoch 51/200 | Loss: 0.8192 | Val Acc: 56.26% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep51.pth
+Epoch 52/200 | Loss: 0.7957 | Val Acc: 58.10% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep52.pth
+Epoch 53/200 | Loss: 0.7676 | Val Acc: 57.29% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep53.pth
+Epoch 54/200 | Loss: 0.7531 | Val Acc: 56.66% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep54.pth
+Epoch 55/200 | Loss: 0.7275 | Val Acc: 55.66% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep55.pth
+Epoch 56/200 | Loss: 0.7136 | Val Acc: 57.54% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep56.pth
+Epoch 57/200 | Loss: 0.6860 | Val Acc: 57.82% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep57.pth
+Epoch 58/200 | Loss: 0.6673 | Val Acc: 57.19% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep58.pth
+Epoch 59/200 | Loss: 0.6427 | Val Acc: 56.39% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep59.pth
+
+[DEBUG] >>> PRUNING @ Epoch 60
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 60/200
+
+============================== PDT Pruning Report: Epoch 60 ==============================
+ [*] Pruned this step: 1007 units | VRAM: 870.5MB -> 870.5MB
+ Group  1 |   64/  64 |     0.0% | Hessian: 0.086942
+ Group  2 |  128/ 128 |     0.0% | Hessian: 0.234850
+ Group  3 |  256/ 256 |     0.0% | Hessian: 0.198813
+ Group  4 |  512/ 512 |     0.0% | Hessian: 0.203020
+ Group  5 |  512/ 512 |     0.0% | Hessian: 0.173091
+ Group  6 | 3473/4096 |    15.2% | Hessian: 0.075660
+ Group  7 | 1777/4096 |    56.6% | Hessian: 0.078102
+
+[Scientific Metrics] 🟢 Size: 92.23MB | 🔵 Sparsity: 28.88% | 🟡 Speedup: 1.41x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 129.68 MB -> 92.23 MB
+ 🔵 Sparsity: 23.51 %
+ 🟡 Speedup: 1.41x
+💾 Checkpoint saved: vgg16_pdt_ep60_sp23.51.pth
+Epoch 60/200 | Loss: 0.7543 | Val Acc: 57.27% | Peak VRAM: 2498.17 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep60.pth
+Epoch 61/200 | Loss: 0.6758 | Val Acc: 57.49% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep61.pth
+Epoch 62/200 | Loss: 0.6331 | Val Acc: 56.74% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep62.pth
+Epoch 63/200 | Loss: 0.6026 | Val Acc: 57.48% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep63.pth
+Epoch 64/200 | Loss: 0.5853 | Val Acc: 57.28% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep64.pth
+Epoch 65/200 | Loss: 0.5616 | Val Acc: 57.65% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep65.pth
+Epoch 66/200 | Loss: 0.5489 | Val Acc: 56.71% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep66.pth
+Epoch 67/200 | Loss: 0.5340 | Val Acc: 58.07% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep67.pth
+Epoch 68/200 | Loss: 0.5141 | Val Acc: 56.49% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep68.pth
+Epoch 69/200 | Loss: 0.5061 | Val Acc: 58.24% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep69.pth
+Epoch 70/200 | Loss: 0.4912 | Val Acc: 58.02% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep70.pth
+Epoch 71/200 | Loss: 0.4857 | Val Acc: 56.97% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep71.pth
+Epoch 72/200 | Loss: 0.4749 | Val Acc: 57.27% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep72.pth
+Epoch 73/200 | Loss: 0.4615 | Val Acc: 57.72% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep73.pth
+Epoch 74/200 | Loss: 0.4528 | Val Acc: 57.75% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep74.pth
+Epoch 75/200 | Loss: 0.4494 | Val Acc: 57.96% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep75.pth
+Epoch 76/200 | Loss: 0.4381 | Val Acc: 57.96% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep76.pth
+Epoch 77/200 | Loss: 0.4325 | Val Acc: 56.68% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep77.pth
+Epoch 78/200 | Loss: 0.4204 | Val Acc: 58.83% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep78.pth
+Epoch 79/200 | Loss: 0.4130 | Val Acc: 59.09% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep79.pth
+
+[DEBUG] >>> PRUNING @ Epoch 80
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 80/200
+
+============================== PDT Pruning Report: Epoch 80 ==============================
+ [*] Pruned this step: 1037 units | VRAM: 870.5MB -> 870.5MB
+ Group  1 |   64/  64 |     0.0% | Hessian: 0.092183
+ Group  2 |  128/ 128 |     0.0% | Hessian: 0.291425
+ Group  3 |  256/ 256 |     0.0% | Hessian: 0.219465
+ Group  4 |  512/ 512 |     0.0% | Hessian: 0.236063
+ Group  5 |  512/ 512 |     0.0% | Hessian: 0.243511
+ Group  6 | 3373/4096 |    17.7% | Hessian: 0.077947
+ Group  7 |  840/4096 |    79.5% | Hessian: 0.057859
+
+[Scientific Metrics] 🟢 Size: 77.39MB | 🔵 Sparsity: 40.32% | 🟡 Speedup: 1.68x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 129.68 MB -> 77.39 MB
+ 🔵 Sparsity: 31.79 %
+ 🟡 Speedup: 1.68x
+💾 Checkpoint saved: vgg16_pdt_ep80_sp31.79.pth
+Epoch 80/200 | Loss: 0.7681 | Val Acc: 58.70% | Peak VRAM: 2498.17 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep80.pth
+Epoch 81/200 | Loss: 0.5236 | Val Acc: 58.89% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep81.pth
+Epoch 82/200 | Loss: 0.4639 | Val Acc: 58.65% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep82.pth
+Epoch 83/200 | Loss: 0.4390 | Val Acc: 58.12% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep83.pth
+Epoch 84/200 | Loss: 0.4160 | Val Acc: 58.89% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep84.pth
+Epoch 85/200 | Loss: 0.4079 | Val Acc: 58.17% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep85.pth
+Epoch 86/200 | Loss: 0.3992 | Val Acc: 59.45% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep86.pth
+Epoch 87/200 | Loss: 0.3898 | Val Acc: 59.43% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep87.pth
+Epoch 88/200 | Loss: 0.3800 | Val Acc: 59.25% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep88.pth
+Epoch 89/200 | Loss: 0.3845 | Val Acc: 59.65% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep89.pth
+Epoch 90/200 | Loss: 0.3753 | Val Acc: 58.26% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep90.pth
+Epoch 91/200 | Loss: 0.3712 | Val Acc: 59.67% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep91.pth
+Epoch 92/200 | Loss: 0.3706 | Val Acc: 59.73% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep92.pth
+Epoch 93/200 | Loss: 0.3618 | Val Acc: 57.52% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep93.pth
+Epoch 94/200 | Loss: 0.3632 | Val Acc: 60.10% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep94.pth
+Epoch 95/200 | Loss: 0.3572 | Val Acc: 57.92% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep95.pth
+Epoch 96/200 | Loss: 0.3583 | Val Acc: 59.21% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep96.pth
+Epoch 97/200 | Loss: 0.3513 | Val Acc: 59.09% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep97.pth
+Epoch 98/200 | Loss: 0.3445 | Val Acc: 57.55% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep98.pth
+Epoch 99/200 | Loss: 0.3431 | Val Acc: 59.83% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep99.pth
+
+[DEBUG] >>> PRUNING @ Epoch 100
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 100/200
+
+============================== PDT Pruning Report: Epoch 100 ==============================
+ [*] Pruned this step: 1877 units | VRAM: 870.5MB -> 870.5MB
+ Group  1 |   64/  64 |     0.0% | Hessian: 0.112889
+ Group  2 |  128/ 128 |     0.0% | Hessian: 0.371273
+ Group  3 |  256/ 256 |     0.0% | Hessian: 0.227728
+ Group  4 |  512/ 512 |     0.0% | Hessian: 0.195863
+ Group  5 |  512/ 512 |     0.0% | Hessian: 0.203253
+ Group  6 | 2303/4096 |    43.8% | Hessian: 0.067114
+ Group  7 |   33/4096 |    99.2% | Hessian: 0.038999
+
+[Scientific Metrics] 🟢 Size: 62.69MB | 🔵 Sparsity: 51.66% | 🟡 Speedup: 2.07x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 129.68 MB -> 62.69 MB
+ 🔵 Sparsity: 46.79 %
+ 🟡 Speedup: 2.07x
+💾 Checkpoint saved: vgg16_pdt_ep100_sp46.79.pth
+Epoch 100/200 | Loss: 3.2152 | Val Acc: 51.09% | Peak VRAM: 2498.17 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep100.pth
+Epoch 101/200 | Loss: 2.2988 | Val Acc: 56.31% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep101.pth
+Epoch 102/200 | Loss: 1.9308 | Val Acc: 57.66% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep102.pth
+Epoch 103/200 | Loss: 1.7225 | Val Acc: 58.83% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep103.pth
+Epoch 104/200 | Loss: 1.6159 | Val Acc: 57.27% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep104.pth
+Epoch 105/200 | Loss: 1.5042 | Val Acc: 59.20% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep105.pth
+Epoch 106/200 | Loss: 1.4461 | Val Acc: 59.50% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep106.pth
+Epoch 107/200 | Loss: 1.3808 | Val Acc: 59.66% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep107.pth
+Epoch 108/200 | Loss: 1.3400 | Val Acc: 59.36% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep108.pth
+Epoch 109/200 | Loss: 1.3114 | Val Acc: 59.10% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep109.pth
+Epoch 110/200 | Loss: 1.2738 | Val Acc: 58.67% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep110.pth
+Epoch 111/200 | Loss: 1.2499 | Val Acc: 60.16% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep111.pth
+Epoch 112/200 | Loss: 1.2328 | Val Acc: 59.65% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep112.pth
+Epoch 113/200 | Loss: 1.2228 | Val Acc: 59.82% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep113.pth
+Epoch 114/200 | Loss: 1.2000 | Val Acc: 59.14% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep114.pth
+Epoch 115/200 | Loss: 1.1848 | Val Acc: 60.75% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep115.pth
+Epoch 116/200 | Loss: 1.1712 | Val Acc: 61.51% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep116.pth
+Epoch 117/200 | Loss: 1.1586 | Val Acc: 60.19% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep117.pth
+Epoch 118/200 | Loss: 1.1557 | Val Acc: 59.51% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep118.pth
+Epoch 119/200 | Loss: 1.1424 | Val Acc: 60.02% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep119.pth
+
+[DEBUG] >>> PRUNING @ Epoch 120
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 120/200
+
+============================== PDT Pruning Report: Epoch 120 ==============================
+ [*] Pruned this step: 2014 units | VRAM: 870.5MB -> 870.5MB
+ Group  1 |   64/  64 |     0.0% | Hessian: 0.139646
+ Group  2 |  128/ 128 |     0.0% | Hessian: 0.131775
+ Group  3 |  256/ 256 |     0.0% | Hessian: 0.063411
+ Group  4 |  512/ 512 |     0.0% | Hessian: 0.084677
+ Group  5 |  428/ 512 |    16.4% | Hessian: 0.020929
+ Group  6 |  574/4096 |    86.0% | Hessian: 0.039147
+ Group  7 |    0/4096 |   100.0% | Hessian: 0.001431
+
+[Scientific Metrics] 🟢 Size: 54.37MB | 🔵 Sparsity: 58.07% | 🟡 Speedup: 2.39x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 120]
+ 🟢 Model Size: 129.68 MB -> 54.37 MB
+ 🔵 Sparsity: 62.88 %
+ 🟡 Speedup: 2.39x
+💾 Checkpoint saved: vgg16_pdt_ep120_sp62.88.pth
+Epoch 120/200 | Loss: 4.5965 | Val Acc: 1.00% | Peak VRAM: 2498.17 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep120.pth
+Epoch 121/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep121.pth
+Epoch 122/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep122.pth
+Epoch 123/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep123.pth
+Epoch 124/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep124.pth
+Epoch 125/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep125.pth
+Epoch 126/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep126.pth
+Epoch 127/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep127.pth
+Epoch 128/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep128.pth
+Epoch 129/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep129.pth
+Epoch 130/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep130.pth
+Epoch 131/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep131.pth
+Epoch 132/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep132.pth
+Epoch 133/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep133.pth
+Epoch 134/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep134.pth
+Epoch 135/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep135.pth
+Epoch 136/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep136.pth
+Epoch 137/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep137.pth
+Epoch 138/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep138.pth
+Epoch 139/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep139.pth
+
+[DEBUG] >>> PRUNING @ Epoch 140
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 140/200
+
+============================== PDT Pruning Report: Epoch 140 ==============================
+ [*] Pruned this step: 4415 units | VRAM: 869.5MB -> 869.5MB
+ Group  1 |   33/  64 |    48.4% | Hessian: 0.000000
+ Group  2 |    0/ 128 |   100.0% | Hessian: 0.000000
+ Group  3 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  6 |   65/4096 |    98.4% | Hessian: 0.000000
+ Group  7 |    0/4096 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 1.77MB | 🔵 Sparsity: 98.64% | 🟡 Speedup: 73.46x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 140]
+ 🟢 Model Size: 129.68 MB -> 1.77 MB
+ 🔵 Sparsity: 98.15 %
+ 🟡 Speedup: 73.46x
+💾 Checkpoint saved: vgg16_pdt_ep140_sp98.15.pth
+Epoch 140/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 2364.68 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep140.pth
+Epoch 141/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep141.pth
+Epoch 142/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep142.pth
+Epoch 143/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep143.pth
+Epoch 144/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep144.pth
+Epoch 145/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep145.pth
+Epoch 146/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep146.pth
+Epoch 147/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep147.pth
+Epoch 148/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep148.pth
+Epoch 149/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep149.pth
+Epoch 150/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep150.pth
+Epoch 151/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep151.pth
+Epoch 152/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep152.pth
+Epoch 153/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep153.pth
+Epoch 154/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep154.pth
+Epoch 155/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep155.pth
+Epoch 156/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep156.pth
+Epoch 157/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep157.pth
+Epoch 158/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep158.pth
+Epoch 159/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep159.pth
+
+[DEBUG] >>> PRUNING @ Epoch 160
+
+[DEBUG] !!! PRUNING TRIGGERED !!! Epoch 160/200
+
+============================== PDT Pruning Report: Epoch 160 ==============================
+ [*] Pruned this step: 0 units | VRAM: 869.5MB -> 869.5MB
+ Group  1 |   33/  64 |    48.4% | Hessian: 0.000000
+ Group  2 |    0/ 128 |   100.0% | Hessian: 0.000000
+ Group  3 |    0/ 256 |   100.0% | Hessian: 0.000000
+ Group  4 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  5 |    0/ 512 |   100.0% | Hessian: 0.000000
+ Group  6 |   65/4096 |    98.4% | Hessian: 0.000000
+ Group  7 |    0/4096 |   100.0% | Hessian: 0.000000
+
+[Scientific Metrics] 🟢 Size: 1.77MB | 🔵 Sparsity: 98.64% | 🟡 Speedup: 73.46x
+=========================================================================================
+
+
+[Scientific Metrics - Epoch 160]
+ 🟢 Model Size: 129.68 MB -> 1.77 MB
+ 🔵 Sparsity: 98.15 %
+ 🟡 Speedup: 73.46x
+💾 Checkpoint saved: vgg16_pdt_ep160_sp98.15.pth
+Epoch 160/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 2364.68 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep160.pth
+Epoch 161/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep161.pth
+Epoch 162/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep162.pth
+Epoch 163/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep163.pth
+Epoch 164/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep164.pth
+Epoch 165/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep165.pth
+Epoch 166/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep166.pth
+Epoch 167/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep167.pth
+Epoch 168/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep168.pth
+Epoch 169/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep169.pth
+Epoch 170/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep170.pth
+Epoch 171/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep171.pth
+Epoch 172/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep172.pth
+Epoch 173/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep173.pth
+Epoch 174/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep174.pth
+Epoch 175/200 | Loss: 4.6055 | Val Acc: 1.00% | Peak VRAM: 742.14 MB
+💾 Epoch Checkpoint Saved: vgg16_pdt_ep175.pth

@@ -44,10 +44,15 @@ def get_resnet(name="resnet18", num_classes=100):
 
     # [PDT] 각 Conv 레이어에 mask와 grad_ema 등록
     for m in model.modules():
-        if isinstance(m, nn.Conv2d) and m.in_channels > 3:
-            # 출력 채널 크기에 맞춘 버퍼 등록
-            m.register_buffer('mask', torch.ones(m.weight.shape[0]))
-            m.register_buffer('grad_ema', torch.zeros(m.weight.shape[0]))
+        if isinstance(m, nn.Conv2d): # 모든 Conv 레이어에 마스크와 EMA 등록
+            m.register_buffer('mask', torch.ones(m.weight.shape[0], device=m.weight.device))
+            m.register_buffer('grad_ema', torch.zeros(m.weight.shape[0], device=m.weight.device))
+        # if isinstance(m, nn.Conv2d) and m.in_channels > 3:
+        #     # 출력 채널 크기에 맞춘 버퍼 등록
+        #     m.register_buffer('mask', torch.ones(m.weight.shape[0]))
+        #     m.register_buffer('grad_ema', torch.zeros(m.weight.shape[0]))
+
+        
             
     return model
 
