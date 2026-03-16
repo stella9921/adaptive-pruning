@@ -1,0 +1,16 @@
+# method: "PAT"
+# type: "normalization"
+# channel_keep_ratio: 0.5   # PDT와 동일하게 50%를 남기도록 설정 (0.5 또는 50.0)
+# n_rounds: 1              # 130에폭에서 '한 번에' 자르는 One-shot 방식 (5라운드에서 1로 변경)
+# start_epoch: 130         # 프루닝 시작 시점
+# finetune_epochs: 70      # 130부터 200까지 충분히 회복 학습 (3에서 70으로 변경)
+# save_dir: "./exp/checkpoints"
+
+
+
+method: "PAT"
+type: "normalization"
+channel_keep_ratio: 0.6  # 50% 유지
+n_rounds: 1
+start_epoch: 130
+finetune_epochs: 70

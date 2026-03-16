@@ -1,0 +1,7 @@
+name: "resnet32"
+input_size: [3, 224, 224]
+num_classes: 100
+epochs: 200
+channel_keep_ratio: 0.82 
+min_survival_ratio: 0.3
+physical_compression: true

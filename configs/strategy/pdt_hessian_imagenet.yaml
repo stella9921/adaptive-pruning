@@ -1,0 +1,14 @@
+method: "PDT"
+type: "pdt_hessian"
+ema_decay: 0.99        # 데이터가 많으므로 과거 그라디언트를 더 오래 축적 (0.9 -> 0.99)
+channel_keep_ratio: 0.6      # 60% 프루닝 목표 유지
+
+# 실행 시점 전략
+# 이미지넷은 데이터가 많아 EMA가 금방 쌓이므로 0~10에폭 사이에 시작해도 됩니다.
+start_epoch: 10        # 충분한 그라디언트 정보를 모은 뒤 10에폭에 실행
+prune_every: 1         # One-shot 효과를 위해 한 번만 크게 하거나 주기 설정
+min_keep_ratio: 0.2
+
+# [Ver.3 Hessian 추가 설정]
+lambda_h: 0.1          # 0.5는 이미지넷에서 다소 강할 수 있어 0.1~0.2 추천
+hessian_iter: 20       # 모델이 깊으므로(152층) 더 정밀한 계산을 위해 20회 권장

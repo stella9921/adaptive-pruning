@@ -1,0 +1,14 @@
+# configs/model/resnet152_imagenet.yaml
+name: "resnet152"
+num_classes: 100        # ImageNet-100 기준
+input_size: 224
+base_lr: 0.01
+momentum: 0.9
+weight_decay: 0.0001
+epochs: 90
+batch_size: 64
+
+
+dataset:
+  name: "imagenet"
+  path: "/content/imagenet"  # unzip한 경로

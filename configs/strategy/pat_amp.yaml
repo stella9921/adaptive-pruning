@@ -1,0 +1,14 @@
+# method: "PAT"
+# type: "amplification"
+# channel_keep_ratio: 40.0
+# p: 2.5                # VGG16 최적 p=2.5, ResNet18 최적 p=1.5 반영
+# n_rounds: 5
+# finetune_epochs: 3
+
+method: "PAT"
+type: "amplification"
+channel_keep_ratio: 0.6  # 동일하게 50%
+p: 2.5                   # 증폭 계수 (표준값)
+n_rounds: 1
+start_epoch: 130
+finetune_epochs: 70

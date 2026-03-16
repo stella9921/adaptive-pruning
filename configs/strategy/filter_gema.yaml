@@ -1,0 +1,5 @@
+name: "filter_gema"
+strategy:
+  ema_decay: 0.9
+  start_epoch: 30
+  prune_interval: 20

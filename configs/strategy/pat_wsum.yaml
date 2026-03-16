@@ -1,0 +1,18 @@
+# method: "PAT"
+# type: "weighted_sum"
+
+# # channel_keep_ratio: 0.5   # normalization이랑 동일하게 50% 유지
+# beta: 0.5
+
+# n_rounds: 1
+# start_epoch: 130
+# finetune_epochs: 70
+
+# save_dir: "./exp/checkpoints"
+method: "PAT"
+type: "weighted_sum"
+channel_keep_ratio: 0.6  # 동일하게 50%
+beta: 0.5                # 파라미터 vs 민감도 5:5 비중
+n_rounds: 1
+start_epoch: 130
+finetune_epochs: 70

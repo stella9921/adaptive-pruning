@@ -1,0 +1,8 @@
+name: "vgg16"
+num_classes: 100
+base_lr: 0.01
+momentum: 0.9
+weight_decay: 0.0005
+epochs: 400
+batch_size: 128
+scheduler: "cosine"

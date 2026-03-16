@@ -1,0 +1,14 @@
+method: "PAT"
+type: "normalization"
+# channel_keep_ratio: 40.0
+# n_rounds: 5
+# finetune_epochs: 3
+
+# configs/strategy/pat.yaml
+# strategy:
+  # type: "amplification"  # 수식 (3)의 비선형 증폭 기법 적용
+  # p: 0.8                 # 논문의 지수 계수 gamma (1보다 작게 설정)
+  # channel_keep_ratio: 0.5 # 모델의 최대 목표 압축률 (target_ratio)
+
+pruning:
+  n_rounds: 1            # 반드시 1로 설정하여 '원샷' 프루닝 수행

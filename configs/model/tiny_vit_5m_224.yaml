@@ -1,0 +1,10 @@
+# 'model:' 이라는 부모 키를 아예 빼고 작성해 보세요.
+name: "tiny_vit_5m_224"
+input_shape: [1, 3, 224, 224]
+num_classes: 100
+
+topology:
+  block_keyword: "Block"
+  qkv_keyword: "qkv"
+  output_keyword: ["proj", "fc2"]
+  inter_keyword: ["fc1", "dwconv"]
