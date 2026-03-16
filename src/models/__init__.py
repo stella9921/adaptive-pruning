@@ -7,21 +7,17 @@ import timm
 
 
 def get_model(model_cfg):
-    """YAML의 model 섹션 설정을 받아 모델 객체를 생성함"""
     name = model_cfg['name'].lower()
     num_classes = model_cfg.get('num_classes', 100)
     
-    # 1. Vision Transformer (ViT) 계열 - Hessian 계산을 위해 표준 어텐션 강제
-    if 'vit' in name or 'transformer' in name:
-        print(f">>> [Model] Loading Vision Transformer for Hessian Analysis: {name}")
-        
-        # [핵심] exportable=True를 설정하면 Flash Attention 같은 가속 커널 대신 
-        # 2차 미분이 가능한 표준 PyTorch 연산으로 어텐션 블록이 구성됩니다.
+    # ViT / DeiT 계열
+    if 'vit' in name or 'deit' in name or 'transformer' in name:
+        print(f">>> [Model] Loading Vision Transformer: {name}")
         model = timm.create_model(
-            name, 
-            pretrained=True, 
+            name,
+            pretrained=model_cfg.get('pretrained', True),
             num_classes=num_classes,
-            exportable=True  # Hessian 계산 시 aten::_scaled_dot_product... 에러 방지용
+            exportable=True
         )
         return model
 
@@ -33,10 +29,6 @@ def get_model(model_cfg):
         return get_efficientnet(num_classes)
     elif "mobilenet" in name:
         return get_mobilenet(name, num_classes)
-    # elif "vit" in name or "transformer" in name:
-    #     print(f">>> [Model] Loading Vision Transformer: {name}")
-    #     # pretrained=True 설정을 권장
-    #     return timm.create_model(name, pretrained=True, num_classes=num_classes)
     else:
         raise ValueError(f"지원하지 않는 모델 이름입니다: {name}")
 

@@ -5,7 +5,7 @@ from .engine.hessian_free import SNOWSEngine
 import numpy as np
 from .optimizer import lagrangian_optimization 
 import sys
-
+import gc
 class PDTPruner(BasePruner):
 
 
@@ -498,7 +498,7 @@ class ViTPDTPruner(PDTPruner):
                 'sparsity': sparsity, 'speedup': speedup}
 
     def step_pruning(self, loss, current_epoch, total_epochs):
-        print(f"\n[DEBUG] === ViT PDT Pruning: Epoch {current_epoch} ===")
+        print(f"\n[DEBUG] === ViT PDT Pruning (k-horizon={self.k_horizon}): Epoch {current_epoch} ===")
 
         all_modules = dict(self.model.named_modules())
 
@@ -509,79 +509,154 @@ class ViTPDTPruner(PDTPruner):
         progress = current_epoch / total_epochs
         total_target_keep_ratio = 1.0 - (progress * (1.0 - self.final_keep_ratio))
 
-        # --- Hessian 계산 ---
-        target_params = []
-        for g in self.topology_groups:
-            # ffn: fc1만, attn: qkv만 hessian 계산 (대표 레이어)
-            rep_name = g['names'][0]
-            m = all_modules.get(rep_name)
-            if m is not None and hasattr(m, 'weight'):
-                target_params.append(m.weight)
+        # topology_groups의 대표 레이어 순서 리스트
+        # blocks.0.attn.qkv → blocks.0.mlp.fc1 → blocks.1.attn.qkv → ...
+        rep_layer_names = [g['names'][0] for g in self.topology_groups]
 
-        hv_list = self.engine.get_k_step_hessian_selective(
-            loss, target_params, self.k_horizon)
+        # ────────────────────────────────────────────────
+        # k-horizon sensitivity 계산
+        # s(g,c,K) = Σᵢ₌₀ᴷ | g(l+i,c)ᵀΔw + ½ΔwᵀH(l+i,c)Δw |
+        # ────────────────────────────────────────────────
+        import gc
+        group_k_sensitivity = {}  # {g_idx: tensor [n_units]}
 
-        # --- 점수 산출 ---
+        for g_idx, g in enumerate(self.topology_groups):
+            rep = all_modules.get(g['names'][0])
+            if rep is None or not hasattr(rep, 'weight'):
+                continue
+
+            n_units = rep.mask.size(0)  # ffn: 1536, attn: 6
+            cumulative = torch.zeros(n_units, device=rep.weight.device)
+
+            for step in range(self.k_horizon):
+                look_idx = g_idx + step  # 현재 그룹에서 k step 앞
+                if look_idx >= len(self.topology_groups):
+                    break
+
+                look_g    = self.topology_groups[look_idx]
+                look_name = look_g['names'][0]
+                look_m    = all_modules.get(look_name)
+                if look_m is None or not hasattr(look_m, 'weight'):
+                    continue
+
+                try:
+                    # 1차 gradient g(l+i,c)
+                    grad = torch.autograd.grad(
+                        loss, look_m.weight,
+                        create_graph=True, retain_graph=True
+                    )[0]
+
+                    # Δw(g,c): 채널 c 제거 시 가중치 변화 = -현재 가중치
+                    delta_w = -look_m.weight.detach()
+
+                    # ── 1차 항: g(l+i)ᵀ · Δw ──────────────────────
+                    if g['type'] == 'ffn':
+                        # [out_features] 단위
+                        grad_term = (grad * delta_w).reshape(
+                            look_m.weight.shape[0], -1).sum(1).abs()
+
+                    elif g['type'] == 'attn':
+                        num_heads = g['num_heads']
+                        head_dim  = g['head_dim']
+                        grad_term = torch.zeros(num_heads, device=grad.device)
+                        if look_g['type'] == 'attn':
+                            # qkv: Q 슬라이스 기준
+                            for h in range(num_heads):
+                                s, e = h * head_dim, (h + 1) * head_dim
+                                if e <= grad.shape[0]:
+                                    grad_term[h] = (grad[s:e] * delta_w[s:e]).sum().abs()
+                        else:
+                            # look 레이어가 ffn 타입이면 head 단위로 묶어서 평균
+                            chunk = grad.reshape(num_heads, -1)
+                            dw_chunk = delta_w.reshape(num_heads, -1)
+                            grad_term = (chunk * dw_chunk).sum(1).abs()
+
+                    # ── 2차 항: ½ · Δw ᵀ · H(l+i) · Δw ───────────
+                    v  = torch.randn_like(grad)
+                    hv = torch.autograd.grad(
+                        (grad * v).sum(), look_m.weight,
+                        retain_graph=True
+                    )[0]
+
+                    if g['type'] == 'ffn':
+                        hess_term = (0.5 * delta_w * hv).reshape(
+                            look_m.weight.shape[0], -1).sum(1).abs()
+
+                    elif g['type'] == 'attn':
+                        hess_term = torch.zeros(num_heads, device=hv.device)
+                        if look_g['type'] == 'attn':
+                            for h in range(num_heads):
+                                s, e = h * head_dim, (h + 1) * head_dim
+                                if e <= hv.shape[0]:
+                                    hess_term[h] = (0.5 * delta_w[s:e] * hv[s:e]).sum().abs()
+                        else:
+                            hv_chunk  = hv.reshape(num_heads, -1)
+                            dw_chunk  = delta_w.reshape(num_heads, -1)
+                            hess_term = (0.5 * dw_chunk * hv_chunk).sum(1).abs()
+
+                    # ── 누적: Σᵢ₌₀ᴷ ─────────────────────────────
+                    step_score = grad_term + hess_term
+                    # 크기 맞추기 (look 레이어와 현재 그룹 단위가 다를 수 있음)
+                    if step_score.size(0) != n_units:
+                        step_score = step_score[:n_units] if step_score.size(0) > n_units \
+                                    else torch.nn.functional.pad(step_score, (0, n_units - step_score.size(0)))
+
+                    cumulative += step_score.detach()
+
+                    del grad, hv, v, delta_w
+                    if step % 3 == 0:
+                        torch.cuda.empty_cache()
+                        gc.collect()
+
+                except RuntimeError as e:
+                    print(f"[WARNING] k-horizon step {step} skipped ({look_name}): {e}")
+                    break
+
+            # 정규화 후 hessian_score 버퍼에 저장
+            avg_sensitivity = cumulative / max(self.k_horizon, 1)
+            if avg_sensitivity.max() > avg_sensitivity.min():
+                avg_sensitivity = (avg_sensitivity - avg_sensitivity.min()) / \
+                                (avg_sensitivity.max() - avg_sensitivity.min() + 1e-8)
+
+            rep.hessian_score.copy_(avg_sensitivity)
+            group_k_sensitivity[g_idx] = avg_sensitivity
+
+        # ────────────────────────────────────────────────
+        # 점수 산출: S(g,c,K) = Ŵ_g^(EMA) × s(g,c,K)
+        # ────────────────────────────────────────────────
         target_unit_scores   = []
         target_unit_costs    = []
         target_unit_metadata = []
 
         for g_idx, g in enumerate(self.topology_groups):
-            hv = hv_list[g_idx]
             rep = all_modules.get(g['names'][0])
             if rep is None or not hasattr(rep, 'mask'):
                 continue
 
-            if g['type'] == 'ffn':
-                # 뉴런 단위 hessian energy [1536]
-                h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
-                if h_energy.max() > h_energy.min():
-                    h_energy = ((h_energy - h_energy.min()) /
-                                (h_energy.max() - h_energy.min() + 1e-8))
-                rep.hessian_score.copy_(h_energy)
+            alive = torch.where(rep.mask > 0.5)[0].cpu().numpy()
 
-                alive = torch.where(rep.mask > 0.5)[0].cpu().numpy()
-                for i in alive:
-                    score = rep.grad_ema[i].item() * (
-                        rep.hessian_score[i].item() * self.lambda_h)
-                    cost  = sum(
-                        all_modules[n].weight.nelement() /
-                        all_modules[n].weight.shape[0]
+            for i in alive:
+                # S(g,c,K) = grad_ema(그룹 rank) × hessian_score(채널 score) × λ
+                score = rep.grad_ema[i].item() * (
+                    rep.hessian_score[i].item() * self.lambda_h)
+
+                if g['type'] == 'ffn':
+                    cost = sum(
+                        all_modules[n].weight.nelement() / all_modules[n].weight.shape[0]
                         for n in g['names'] if n in all_modules)
-                    target_unit_scores.append(score)
-                    target_unit_costs.append(cost)
-                    target_unit_metadata.append((g, int(i)))
-
-            elif g['type'] == 'attn':
-                num_heads = g['num_heads']
-                head_dim  = g['head_dim']
-
-                # head별 hessian energy (Q슬라이스 기준)
-                h_energy = torch.zeros(num_heads, device=hv.device)
-                for h in range(num_heads):
-                    start = h * head_dim
-                    end   = start + head_dim
-                    h_energy[h] = hv[start:end].pow(2).mean()
-
-                if h_energy.max() > h_energy.min():
-                    h_energy = ((h_energy - h_energy.min()) /
-                                (h_energy.max() - h_energy.min() + 1e-8))
-                rep.hessian_score.copy_(h_energy)
-
-                alive = torch.where(rep.mask > 0.5)[0].cpu().numpy()
-                for h in alive:
-                    score = rep.grad_ema[h].item() * (
-                        rep.hessian_score[h].item() * self.lambda_h)
-                    # head 하나 제거 시 줄어드는 파라미터 수
+                else:
+                    head_dim = g['head_dim']
                     cost = head_dim * (
-                        all_modules[g['names'][0]].weight.shape[1] * 3 +  # qkv
-                        all_modules[g['names'][1]].weight.shape[0]         # proj
-                    )
-                    target_unit_scores.append(score)
-                    target_unit_costs.append(cost)
-                    target_unit_metadata.append((g, int(h)))
+                        all_modules[g['names'][0]].weight.shape[1] * 3 +
+                        all_modules[g['names'][1]].weight.shape[0])
 
-        # --- Lagrangian 최적화 ---
+                target_unit_scores.append(score)
+                target_unit_costs.append(cost)
+                target_unit_metadata.append((g, int(i)))
+
+        # ────────────────────────────────────────────────
+        # Lagrangian 최적화 및 마스크 집행 (기존과 동일)
+        # ────────────────────────────────────────────────
         if not target_unit_scores:
             return
 
@@ -594,45 +669,37 @@ class ViTPDTPruner(PDTPruner):
             np.sum(target_unit_costs) * target_ratio
         )
 
-        # force pruning (lagrangian이 전부 keep으로 돌려줄 때)
         if np.all(optimal_mask_flags == 1) and target_ratio < 0.999:
             num_force = int(len(optimal_mask_flags) * (1 - target_ratio))
             optimal_mask_flags[np.argsort(target_unit_scores)[:num_force]] = 0
 
-        # --- 마스크 집행 ---
         pruned_count = 0
         with torch.no_grad():
             for idx, is_alive in enumerate(optimal_mask_flags):
                 if not is_alive:
                     g_obj, unit_idx = target_unit_metadata[idx]
-                    # 그룹 내 모든 레이어의 마스크를 동일 인덱스로 0
                     for name in g_obj['names']:
                         m = all_modules.get(name)
-                        if m is not None and hasattr(m, 'mask'):
-                            if unit_idx < m.mask.size(0):
-                                m.mask.data[unit_idx] = 0.0
-                                pruned_count += 1
+                        if m is not None and hasattr(m, 'mask') and unit_idx < m.mask.size(0):
+                            m.mask.data[unit_idx] = 0.0
+                            pruned_count += 1
 
         self.apply_mask_to_weights()
         torch.cuda.empty_cache()
 
-        # --- 리포트 ---
+        # 리포트
         eff = self.get_model_efficiency()
-        print(f"\n{'='*30} ViT PDT Pruning Report {'='*30}")
-        print(f" Pruned: {pruned_count} units")
+        print(f"\n{'='*30} ViT PDT k-horizon Pruning Report {'='*30}")
+        print(f" k_horizon={self.k_horizon} | Pruned: {pruned_count} units")
         for g in self.topology_groups:
             m = all_modules.get(g['names'][0])
             if m is None or not hasattr(m, 'mask'):
                 continue
             t = m.mask.numel()
             a = int(m.mask.sum().item())
-            print(f" [{g['type'].upper()}] {g['names'][0]:40s} "
-                  f"| {a:3d}/{t:3d} alive "
-                  f"| {(1-a/t)*100:5.1f}% pruned")
-        print(f"\n Size: {eff['curr_mb']:.2f}MB "
-              f"| Sparsity: {eff['sparsity']:.2f}% "
-              f"| Speedup: {eff['speedup']:.2f}x")
-        print('='*73)
+            print(f" [{g['type'].upper()}] {g['names'][0]:40s} | {a:4d}/{t:4d} | {(1-a/t)*100:5.1f}% pruned")
+        print(f"\n Size: {eff['curr_mb']:.2f}MB | Sparsity: {eff['sparsity']:.2f}% | Speedup: {eff['speedup']:.2f}x")
+        print('='*67)
 
 
 # ==============================================================================

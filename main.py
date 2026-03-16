@@ -122,14 +122,51 @@ def main():
 
     # 2. 모델 초기화
     model = get_model(config['model']).to(device)
+
+    is_vit_model = any(k in config['model']['name'].lower()
+                       for k in ['vit', 'deit', 'transformer'])
+    
+    if is_vit_model and 'imagenet100' in str(dataset_name):
+        in_features = model.head.in_features
+        model.head = nn.Linear(in_features, 100).to(device)
+        print(f">>> [System] ViT head replaced: {in_features} → 100")
+
+        # Head warmup: backbone freeze하고 head만 먼저 학습
+        print(">>> [System] Head warmup 시작 (5 epochs, head only)...")
+        for param in model.parameters():
+            param.requires_grad = False
+        for param in model.head.parameters():
+            param.requires_grad = True
+
+        warmup_opt = optim.AdamW(model.head.parameters(), lr=0.001)
+        warmup_criterion = nn.CrossEntropyLoss()
+
+        for ep in range(5):
+            model.train()
+            for x, y in train_loader:
+                if x.shape[-1] != 224:
+                    x = torch.nn.functional.interpolate(
+                        x, size=(224, 224), mode='bilinear', align_corners=False)
+                x, y = x.to(device), y.to(device)
+                warmup_opt.zero_grad()
+                warmup_criterion(model(x), y).backward()
+                warmup_opt.step()
+
+            val_acc = evaluate(model, val_loader, device)
+            print(f"  [Head Warmup] Epoch {ep+1}/5 | Val Acc: {val_acc:.2f}%")
+
+        # 전체 파라미터 다시 학습 가능하게
+        for param in model.parameters():
+            param.requires_grad = True
+        print(">>> [System] Head warmup 완료. 전체 fine-tuning 시작.")
     
     # [System] ImageNet-100 대응 FC 가중치 이식
-    if dataset_name == 'imagenet' or 'imagenet' in dataset_name:
+    if ('imagenet' in str(dataset_name)) and not is_vit_model:
         print(">>> [System] Transferring Pretrained Weights to FC Layer (1000 -> 100)...")
         temp_config = config['model'].copy()
         temp_config['num_classes'] = 1000
         full_model = get_model(temp_config).to(device)
-        
+
         with torch.no_grad():
             model.fc.weight.copy_(full_model.fc.weight[:100])
             model.fc.bias.copy_(full_model.fc.bias[:100])
