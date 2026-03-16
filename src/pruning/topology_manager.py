@@ -5,78 +5,41 @@ import operator
 
 
 def get_model_topology(model):
-    """
-    모델의 구조를 분석하여 의존성이 있는 레이어들을 그룹화합니다.
-    - EfficientNet: MBConv 블록 단위 전략
-    - VGG: Conv 채널 일치 그룹 + Classifier Linear 레이어 독립 그룹
-    - MobileNet: InvertedResidual 블록 단위
-    - ResNet 등: FX Graph 분석 기반 Residual Topology
-    """
     model_name = model.__class__.__name__.lower()
-    groups = []
 
-    # 1. EfficientNet
     if "efficientnet" in model_name:
-        print(f"\n[Stage 1] Applying MBConv Block-wise Topology for {model_name}...")
         groups = _get_efficientnet_topology(model)
-
-    # 2. VGG
     elif "vgg" in model_name:
-        print(f"\n[Stage 1] Analyzing VGG-style Topology (Conv + Classifier) for {model_name}...")
         groups = _get_vgg_topology(model)
-
-    # 3. MobileNet
     elif "mobilenet" in model_name:
-        print(f"\n[Stage 1] Analyzing MobileNet InvertedResidual Topology for {model_name}...")
         groups = _get_mobilenet_topology(model)
-    elif "vit" in model_name or "transformer" in model_name:
-        print(f"\n[Stage 1] Analyzing ViT Block-wise Topology for {model_name}...")
-        groups = _get_vit_topology(model)
-
-    # 4. Residual (ResNet 등)
+    elif "vit" in model_name or "transformer" in model_name or "deit" in model_name:
+        # ViT는 dict 형태 그룹을 바로 리턴 (후처리 불필요)
+        return _get_vit_topology(model)
     else:
-        print(f"\n[Stage 1] Analyzing Residual Topology for {model_name} via PyTorch FX...")
         groups = _get_residual_topology(model)
 
-    # ----------------------------
-    # 공통 그룹 후처리 및 출력
-    # ----------------------------
+    # --- CNN용 후처리 (ViT는 여기 안 옴) ---
     final_groups = []
-
     if groups:
         print(f"\n{'='*20} Final Topology Groups {'='*20}")
-
         for group_seeds in groups:
             valid_sub_group = []
             channels = "N/A"
-
             for seed in group_seeds:
                 for name, module in model.named_modules():
                     if name == seed or name.startswith(seed + "."):
                         if isinstance(module, (nn.Conv2d, nn.Linear, nn.BatchNorm2d)):
                             valid_sub_group.append(name)
-
                             if channels == "N/A":
                                 if hasattr(module, 'out_channels'):
                                     channels = module.out_channels
                                 elif hasattr(module, 'out_features'):
                                     channels = module.out_features
-                                elif hasattr(module, 'num_features'):
-                                    channels = module.num_features
-
             if valid_sub_group:
                 valid_sub_group = sorted(list(set(valid_sub_group)))
                 final_groups.append(valid_sub_group)
-
-                display_layers = f"{valid_sub_group[0]} ... ({len(valid_sub_group)} layers)"
-                print(f" Group {len(final_groups):2d} | Dimension: {str(channels):>4} | Layers: {display_layers}")
-
-        print(f"{'='*63}")
         print(f"[*] Total {len(final_groups)} groups identified.\n")
-
-    else:
-        print("\n[!] No dependency groups found. Layers will be treated independently.")
-
     return final_groups
 
 
@@ -216,43 +179,74 @@ def _find_source_layers(node, traced_model, visited=None):
 # ----------------------------
 def _get_vit_topology(model):
     """
-    ViT의 의존성을 고려한 세부 그룹화:
-    1. QKV Group: 입력 차원을 공유하는 Q, K, V 레이어
-    2. Output Group: Residual Connection에 직접 닿는 레이어들 (Proj, FC2)
-    3. Intermediate Group: 독립적으로 확장이 가능한 레이어 (FC1)
+    DeiT/ViT 전용 topology.
+    
+    그룹 타입 2가지:
+    - type 'ffn':  [fc1, fc2] — 뉴런 단위, fc1 출력 = fc2 입력
+    - type 'attn': [qkv, proj] — head 단위, head_dim 슬라이스 동기화
+    
+    각 그룹에 meta 정보를 함께 저장해서
+    ViTPDTPruner가 마스킹 방식을 구분할 수 있게 함.
     """
     groups = []
-    
-    for name, module in model.named_modules():
-        module_type = module.__class__.__name__
-        
-        # Transformer Block 단위로 진입
-        if any(keyword in module_type for keyword in ["Block", "LayerScale", "EncoderBlock"]):
-            
-            # 1. QKV Group (Attention의 입력부)
-            qkv_group = []
-            # 2. Output Group (Residual Connection과 맞닿는 부분 - $D$ 차원 유지)
-            output_group = []
-            # 3. Intermediate Group (MLP 확장부 - 프루닝 자유도 높음)
-            inter_group = []
 
-            for sub_name, sub_module in module.named_modules():
-                full_name = f"{name}.{sub_name}" if sub_name != "" else name
-                if not isinstance(sub_module, nn.Linear) or "head" in full_name:
-                    continue
+    all_modules = dict(model.named_modules())
+    all_linear_names = {
+        name for name, m in all_modules.items()
+        if isinstance(m, nn.Linear) and name != 'head'
+    }
 
-                # 레이어 이름 키워드에 따른 그룹 분기
-                if any(k in full_name for k in ["qkv", "query", "key", "value"]):
-                    qkv_group.append(full_name)
-                elif any(k in full_name for k in ["proj", "fc2", "mlp.dwconv"]): # 출력부
-                    output_group.append(full_name)
-                elif any(k in full_name for k in ["fc1", "mlp.fc1"]): # 중간 확장부
-                    inter_group.append(full_name)
+    block_indices = set()
+    for name in all_linear_names:
+        parts = name.split('.')
+        if parts[0] == 'blocks' and parts[1].isdigit():
+            block_indices.add(int(parts[1]))
 
-            # 유효한 그룹들만 추가
-            if qkv_group: groups.append(qkv_group)
-            if inter_group: groups.append(inter_group)
-            if output_group: groups.append(output_group)
+    # head_dim 자동 추출
+    first_block = f'blocks.0'
+    qkv_layer = all_modules.get(f'{first_block}.attn.qkv')
+    proj_layer = all_modules.get(f'{first_block}.attn.proj')
+    num_heads = None
+    head_dim = None
+    if qkv_layer is not None and proj_layer is not None:
+        embed_dim = proj_layer.out_features       # 384
+        qkv_out   = qkv_layer.out_features        # 1152
+        num_heads_x3 = qkv_out // embed_dim       # 3
+        # num_heads는 모델에서 직접 꺼내는 게 가장 안전
+        for name, m in model.named_modules():
+            if 'blocks.0.attn' == name and hasattr(m, 'num_heads'):
+                num_heads = m.num_heads
+                head_dim  = embed_dim // num_heads
+                break
+        if num_heads is None:
+            # fallback: timm default
+            num_heads = 6
+            head_dim  = embed_dim // num_heads
 
-    print(f"[*] ViT Topology: {len(groups)} dependency-aware groups identified.")
+    for i in sorted(block_indices):
+        p    = f'blocks.{i}'
+        qkv  = f'{p}.attn.qkv'
+        proj = f'{p}.attn.proj'
+        fc1  = f'{p}.mlp.fc1'
+        fc2  = f'{p}.mlp.fc2'
+
+        # Attention head 그룹
+        if qkv in all_linear_names and proj in all_linear_names:
+            groups.append({
+                'type'     : 'attn',
+                'names'    : [qkv, proj],
+                'num_heads': num_heads,
+                'head_dim' : head_dim,
+            })
+
+        # FFN intermediate 그룹
+        if fc1 in all_linear_names and fc2 in all_linear_names:
+            groups.append({
+                'type' : 'ffn',
+                'names': [fc1, fc2],
+            })
+
+    print(f"[*] ViT Topology: {len(block_indices)} blocks "
+          f"→ {len(groups)} groups "
+          f"(num_heads={num_heads}, head_dim={head_dim})")
     return groups

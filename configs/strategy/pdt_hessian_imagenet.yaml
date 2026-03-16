@@ -1,3 +1,4 @@
+#pdt_hessian_imagenet.yaml
 method: "PDT"
 type: "pdt_hessian"
 ema_decay: 0.99        # 데이터가 많으므로 과거 그라디언트를 더 오래 축적 (0.9 -> 0.99)

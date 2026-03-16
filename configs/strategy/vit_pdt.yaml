@@ -1,12 +1,13 @@
-strategy:
-  name: "ViTPDTPruner"
-  group_selection_ratio: 1.0
-  channel_keep_ratio: 0.3
-  min_survival_ratio: 0.1
-  ema_decay: 0.95
-  lambda_h: 0.005
-  hessian_iter: 3
-  k_horizon: 5
+method: "pdt"
+name: "ViTPDTPruner"
 
-# 여기에 강제로 배치 사이즈를 박아버립시다
-batch_size: 16
+group_selection_ratio: 1.0
+channel_keep_ratio: 0.5
+min_survival_ratio: 0.1
+ema_decay: 0.95
+lambda_h: 0.005
+hessian_iter: 3
+k_horizon: 5
+
+start_epoch: 5
+prune_every: 5

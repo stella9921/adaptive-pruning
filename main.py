@@ -518,6 +518,18 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     import torch_pruning as tp
     import json
 
+    # ← 맨 앞으로 올림
+    is_vit_model = any(k in config['model']['name'].lower()
+                       for k in ['vit', 'deit', 'transformer'])
+     # ViT Hessian 2차 미분 지원을 위해 flash attention 비활성화
+    if 'vit' in config['model']['name'].lower() or \
+       'deit' in config['model']['name'].lower():
+        torch.backends.cuda.enable_flash_sdp(False)
+        torch.backends.cuda.enable_mem_efficient_sdp(False)
+        torch.backends.cuda.enable_math_sdp(True)
+        print(">>> [System] Flash Attention disabled for Hessian computation.")
+
+
     checkpoint_dir = config.get('save_dir', './exp/checkpoints')
     os.makedirs(checkpoint_dir, exist_ok=True)
 
@@ -527,7 +539,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # Pruner 생성
     # -------------------------
     model_name = config['model']['name'].lower()
-    if "vit" in model_name or "transformer" in model_name:
+    if "vit" in model_name or "deit" in model_name or "transformer" in model_name:
         pdt_engine = ViTPDTPruner(model, config, args, topology_groups=topology_groups)
         print(f"[System] Initializing ViTPDTPruner for {model_name}")
     else:
@@ -539,12 +551,19 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
     # print("[System] Initializing PDTPruner (Stable Version)")
 
-    optimizer = optim.SGD(
+    if is_vit_model:
+        optimizer = optim.AdamW(
         model.parameters(),
-        lr=config['model'].get('base_lr', 0.01),
-        momentum=config['model'].get('momentum', 0.9),
-        weight_decay=config['model'].get('weight_decay', 1e-4)
+        lr=config['model'].get('base_lr', 1e-4),
+        weight_decay=config['model'].get('weight_decay', 0.05)
     )
+    else:
+        optimizer = optim.SGD(
+            model.parameters(),
+            lr=config['model'].get('base_lr', 0.01),
+            momentum=config['model'].get('momentum', 0.9),
+            weight_decay=config['model'].get('weight_decay', 1e-4)
+        )
     criterion = nn.CrossEntropyLoss()
 
     total_epochs = args.epochs
@@ -715,77 +734,105 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # ================= PHYSICAL COMPRESSION =====================
     # ============================================================
 
+    # ============================================================
+    # ================= PHYSICAL COMPRESSION =====================
+    # ============================================================
     print("\n================ FINAL PHYSICAL COMPRESSION ================\n")
 
     torch.cuda.empty_cache()
     torch.cuda.synchronize()
 
+
+
     example_inputs = torch.randn(
         1, 3,
-        config['model'].get('input_size', 32),
-        config['model'].get('input_size', 32)
+        config['model'].get('input_size', 224 if is_vit_model else 32),
+        config['model'].get('input_size', 224 if is_vit_model else 32)
     ).to(device)
 
     DG = tp.DependencyGraph().build(model, example_inputs=example_inputs)
 
-    for module in model.modules():
+    if is_vit_model:
+        # ViT: 타입별로 pruning 함수 구분
+        all_modules = dict(model.named_modules())
 
-        # ---------------- Conv ----------------
-        if isinstance(module, torch.nn.Conv2d):
+        for g in topology_groups:
+            if g['type'] == 'ffn':
+                # fc1: out_channels (행 방향)
+                fc1 = all_modules.get(g['names'][0])
+                fc2 = all_modules.get(g['names'][1])
 
-            # 🔥 Depthwise 보호 (MobileNet 대응)
-            if module.groups == module.in_channels and module.in_channels == module.out_channels:
-                pruning_fn = tp.prune_conv_in_channels
-            else:
-                pruning_fn = tp.prune_conv_out_channels
+                if fc1 is not None and hasattr(fc1, 'mask'):
+                    idxs = torch.where(fc1.mask == 0)[0].tolist()
+                    if 0 < len(idxs) < fc1.out_features:
+                        pruning_group = DG.get_pruning_group(
+                            fc1, tp.prune_linear_out_channels, idxs)
+                        pruning_group.prune()
+                        print(f"[Compressed] {g['names'][0]}: {len(idxs)} neurons removed")
 
-            if hasattr(module, "mask"):
-                mask = module.mask.detach().cpu()
-                idxs = torch.nonzero(mask == 0).squeeze().tolist()
+                # fc2는 DependencyGraph가 fc1과 묶어서 자동 처리
+                # (fc1 out = fc2 in 의존성을 DG가 인식)
 
-                if isinstance(idxs, int):
-                    idxs = [idxs]
+            elif g['type'] == 'attn':
+                qkv  = all_modules.get(g['names'][0])
+                proj = all_modules.get(g['names'][1])
 
-                if len(idxs) == 0:
-                    continue
+                if qkv is not None and hasattr(qkv, 'mask'):
+                    num_heads = g['num_heads']
+                    head_dim  = g['head_dim']
 
-                if len(idxs) >= module.out_channels:
-                    continue
+                    # 제거할 head 인덱스 → qkv 행 인덱스로 변환
+                    dead_heads = torch.where(qkv.mask == 0)[0].tolist()
+                    if not dead_heads:
+                        continue
 
-                pruning_group = DG.get_pruning_group(
-                    module,
-                    pruning_fn,
-                    idxs
-                )
-                pruning_group.prune()
+                    # Q/K/V 각 슬라이스의 행 인덱스 수집
+                    qkv_idxs = []
+                    for h in dead_heads:
+                        for offset in range(3):  # Q, K, V
+                            start = offset * (num_heads * head_dim) + h * head_dim
+                            qkv_idxs.extend(range(start, start + head_dim))
 
-        # ---------------- Linear ----------------
-        elif isinstance(module, torch.nn.Linear):
-            if hasattr(module, "mask"):
-                mask = module.mask.detach().cpu()
-                idxs = torch.nonzero(mask == 0).squeeze().tolist()
-                
-                if isinstance(idxs, int): idxs = [idxs]
-                if len(idxs) == 0 or len(idxs) >= module.out_features:
-                    continue
+                    if 0 < len(qkv_idxs) < qkv.out_features:
+                        pruning_group = DG.get_pruning_group(
+                            qkv, tp.prune_linear_out_channels, qkv_idxs)
+                        pruning_group.prune()
+                        print(f"[Compressed] {g['names'][0]}: {len(dead_heads)} heads removed")
 
-                # ViT의 Linear 레이어 실제 차원 축소 집행
-                pruning_group = DG.get_pruning_group(
-                    module, 
-                    tp.prune_linear_out_channels, # Linear용 pruning 함수
-                    idxs
-                )
-                pruning_group.prune()
+    else:
+        # CNN: 기존 로직 그대로
+        for module in model.modules():
+            if isinstance(module, torch.nn.Conv2d):
+                if module.groups == module.in_channels == module.out_channels:
+                    pruning_fn = tp.prune_conv_in_channels
+                else:
+                    pruning_fn = tp.prune_conv_out_channels
+
+                if hasattr(module, "mask"):
+                    mask = module.mask.detach().cpu()
+                    idxs = torch.nonzero(mask == 0).squeeze().tolist()
+                    if isinstance(idxs, int): idxs = [idxs]
+                    if len(idxs) == 0 or len(idxs) >= module.out_channels:
+                        continue
+                    DG.get_pruning_group(module, pruning_fn, idxs).prune()
+
+            elif isinstance(module, torch.nn.Linear):
+                if hasattr(module, "mask"):
+                    mask = module.mask.detach().cpu()
+                    idxs = torch.nonzero(mask == 0).squeeze().tolist()
+                    if isinstance(idxs, int): idxs = [idxs]
+                    if len(idxs) == 0 or len(idxs) >= module.out_features:
+                        continue
+                    DG.get_pruning_group(
+                        module, tp.prune_linear_out_channels, idxs).prune()
 
     compressed_path = os.path.join(
         checkpoint_dir,
         f"{config['model']['name']}_{strategy_type}_FINAL_COMPRESSED.pth"
     )
-
     torch.save(model.state_dict(), compressed_path)
     print(f"✅ Physically Compressed Model Saved: {compressed_path}")
     print("=============================================================\n")
-
 
 
 
