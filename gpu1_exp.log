@@ -1,0 +1,7 @@
+nohup: ignoring input
+
+==================================================
+🔥 SYSTEM CHECK: Raw Args -> ['main.py', '--model', 'deit_small', '--strategy', 'vit_pdt', '--epochs', '200', '--start_epoch', '30', '--prune_every', '20', '--channel_keep_ratio', '0.3', '--batch_size', '64', '--lr', '0.0005']
+==================================================
+
+🔥 DEBUG: Final Batch Size fixed to -> 64

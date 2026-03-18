@@ -787,7 +787,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         config['model'].get('input_size', 224 if is_vit_model else 32)
     ).to(device)
 
-    DG = tp.DependencyGraph().build(model, example_inputs=example_inputs)
+   
+    try:
+        DG = tp.DependencyGraph().build_graph(model, example_inputs=example_inputs)
+    except AttributeError:
+        DG = tp.DependencyGraph()
+        DG.build_dependency(model, example_inputs=example_inputs)
 
     if is_vit_model:
         # ViT: 타입별로 pruning 함수 구분

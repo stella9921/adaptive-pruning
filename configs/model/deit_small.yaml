@@ -1,6 +1,6 @@
 name: "deit_small_patch16_224"
 pretrained: true
-num_classes: 100
+num_classes: 1000
 input_size: 224
 base_lr: 0.0001
 weight_decay: 0.05
