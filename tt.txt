@@ -1,0 +1,23 @@
+# GPU 0
+CUDA_VISIBLE_DEVICES=0 nohup /home/stella/anaconda3/envs/pdt_2/bin/python main.py \
+  --model deit_small \
+  --strategy vit_pdt \
+  --epochs 100 \
+  --start_epoch 30 \
+  --prune_every 20 \
+  --channel_keep_ratio 0.4 \
+  --batch_size 64 \
+  --lr 0.0003 > gpu0_exp.log 2>&1 &
+echo "GPU 0 PID: $!"
+
+# GPU 1
+CUDA_VISIBLE_DEVICES=1 nohup /home/stella/anaconda3/envs/pdt_2/bin/python main.py \
+  --model deit_small \
+  --strategy vit_pdt \
+  --epochs 200 \
+  --start_epoch 30 \
+  --prune_every 20 \
+  --channel_keep_ratio 0.3 \
+  --batch_size 64 \
+  --lr 0.0005 > gpu1_exp.log 2>&1 &
+echo "GPU 1 PID: $!"
