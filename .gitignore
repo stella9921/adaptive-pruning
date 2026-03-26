@@ -4,4 +4,4 @@ __pycache__/
 results/logs/
 exp/checkpoints/*.pth
 exp/checkpoints/*.json
-Analyzing
+Analyzing*.pth
