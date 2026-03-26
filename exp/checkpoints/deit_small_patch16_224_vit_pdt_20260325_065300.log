@@ -1,0 +1,22 @@
+📝 Logging started: deit_small_patch16_224_vit_pdt_20260325_065300.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: pdt
+Target Model: deit_small_patch16_224 | Dataset: imagenet100
+>>> [Model] Loading Vision Transformer: deit_small_patch16_224
+>>> [System] ViT head replaced: 384 → 100
+>>> [System] Head warmup 시작 (5 epochs, head only)...
+  [Head Warmup] Epoch 1/5 | Val Acc: 69.77%
+  [Head Warmup] Epoch 2/5 | Val Acc: 72.62%
+  [Head Warmup] Epoch 3/5 | Val Acc: 73.28%
+  [Head Warmup] Epoch 4/5 | Val Acc: 73.09%
+  [Head Warmup] Epoch 5/5 | Val Acc: 73.77%
+>>> [System] Head warmup 완료. 전체 fine-tuning 시작.
+[*] ViT Topology: 12 blocks → 24 groups (num_heads=6, head_dim=64)
+>>> [System] Flash Attention disabled for Hessian computation.
+
+[Pruner Init] Identified 24 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing ViTPDTPruner for deit_small_patch16_224
+
+>>> Strategy: VIT_PDT | Total Epochs: 200
+>>> Pruning starts at Epoch 30, every 20 epochs.

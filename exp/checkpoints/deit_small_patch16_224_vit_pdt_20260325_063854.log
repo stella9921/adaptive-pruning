@@ -1,0 +1,4 @@
+📝 Logging started: deit_small_patch16_224_vit_pdt_20260325_063854.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: pdt
+Target Model: deit_small_patch16_224 | Dataset: imagenet100

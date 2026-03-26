@@ -1,0 +1,34 @@
+📝 Logging started: deit_small_patch16_224_vit_pdt_20260325_063926.log
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: pdt
+Target Model: deit_small_patch16_224 | Dataset: imagenet100
+>>> [Model] Loading Vision Transformer: deit_small_patch16_224
+>>> [System] ViT head replaced: 384 → 100
+>>> [System] Head warmup 시작 (5 epochs, head only)...
+  [Head Warmup] Epoch 1/5 | Val Acc: 70.23%
+  [Head Warmup] Epoch 2/5 | Val Acc: 72.49%
+  [Head Warmup] Epoch 3/5 | Val Acc: 73.51%
+  [Head Warmup] Epoch 4/5 | Val Acc: 73.98%
+  [Head Warmup] Epoch 5/5 | Val Acc: 73.53%
+>>> [System] Head warmup 완료. 전체 fine-tuning 시작.
+
+[Stage 1] Analyzing ViT Block-wise Topology for visiontransformer...
+[*] ViT: 12 transformer blocks identified for grouping.
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels: 1152 | Layers: blocks.0.attn.proj ... (4 layers)
+ Group  2 | Channels: 1152 | Layers: blocks.1.attn.proj ... (4 layers)
+ Group  3 | Channels: 1152 | Layers: blocks.2.attn.proj ... (4 layers)
+ Group  4 | Channels: 1152 | Layers: blocks.3.attn.proj ... (4 layers)
+ Group  5 | Channels: 1152 | Layers: blocks.4.attn.proj ... (4 layers)
+ Group  6 | Channels: 1152 | Layers: blocks.5.attn.proj ... (4 layers)
+ Group  7 | Channels: 1152 | Layers: blocks.6.attn.proj ... (4 layers)
+ Group  8 | Channels: 1152 | Layers: blocks.7.attn.proj ... (4 layers)
+ Group  9 | Channels: 1152 | Layers: blocks.8.attn.proj ... (4 layers)
+ Group 10 | Channels: 1152 | Layers: blocks.9.attn.proj ... (4 layers)
+ Group 11 | Channels: 1152 | Layers: blocks.10.attn.proj ... (4 layers)
+ Group 12 | Channels: 1152 | Layers: blocks.11.attn.proj ... (4 layers)
+===============================================================
+[*] Total 12 groups identified.
+
+>>> [System] Flash Attention disabled for Hessian computation.

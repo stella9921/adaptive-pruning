@@ -2,14 +2,25 @@ import torch.nn as nn
 from .resnet import get_resnet, prune_resnet_blockwise
 from .vgg import get_vgg16, prune_vgg_blockwise
 from .efficientnet import get_efficientnet, prune_efficientnet_blockwise
-from .mobilenet import get_mobilenet, prune_mobilenet_blockwise
+# from .mobilenet import get_mobilenet, prune_mobilenet_blockwise
+import timm 
 
 
 def get_model(model_cfg):
-    """YAML의 model 섹션 설정을 받아 모델 객체를 생성함"""
     name = model_cfg['name'].lower()
     num_classes = model_cfg.get('num_classes', 100)
     
+    # ViT / DeiT 계열
+    if 'vit' in name or 'deit' in name or 'transformer' in name:
+        print(f">>> [Model] Loading Vision Transformer: {name}")
+        model = timm.create_model(
+            name,
+            pretrained=model_cfg.get('pretrained', True),
+            num_classes=num_classes,
+            exportable=True
+        )
+        return model
+
     if "resnet" in name:
         return get_resnet(name, num_classes)
     elif "vgg" in name:
@@ -31,6 +42,10 @@ def get_prune_fn(model_name):
     elif "efficientnet" in name:
         return prune_efficientnet_blockwise
     elif "mobilenet" in name:
+        return prune_mobilenet_blockwise
+    elif "vit" in name or "transformer" in name:
+        # ViT는 Linear 레이어를 다루므로 mobilenet용 물리적 프루닝 함수를 공용으로 쓰거나
+        # 별도의 prune_vit_blockwise를 정의하여 연결
         return prune_mobilenet_blockwise
     else:
         raise ValueError(f"물리적 프루닝 함수를 찾을 수 없습니다: {name}")
@@ -66,6 +81,11 @@ def find_prunable_blocks(model, model_name, topology_groups=None):
         from torchvision.models import resnet as _tv_resnet
         for n, m in model.named_modules():
             if isinstance(m, (_tv_resnet.BasicBlock, _tv_resnet.Bottleneck)):
+                blocks[n] = m
+    elif "vit" in name:
+        for n, m in model.named_modules():
+            # ViT 블록 내의 Linear 레이어들을 수집
+            if isinstance(m, nn.Linear) and "head" not in n:
                 blocks[n] = m
                 
     elif "vgg" in name:

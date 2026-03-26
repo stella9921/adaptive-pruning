@@ -1,0 +1,242 @@
+📝 Logging started: vit_tiny_patch16_224_pdt_20260304_035201.log
+>>> [System] ViT detected. Input size forced to 224 for dataloader.
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: vit_tiny_patch16_224 | Dataset: cifar100
+>>> [Model] Loading Vision Transformer for Hessian Analysis: vit_tiny_patch16_224
+
+[Stage 1] Analyzing ViT Block-wise Topology for visiontransformer...
+[*] ViT: 12 transformer blocks identified for grouping.
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  576 | Layers: blocks.0.attn.proj ... (4 layers)
+ Group  2 | Channels:  576 | Layers: blocks.1.attn.proj ... (4 layers)
+ Group  3 | Channels:  576 | Layers: blocks.2.attn.proj ... (4 layers)
+ Group  4 | Channels:  576 | Layers: blocks.3.attn.proj ... (4 layers)
+ Group  5 | Channels:  576 | Layers: blocks.4.attn.proj ... (4 layers)
+ Group  6 | Channels:  576 | Layers: blocks.5.attn.proj ... (4 layers)
+ Group  7 | Channels:  576 | Layers: blocks.6.attn.proj ... (4 layers)
+ Group  8 | Channels:  576 | Layers: blocks.7.attn.proj ... (4 layers)
+ Group  9 | Channels:  576 | Layers: blocks.8.attn.proj ... (4 layers)
+ Group 10 | Channels:  576 | Layers: blocks.9.attn.proj ... (4 layers)
+ Group 11 | Channels:  576 | Layers: blocks.10.attn.proj ... (4 layers)
+ Group 12 | Channels:  576 | Layers: blocks.11.attn.proj ... (4 layers)
+===============================================================
+[*] Total 12 groups identified.
+
+
+[Pruner Init] Identified 12 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing ViTPDTPruner for vit_tiny_patch16_224
+
+>>> Strategy: PDT | Total Epochs: 100
+>>> Pruning starts at Epoch 20, every 10 epochs.
+Epoch 1/100 | Loss: 4.3771 | Val Acc: 14.28% | Peak VRAM: 4506.89 MB
+Epoch 2/100 | Loss: 3.0584 | Val Acc: 39.50% | Peak VRAM: 4506.89 MB
+Epoch 3/100 | Loss: 2.0988 | Val Acc: 55.75% | Peak VRAM: 4506.89 MB
+Epoch 4/100 | Loss: 1.5682 | Val Acc: 64.38% | Peak VRAM: 4506.89 MB
+Epoch 5/100 | Loss: 1.2538 | Val Acc: 69.79% | Peak VRAM: 4506.89 MB
+Epoch 6/100 | Loss: 1.0564 | Val Acc: 73.39% | Peak VRAM: 4506.89 MB
+Epoch 7/100 | Loss: 0.9228 | Val Acc: 76.01% | Peak VRAM: 4506.89 MB
+Epoch 8/100 | Loss: 0.8292 | Val Acc: 77.50% | Peak VRAM: 4506.89 MB
+Epoch 9/100 | Loss: 0.7611 | Val Acc: 78.24% | Peak VRAM: 4506.89 MB
+Epoch 10/100 | Loss: 0.7084 | Val Acc: 79.58% | Peak VRAM: 4506.89 MB
+Epoch 11/100 | Loss: 0.6596 | Val Acc: 80.11% | Peak VRAM: 4506.89 MB
+Epoch 12/100 | Loss: 0.6242 | Val Acc: 80.56% | Peak VRAM: 4506.89 MB
+Epoch 13/100 | Loss: 0.5910 | Val Acc: 81.12% | Peak VRAM: 4506.89 MB
+Epoch 14/100 | Loss: 0.5670 | Val Acc: 81.57% | Peak VRAM: 4506.89 MB
+Epoch 15/100 | Loss: 0.5406 | Val Acc: 82.08% | Peak VRAM: 4506.89 MB
+Epoch 16/100 | Loss: 0.5232 | Val Acc: 82.22% | Peak VRAM: 4506.89 MB
+Epoch 17/100 | Loss: 0.5020 | Val Acc: 82.64% | Peak VRAM: 4506.89 MB
+Epoch 18/100 | Loss: 0.4845 | Val Acc: 82.88% | Peak VRAM: 4506.89 MB
+Epoch 19/100 | Loss: 0.4690 | Val Acc: 82.99% | Peak VRAM: 4506.89 MB
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 82.99%, Size: 20.89 MB
+💾 Saved Baseline: vit_tiny_patch16_224_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 20
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 20 ===
+ [*] ViT Pruning Complete: 323 units pruned.
+
+[Scientific Metrics - Epoch 20]
+ 🟢 Model Size: 20.89 MB -> 19.23 MB
+ 🔵 Sparsity: 6.14 %
+ 🟡 Speedup: 1.09x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep20_sp6.14.pth
+Epoch 20/100 | Loss: 1.2138 | Val Acc: 76.41% | Peak VRAM: 19662.38 MB
+Epoch 21/100 | Loss: 0.8449 | Val Acc: 77.86% | Peak VRAM: 4508.67 MB
+Epoch 22/100 | Loss: 0.7459 | Val Acc: 78.35% | Peak VRAM: 4508.67 MB
+Epoch 23/100 | Loss: 0.6827 | Val Acc: 79.12% | Peak VRAM: 4508.67 MB
+Epoch 24/100 | Loss: 0.6380 | Val Acc: 79.61% | Peak VRAM: 4508.67 MB
+Epoch 25/100 | Loss: 0.6039 | Val Acc: 80.04% | Peak VRAM: 4508.67 MB
+Epoch 26/100 | Loss: 0.5763 | Val Acc: 80.28% | Peak VRAM: 4508.67 MB
+Epoch 27/100 | Loss: 0.5505 | Val Acc: 80.77% | Peak VRAM: 4508.67 MB
+Epoch 28/100 | Loss: 0.5311 | Val Acc: 80.82% | Peak VRAM: 4508.67 MB
+Epoch 29/100 | Loss: 0.5114 | Val Acc: 81.10% | Peak VRAM: 4508.67 MB
+
+[DEBUG] >>> PRUNING @ Epoch 30
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 30 ===
+ [*] ViT Pruning Complete: 314 units pruned.
+
+[Scientific Metrics - Epoch 30]
+ 🟢 Model Size: 20.89 MB -> 17.62 MB
+ 🔵 Sparsity: 12.12 %
+ 🟡 Speedup: 1.19x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep30_sp12.12.pth
+Epoch 30/100 | Loss: 1.5181 | Val Acc: 64.25% | Peak VRAM: 19663.82 MB
+Epoch 31/100 | Loss: 1.1240 | Val Acc: 68.50% | Peak VRAM: 4503.32 MB
+Epoch 32/100 | Loss: 0.9822 | Val Acc: 70.83% | Peak VRAM: 4503.32 MB
+Epoch 33/100 | Loss: 0.8946 | Val Acc: 72.20% | Peak VRAM: 4503.32 MB
+Epoch 34/100 | Loss: 0.8316 | Val Acc: 73.18% | Peak VRAM: 4503.32 MB
+Epoch 35/100 | Loss: 0.7784 | Val Acc: 73.92% | Peak VRAM: 4503.32 MB
+Epoch 36/100 | Loss: 0.7401 | Val Acc: 74.73% | Peak VRAM: 4503.32 MB
+Epoch 37/100 | Loss: 0.7070 | Val Acc: 75.19% | Peak VRAM: 4503.32 MB
+Epoch 38/100 | Loss: 0.6770 | Val Acc: 75.71% | Peak VRAM: 4503.32 MB
+Epoch 39/100 | Loss: 0.6516 | Val Acc: 76.18% | Peak VRAM: 4503.32 MB
+
+[DEBUG] >>> PRUNING @ Epoch 40
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 40 ===
+ [*] ViT Pruning Complete: 302 units pruned.
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 20.89 MB -> 16.07 MB
+ 🔵 Sparsity: 17.86 %
+ 🟡 Speedup: 1.30x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep40_sp17.86.pth
+Epoch 40/100 | Loss: 2.3963 | Val Acc: 47.63% | Peak VRAM: 19665.60 MB
+Epoch 41/100 | Loss: 1.7243 | Val Acc: 54.60% | Peak VRAM: 4499.76 MB
+Epoch 42/100 | Loss: 1.4966 | Val Acc: 58.10% | Peak VRAM: 4499.76 MB
+Epoch 43/100 | Loss: 1.3622 | Val Acc: 60.91% | Peak VRAM: 4499.76 MB
+Epoch 44/100 | Loss: 1.2666 | Val Acc: 62.46% | Peak VRAM: 4499.76 MB
+Epoch 45/100 | Loss: 1.1914 | Val Acc: 63.72% | Peak VRAM: 4499.76 MB
+Epoch 46/100 | Loss: 1.1340 | Val Acc: 64.96% | Peak VRAM: 4499.76 MB
+Epoch 47/100 | Loss: 1.0850 | Val Acc: 65.66% | Peak VRAM: 4499.76 MB
+Epoch 48/100 | Loss: 1.0417 | Val Acc: 66.84% | Peak VRAM: 4499.76 MB
+Epoch 49/100 | Loss: 1.0077 | Val Acc: 67.09% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 50
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 50 ===
+ [*] ViT Pruning Complete: 285 units pruned.
+
+[Scientific Metrics - Epoch 50]
+ 🟢 Model Size: 20.89 MB -> 14.61 MB
+ 🔵 Sparsity: 23.28 %
+ 🟡 Speedup: 1.43x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep50_sp23.28.pth
+Epoch 50/100 | Loss: 3.5696 | Val Acc: 26.01% | Peak VRAM: 19660.26 MB
+Epoch 51/100 | Loss: 2.5959 | Val Acc: 36.53% | Peak VRAM: 4499.76 MB
+Epoch 52/100 | Loss: 2.2679 | Val Acc: 41.33% | Peak VRAM: 4499.76 MB
+Epoch 53/100 | Loss: 2.0844 | Val Acc: 44.59% | Peak VRAM: 4499.76 MB
+Epoch 54/100 | Loss: 1.9515 | Val Acc: 46.98% | Peak VRAM: 4499.76 MB
+Epoch 55/100 | Loss: 1.8480 | Val Acc: 49.09% | Peak VRAM: 4499.76 MB
+Epoch 56/100 | Loss: 1.7663 | Val Acc: 50.56% | Peak VRAM: 4499.76 MB
+Epoch 57/100 | Loss: 1.7021 | Val Acc: 52.19% | Peak VRAM: 4499.76 MB
+Epoch 58/100 | Loss: 1.6477 | Val Acc: 53.23% | Peak VRAM: 4499.76 MB
+Epoch 59/100 | Loss: 1.5975 | Val Acc: 53.73% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 60
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 60 ===
+ [*] ViT Pruning Complete: 264 units pruned.
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 20.89 MB -> 13.26 MB
+ 🔵 Sparsity: 28.31 %
+ 🟡 Speedup: 1.58x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep60_sp28.31.pth
+Epoch 60/100 | Loss: 3.3652 | Val Acc: 26.32% | Peak VRAM: 19656.70 MB
+Epoch 61/100 | Loss: 2.7581 | Val Acc: 32.23% | Peak VRAM: 4499.76 MB
+Epoch 62/100 | Loss: 2.5430 | Val Acc: 34.91% | Peak VRAM: 4499.76 MB
+Epoch 63/100 | Loss: 2.4013 | Val Acc: 37.59% | Peak VRAM: 4499.76 MB
+Epoch 64/100 | Loss: 2.2987 | Val Acc: 39.50% | Peak VRAM: 4499.76 MB
+Epoch 65/100 | Loss: 2.2142 | Val Acc: 41.20% | Peak VRAM: 4499.76 MB
+Epoch 66/100 | Loss: 2.1477 | Val Acc: 42.72% | Peak VRAM: 4499.76 MB
+Epoch 67/100 | Loss: 2.0836 | Val Acc: 43.51% | Peak VRAM: 4499.76 MB
+Epoch 68/100 | Loss: 2.0346 | Val Acc: 44.91% | Peak VRAM: 4499.76 MB
+Epoch 69/100 | Loss: 1.9969 | Val Acc: 45.89% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 70
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 70 ===
+ [*] ViT Pruning Complete: 236 units pruned.
+
+[Scientific Metrics - Epoch 70]
+ 🟢 Model Size: 20.89 MB -> 12.05 MB
+ 🔵 Sparsity: 32.79 %
+ 🟡 Speedup: 1.73x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep70_sp32.79.pth
+Epoch 70/100 | Loss: 3.6902 | Val Acc: 17.98% | Peak VRAM: 19656.70 MB
+Epoch 71/100 | Loss: 3.1765 | Val Acc: 23.10% | Peak VRAM: 4499.76 MB
+Epoch 72/100 | Loss: 2.9964 | Val Acc: 25.34% | Peak VRAM: 4499.76 MB
+Epoch 73/100 | Loss: 2.8760 | Val Acc: 28.04% | Peak VRAM: 4499.76 MB
+Epoch 74/100 | Loss: 2.7895 | Val Acc: 30.04% | Peak VRAM: 4499.76 MB
+Epoch 75/100 | Loss: 2.7121 | Val Acc: 30.59% | Peak VRAM: 4499.76 MB
+Epoch 76/100 | Loss: 2.6500 | Val Acc: 31.79% | Peak VRAM: 4499.76 MB
+Epoch 77/100 | Loss: 2.6071 | Val Acc: 32.87% | Peak VRAM: 4499.76 MB
+Epoch 78/100 | Loss: 2.5580 | Val Acc: 33.56% | Peak VRAM: 4499.76 MB
+Epoch 79/100 | Loss: 2.5175 | Val Acc: 34.37% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 80
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 80 ===
+ [*] ViT Pruning Complete: 201 units pruned.
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 20.89 MB -> 11.02 MB
+ 🔵 Sparsity: 36.62 %
+ 🟡 Speedup: 1.90x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep80_sp36.62.pth
+Epoch 80/100 | Loss: 4.1863 | Val Acc: 10.29% | Peak VRAM: 19656.70 MB
+Epoch 81/100 | Loss: 3.7217 | Val Acc: 14.32% | Peak VRAM: 4499.76 MB
+Epoch 82/100 | Loss: 3.4914 | Val Acc: 16.90% | Peak VRAM: 4499.76 MB
+Epoch 83/100 | Loss: 3.3517 | Val Acc: 19.27% | Peak VRAM: 4499.76 MB
+Epoch 84/100 | Loss: 3.2569 | Val Acc: 20.50% | Peak VRAM: 4499.76 MB
+Epoch 85/100 | Loss: 3.1823 | Val Acc: 21.38% | Peak VRAM: 4499.76 MB
+Epoch 86/100 | Loss: 3.1236 | Val Acc: 22.34% | Peak VRAM: 4499.76 MB
+Epoch 87/100 | Loss: 3.0678 | Val Acc: 23.44% | Peak VRAM: 4499.76 MB
+Epoch 88/100 | Loss: 3.0261 | Val Acc: 23.89% | Peak VRAM: 4499.76 MB
+Epoch 89/100 | Loss: 2.9868 | Val Acc: 24.43% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 90
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 90 ===
+ [*] ViT Pruning Complete: 158 units pruned.
+
+[Scientific Metrics - Epoch 90]
+ 🟢 Model Size: 20.89 MB -> 10.21 MB
+ 🔵 Sparsity: 39.62 %
+ 🟡 Speedup: 2.05x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep90_sp39.62.pth
+Epoch 90/100 | Loss: 4.3563 | Val Acc: 7.34% | Peak VRAM: 19656.70 MB
+Epoch 91/100 | Loss: 4.0214 | Val Acc: 9.76% | Peak VRAM: 4499.76 MB
+Epoch 92/100 | Loss: 3.8612 | Val Acc: 11.70% | Peak VRAM: 4499.76 MB
+Epoch 93/100 | Loss: 3.7367 | Val Acc: 13.72% | Peak VRAM: 4499.76 MB
+Epoch 94/100 | Loss: 3.6375 | Val Acc: 15.26% | Peak VRAM: 4499.76 MB
+Epoch 95/100 | Loss: 3.5546 | Val Acc: 16.79% | Peak VRAM: 4499.76 MB
+Epoch 96/100 | Loss: 3.4863 | Val Acc: 17.41% | Peak VRAM: 4499.76 MB
+Epoch 97/100 | Loss: 3.4273 | Val Acc: 18.68% | Peak VRAM: 4499.76 MB
+Epoch 98/100 | Loss: 3.3765 | Val Acc: 19.36% | Peak VRAM: 4499.76 MB
+Epoch 99/100 | Loss: 3.3267 | Val Acc: 20.49% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 100
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 100 ===
+ [*] ViT Pruning Complete: 112 units pruned.
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 20.89 MB -> 9.63 MB
+ 🔵 Sparsity: 41.75 %
+ 🟡 Speedup: 2.17x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep100_sp41.75.pth
+Epoch 100/100 | Loss: 4.3326 | Val Acc: 6.77% | Peak VRAM: 19656.70 MB
+
+🏁 Final Model Saved: ./exp/checkpoints/vit_tiny_patch16_224_pdt_final.pth
+
+================ FINAL PHYSICAL COMPRESSION ================
+

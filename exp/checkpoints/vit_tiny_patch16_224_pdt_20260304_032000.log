@@ -1,0 +1,60 @@
+📝 Logging started: vit_tiny_patch16_224_pdt_20260304_032000.log
+>>> [System] ViT detected. Input size forced to 224 for dataloader.
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: vit_tiny_patch16_224 | Dataset: cifar100
+>>> [Model] Loading Vision Transformer: vit_tiny_patch16_224
+
+[Stage 1] Analyzing ViT Block-wise Topology for visiontransformer...
+[*] ViT: 12 transformer blocks identified for grouping.
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  576 | Layers: blocks.0.attn.proj ... (4 layers)
+ Group  2 | Channels:  576 | Layers: blocks.1.attn.proj ... (4 layers)
+ Group  3 | Channels:  576 | Layers: blocks.2.attn.proj ... (4 layers)
+ Group  4 | Channels:  576 | Layers: blocks.3.attn.proj ... (4 layers)
+ Group  5 | Channels:  576 | Layers: blocks.4.attn.proj ... (4 layers)
+ Group  6 | Channels:  576 | Layers: blocks.5.attn.proj ... (4 layers)
+ Group  7 | Channels:  576 | Layers: blocks.6.attn.proj ... (4 layers)
+ Group  8 | Channels:  576 | Layers: blocks.7.attn.proj ... (4 layers)
+ Group  9 | Channels:  576 | Layers: blocks.8.attn.proj ... (4 layers)
+ Group 10 | Channels:  576 | Layers: blocks.9.attn.proj ... (4 layers)
+ Group 11 | Channels:  576 | Layers: blocks.10.attn.proj ... (4 layers)
+ Group 12 | Channels:  576 | Layers: blocks.11.attn.proj ... (4 layers)
+===============================================================
+[*] Total 12 groups identified.
+
+
+[Pruner Init] Identified 12 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing ViTPDTPruner for vit_tiny_patch16_224
+
+>>> Strategy: PDT | Total Epochs: 100
+>>> Pruning starts at Epoch 10, every 10 epochs.
+Epoch 1/100 | Loss: 4.1180 | Val Acc: 21.85% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep1.pth
+Epoch 2/100 | Loss: 2.6664 | Val Acc: 46.79% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep2.pth
+Epoch 3/100 | Loss: 1.8078 | Val Acc: 61.09% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep3.pth
+Epoch 4/100 | Loss: 1.3614 | Val Acc: 68.22% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep4.pth
+Epoch 5/100 | Loss: 1.1133 | Val Acc: 72.16% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep5.pth
+Epoch 6/100 | Loss: 0.9607 | Val Acc: 74.54% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep6.pth
+Epoch 7/100 | Loss: 0.8535 | Val Acc: 76.49% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep7.pth
+Epoch 8/100 | Loss: 0.7782 | Val Acc: 77.72% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep8.pth
+Epoch 9/100 | Loss: 0.7203 | Val Acc: 78.79% | Peak VRAM: 3828.63 MB
+💾 Epoch Checkpoint Saved: vit_tiny_patch16_224_pdt_ep9.pth
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 78.79%, Size: 20.89 MB
+💾 Saved Baseline: vit_tiny_patch16_224_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 10
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 10 ===

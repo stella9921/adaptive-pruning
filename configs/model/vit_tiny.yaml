@@ -1,0 +1,5 @@
+name: 'vit_tiny_patch16_224'  # timm 공식 모델 명칭
+num_classes: 100              # 사용하는 데이터셋(CIFAR-100 등)에 맞게 설정
+input_size: 224               # ViT는 보통 224 입력을 기본으로 합니다
+base_lr: 0.0005               # ViT는 CNN보다 작은 학습률에서 안정적인 경우가 많습니다
+epochs: 100                   # 실험 목적에 따라 조절

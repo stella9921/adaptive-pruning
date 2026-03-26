@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 import torch_pruning as tp
 import sys
 from datetime import datetime
+import time
 import json
 
 # 기존 모듈 임포트
@@ -19,7 +20,7 @@ from src.data.dataloader import get_dataloaders
 from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
-from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner,DFPCPruner,TPPPruner
+from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner,DFPCPruner,TPPPruner,ViTPDTPruner
 
 def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     """Stage 1(Topology)과 Stage 4(Resource)를 동시에 분석"""
@@ -27,6 +28,8 @@ def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     
     model_config = config.get('model', {})
     input_size = model_config.get('input_size', 224)
+    if "vit" in model_config.get('name', '').lower():
+        input_size = 224
     inputs = torch.randn(1, 3, input_size, input_size).to(device)
 
     # [Stage 1] Topology Status (FX)
@@ -46,12 +49,28 @@ def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     print(prof.key_averages().table(sort_by="cuda_memory_usage", row_limit=10))
     return prof
 
-
+# [여기에 넣으세요!] 어떤 함수도 시작되기 전, 파일의 생얼 부분입니다.
+print("\n" + "="*50, flush=True)
+print(f"🔥 SYSTEM CHECK: Raw Args -> {sys.argv}", flush=True)
+print("="*50 + "\n", flush=True)
 def main():
     # 1. 설정 및 데이터 준비
     config, args = load_config()
-
+    # print(f"DEBUG: Current Batch Size is {config.get('batch_size', args.batch_size)}")
+    # [강제 수정] 명령어로 들어온 batch_size가 무시되지 않도록 직접 박아넣습니다.
+    if args.batch_size:
+        config['batch_size'] = args.batch_size
+    
+    print(f"🔥 DEBUG: Final Batch Size fixed to -> {config['batch_size']}", flush=True)
     # --- 로그 파일 자동 저장 설정 시작 ---
+
+    # ViT 모델은 224x224 해상도가 필수이므로 설정을 강제 업데이트
+    # if "vit" in config['model']['name'].lower():
+    if any(k in config['model']['name'].lower() for k in ['vit', 'deit', 'transformer']):
+        config['model']['input_size'] = 224
+        print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")    
+
+ 
     log_dir = config.get('save_dir', './exp/logs')
     os.makedirs(log_dir, exist_ok=True)
     log_filename = f"{config['model']['name']}_{getattr(args, 'strategy', 'pdt')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
@@ -85,6 +104,14 @@ def main():
     dataset_cfg = config.get('dataset', {})
     dataset_name = dataset_cfg if isinstance(dataset_cfg, str) else dataset_cfg.get('name', 'cifar100')
 
+    # if "vit" in config['model']['name'].lower():
+    if any(k in config['model']['name'].lower() for k in ['vit', 'deit', 'transformer']):
+        # ViT 모델 구조상 224x224 해상도가 필수
+        config['model']['input_size'] = 224
+        print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")
+
+
+
     loaders = get_dataloaders(config)
     
     if len(loaders) == 3:
@@ -98,14 +125,51 @@ def main():
 
     # 2. 모델 초기화
     model = get_model(config['model']).to(device)
+
+    is_vit_model = any(k in config['model']['name'].lower()
+                       for k in ['vit', 'deit', 'transformer'])
+    
+    if is_vit_model and 'imagenet100' in str(dataset_name):
+        in_features = model.head.in_features
+        model.head = nn.Linear(in_features, 100).to(device)
+        print(f">>> [System] ViT head replaced: {in_features} → 100")
+
+        # Head warmup: backbone freeze하고 head만 먼저 학습
+        print(">>> [System] Head warmup 시작 (5 epochs, head only)...")
+        for param in model.parameters():
+            param.requires_grad = False
+        for param in model.head.parameters():
+            param.requires_grad = True
+
+        warmup_opt = optim.AdamW(model.head.parameters(), lr=0.001)
+        warmup_criterion = nn.CrossEntropyLoss()
+
+        for ep in range(5):
+            model.train()
+            for x, y in train_loader:
+                if x.shape[-1] != 224:
+                    x = torch.nn.functional.interpolate(
+                        x, size=(224, 224), mode='bilinear', align_corners=False)
+                x, y = x.to(device), y.to(device)
+                warmup_opt.zero_grad()
+                warmup_criterion(model(x), y).backward()
+                warmup_opt.step()
+
+            val_acc = evaluate(model, val_loader, device)
+            print(f"  [Head Warmup] Epoch {ep+1}/5 | Val Acc: {val_acc:.2f}%")
+
+        # 전체 파라미터 다시 학습 가능하게
+        for param in model.parameters():
+            param.requires_grad = True
+        print(">>> [System] Head warmup 완료. 전체 fine-tuning 시작.")
     
     # [System] ImageNet-100 대응 FC 가중치 이식
-    if dataset_name == 'imagenet' or 'imagenet' in dataset_name:
+    if ('imagenet' in str(dataset_name)) and not is_vit_model:
         print(">>> [System] Transferring Pretrained Weights to FC Layer (1000 -> 100)...")
         temp_config = config['model'].copy()
         temp_config['num_classes'] = 1000
         full_model = get_model(temp_config).to(device)
-        
+
         with torch.no_grad():
             model.fc.weight.copy_(full_model.fc.weight[:100])
             model.fc.bias.copy_(full_model.fc.bias[:100])
@@ -494,6 +558,18 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     import torch_pruning as tp
     import json
 
+    # ← 맨 앞으로 올림
+    is_vit_model = any(k in config['model']['name'].lower()
+                       for k in ['vit', 'deit', 'transformer'])
+     # ViT Hessian 2차 미분 지원을 위해 flash attention 비활성화
+    if 'vit' in config['model']['name'].lower() or \
+       'deit' in config['model']['name'].lower():
+        torch.backends.cuda.enable_flash_sdp(False)
+        torch.backends.cuda.enable_mem_efficient_sdp(False)
+        torch.backends.cuda.enable_math_sdp(True)
+        print(">>> [System] Flash Attention disabled for Hessian computation.")
+
+
     checkpoint_dir = config.get('save_dir', './exp/checkpoints')
     os.makedirs(checkpoint_dir, exist_ok=True)
 
@@ -502,15 +578,32 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # -------------------------
     # Pruner 생성
     # -------------------------
-    pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
-    print("[System] Initializing PDTPruner (Stable Version)")
+    model_name = config['model']['name'].lower()
+    if "vit" in model_name or "deit" in model_name or "transformer" in model_name:
+        pdt_engine = ViTPDTPruner(model, config, args, topology_groups=topology_groups)
+        print(f"[System] Initializing ViTPDTPruner for {model_name}")
+    else:
+        pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
+        print(f"[System] Initializing PDTPruner (Stable Version) for {model_name}")
 
-    optimizer = optim.SGD(
+
+
+    # pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
+    # print("[System] Initializing PDTPruner (Stable Version)")
+
+    if is_vit_model:
+        optimizer = optim.AdamW(
         model.parameters(),
-        lr=config['model'].get('base_lr', 0.01),
-        momentum=config['model'].get('momentum', 0.9),
-        weight_decay=config['model'].get('weight_decay', 1e-4)
+        lr=config['model'].get('base_lr', 1e-4),
+        weight_decay=config['model'].get('weight_decay', 0.05)
     )
+    else:
+        optimizer = optim.SGD(
+            model.parameters(),
+            lr=config['model'].get('base_lr', 0.01),
+            momentum=config['model'].get('momentum', 0.9),
+            weight_decay=config['model'].get('weight_decay', 1e-4)
+        )
     criterion = nn.CrossEntropyLoss()
 
     total_epochs = args.epochs
@@ -527,6 +620,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # ======================= TRAIN LOOP =========================
     # ============================================================
     for epoch in range(1, total_epochs + 1):
+    # start_f = args.start_epoch if args.start_epoch else 1
+    # for epoch in range(start_f, total_epochs + 1):
 
         model.train()
         total_loss = 0.0
@@ -537,36 +632,19 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         prune_step_index = None
 
         for batch_idx, (x, y) in enumerate(train_loader):
+            # if "vit" in config['model']['name'].lower() and x.shape[-1] != 224:
+            if x.shape[-1] != 224 and hasattr(model, 'patch_embed'):
+                x = torch.nn.functional.interpolate(x, size=(224, 224), mode='bilinear', align_corners=False)
+            
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()
 
+            # --- [여기서부터 교체 시작] ---
             output = model(x)
             loss = criterion(output, y)
-
-
-
-
-            # --------------------------------------------------------
-            # [추가] 프루닝 시작 직전 에폭(start_epoch - 1)에 Dense 수치 저장
-            # --------------------------------------------------------
-            if epoch == start_epoch and batch_idx == 0:
-                print(f"\n[System] Saving Baseline Dense Model before pruning starts...")
-                
-                # Dense 상태의 효율성 측정 (Sparsity 0%)
-                dense_eff = pdt_engine.get_model_efficiency()
-                dense_acc = evaluate(model, val_loader, device)
-                
-                dense_ckpt_name = f"{config['model']['name']}_DENSE_BASELINE.pth"
-                torch.save({
-                    'model_state_dict': model.state_dict(),
-                    'epoch': epoch - 1,
-                    'sparsity': 0.0,
-                    'val_acc': dense_acc,
-                    'metrics': dense_eff
-                }, os.path.join(checkpoint_dir, dense_ckpt_name))
-                
-                print(f"📊 Dense Baseline - Acc: {dense_acc:.2f}%, Size: {dense_eff['orig_mb']:.2f} MB")
-                print(f"💾 Saved Baseline: {dense_ckpt_name}\n")
+            
+            # 나중에 del loss 할 거니까 미리 숫자만 빼둡니다 (에러 방지)
+            current_loss_val = loss.item()
 
             should_prune = (
                 not stop_pruning
@@ -579,6 +657,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 prune_step_index = batch_idx
                 print(f"\n[DEBUG] >>> PRUNING @ Epoch {epoch}")
 
+                # Hessian 계산을 위해 그래프 유지하며 백워드
                 loss.backward(retain_graph=True)
 
                 pdt_engine.step_pruning(
@@ -589,43 +668,44 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
 
+                # [메모리 해제 핵심] 찌꺼기를 완전히 지웁니다.
+                import gc
+                del loss  # 1. loss 객체 삭제
+                gc.collect() # 2. 가비지 컬렉션
+                torch.cuda.empty_cache() # 3. GPU 메모리 반환
+                print("🧹 Post-Pruning Memory Cleared & Graph Destroyed.")
+
                 current_sp = pdt_engine.get_current_sparsity()
                 eff = pdt_engine.get_model_efficiency()
 
-                # -------------------------
-                # Scientific metrics 출력
-                # -------------------------
                 print(f"\n[Scientific Metrics - Epoch {epoch}]")
                 print(f" 🟢 Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
                 print(f" 🔵 Sparsity: {current_sp:.2f} %")
                 print(f" 🟡 Speedup: {eff['speedup']:.2f}x")
 
-                # -------------------------
-                # Checkpoint 저장
-                # -------------------------
                 ckpt_name = f"{config['model']['name']}_{strategy_type}_ep{epoch}_sp{current_sp:.2f}.pth"
-                torch.save(
-                    {
-                        'model_state_dict': model.state_dict(),
-                        'epoch': epoch,
-                        'sparsity': current_sp,
-                        'metrics': eff
-                    },
-                    os.path.join(checkpoint_dir, ckpt_name)
-                )
+                torch.save({
+                    'model_state_dict': model.state_dict(),
+                    'epoch': epoch,
+                    'sparsity': current_sp,
+                    'metrics': eff
+                }, os.path.join(checkpoint_dir, ckpt_name))
                 print(f"💾 Checkpoint saved: {ckpt_name}")
 
-                # -------------------------
-                # 안전 제한
-                # -------------------------
-                # if current_sp >= 45:
-                #     print("🛑 Sparsity limit reached. Stop further pruning.")
-                #     stop_pruning = True
-
-                torch.cuda.empty_cache()
-
             else:
+                # 프루닝 안 할 때는 그냥 백워드
                 loss.backward()
+                t_step_start = time.time()
+                loss.backward()
+                pdt_engine.update_ema_and_mask_grad()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+                optimizer.step()
+                pdt_engine.apply_mask_to_weights()
+                t_step_end = time.time()
+                if batch_idx % 100 == 0:
+                    print(f" [Normal step time] batch {batch_idx}: {t_step_end - t_step_start:.4f}s")
+                total_loss += current_loss_val
+                continue
 
             pdt_engine.update_ema_and_mask_grad()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -637,7 +717,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             step_peak = torch.cuda.max_memory_allocated(device) / (1024**2)
             step_mem_trace.append(step_peak)
 
-            total_loss += loss.item()
+            # 아까 저장해둔 숫자값을 더해줍니다.
+            total_loss += current_loss_val 
+            # --- [교체 끝] ---
 
         # -------------------------
         # Epoch 종료
@@ -671,20 +753,20 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         # -------------------------
         # 🔥 매 Epoch 체크포인트 저장
         # -------------------------
-        epoch_ckpt_name = f"{config['model']['name']}_{strategy_type}_ep{epoch}.pth"
+        # epoch_ckpt_name = f"{config['model']['name']}_{strategy_type}_ep{epoch}.pth"
 
-        torch.save(
-            {
-                'model_state_dict': model.state_dict(),
-                'epoch': epoch,
-                'val_acc': val_acc,
-                'peak_vram': peak_vram,
-                'sparsity': pdt_engine.get_current_sparsity()
-            },
-            os.path.join(checkpoint_dir, epoch_ckpt_name)
-        )
+        # torch.save(
+        #     {
+        #         'model_state_dict': model.state_dict(),
+        #         'epoch': epoch,
+        #         'val_acc': val_acc,
+        #         'peak_vram': peak_vram,
+        #         'sparsity': pdt_engine.get_current_sparsity()
+        #     },
+        #     os.path.join(checkpoint_dir, epoch_ckpt_name)
+        # )
 
-        print(f"💾 Epoch Checkpoint Saved: {epoch_ckpt_name}")
+        # print(f"💾 Epoch Checkpoint Saved: {epoch_ckpt_name}")
 
         history_data.append({
             "epoch": epoch,
@@ -704,464 +786,114 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # ================= PHYSICAL COMPRESSION =====================
     # ============================================================
 
+    # ============================================================
+    # ================= PHYSICAL COMPRESSION =====================
+    # ============================================================
     print("\n================ FINAL PHYSICAL COMPRESSION ================\n")
 
     torch.cuda.empty_cache()
     torch.cuda.synchronize()
 
+
+
     example_inputs = torch.randn(
         1, 3,
-        config['model'].get('input_size', 32),
-        config['model'].get('input_size', 32)
+        config['model'].get('input_size', 224 if is_vit_model else 32),
+        config['model'].get('input_size', 224 if is_vit_model else 32)
     ).to(device)
 
-    DG = tp.DependencyGraph().build(model, example_inputs=example_inputs)
+   
+    try:
+        DG = tp.DependencyGraph().build_graph(model, example_inputs=example_inputs)
+    except AttributeError:
+        DG = tp.DependencyGraph()
+        DG.build_dependency(model, example_inputs=example_inputs)
 
-    for module in model.modules():
+    if is_vit_model:
+        # ViT: 타입별로 pruning 함수 구분
+        all_modules = dict(model.named_modules())
 
-        # ---------------- Conv ----------------
-        if isinstance(module, torch.nn.Conv2d):
+        for g in topology_groups:
+            if g['type'] == 'ffn':
+                # fc1: out_channels (행 방향)
+                fc1 = all_modules.get(g['names'][0])
+                fc2 = all_modules.get(g['names'][1])
 
-            # 🔥 Depthwise 보호 (MobileNet 대응)
-            if module.groups == module.in_channels and module.in_channels == module.out_channels:
-                pruning_fn = tp.prune_conv_in_channels
-            else:
-                pruning_fn = tp.prune_conv_out_channels
+                if fc1 is not None and hasattr(fc1, 'mask'):
+                    idxs = torch.where(fc1.mask == 0)[0].tolist()
+                    if 0 < len(idxs) < fc1.out_features:
+                        pruning_group = DG.get_pruning_group(
+                            fc1, tp.prune_linear_out_channels, idxs)
+                        pruning_group.prune()
+                        print(f"[Compressed] {g['names'][0]}: {len(idxs)} neurons removed")
 
-            if hasattr(module, "mask"):
-                mask = module.mask.detach().cpu()
-                idxs = torch.nonzero(mask == 0).squeeze().tolist()
+                # fc2는 DependencyGraph가 fc1과 묶어서 자동 처리
+                # (fc1 out = fc2 in 의존성을 DG가 인식)
 
-                if isinstance(idxs, int):
-                    idxs = [idxs]
+            elif g['type'] == 'attn':
+                qkv  = all_modules.get(g['names'][0])
+                proj = all_modules.get(g['names'][1])
 
-                if len(idxs) == 0:
-                    continue
+                if qkv is not None and hasattr(qkv, 'mask'):
+                    num_heads = g['num_heads']
+                    head_dim  = g['head_dim']
 
-                if len(idxs) >= module.out_channels:
-                    continue
+                    # 제거할 head 인덱스 → qkv 행 인덱스로 변환
+                    dead_heads = torch.where(qkv.mask == 0)[0].tolist()
+                    if not dead_heads:
+                        continue
 
-                pruning_group = DG.get_pruning_group(
-                    module,
-                    pruning_fn,
-                    idxs
-                )
-                pruning_group.prune()
+                    # Q/K/V 각 슬라이스의 행 인덱스 수집
+                    qkv_idxs = []
+                    for h in dead_heads:
+                        for offset in range(3):  # Q, K, V
+                            start = offset * (num_heads * head_dim) + h * head_dim
+                            qkv_idxs.extend(range(start, start + head_dim))
 
-        # ---------------- Linear ----------------
-        elif isinstance(module, torch.nn.Linear):
+                    if 0 < len(qkv_idxs) < qkv.out_features:
+                        pruning_group = DG.get_pruning_group(
+                            qkv, tp.prune_linear_out_channels, qkv_idxs)
+                        pruning_group.prune()
+                        print(f"[Compressed] {g['names'][0]}: {len(dead_heads)} heads removed")
 
-            if hasattr(module, "mask"):
-                mask = module.mask.detach().cpu()
-                idxs = torch.nonzero(mask == 0).squeeze().tolist()
+    else:
+        # CNN: 기존 로직 그대로
+        for module in model.modules():
+            if isinstance(module, torch.nn.Conv2d):
+                if module.groups == module.in_channels == module.out_channels:
+                    pruning_fn = tp.prune_conv_in_channels
+                else:
+                    pruning_fn = tp.prune_conv_out_channels
 
-                if isinstance(idxs, int):
-                    idxs = [idxs]
+                if hasattr(module, "mask"):
+                    mask = module.mask.detach().cpu()
+                    idxs = torch.nonzero(mask == 0).squeeze().tolist()
+                    if isinstance(idxs, int): idxs = [idxs]
+                    if len(idxs) == 0 or len(idxs) >= module.out_channels:
+                        continue
+                    DG.get_pruning_group(module, pruning_fn, idxs).prune()
 
-                if len(idxs) == 0:
-                    continue
-
-                if len(idxs) >= module.out_features:
-                    continue
-
-                pruning_group = DG.get_pruning_group(
-                    module,
-                    tp.prune_linear_out_channels,
-                    idxs
-                )
-                pruning_group.prune()
+            elif isinstance(module, torch.nn.Linear):
+                if hasattr(module, "mask"):
+                    mask = module.mask.detach().cpu()
+                    idxs = torch.nonzero(mask == 0).squeeze().tolist()
+                    if isinstance(idxs, int): idxs = [idxs]
+                    if len(idxs) == 0 or len(idxs) >= module.out_features:
+                        continue
+                    DG.get_pruning_group(
+                        module, tp.prune_linear_out_channels, idxs).prune()
 
     compressed_path = os.path.join(
         checkpoint_dir,
         f"{config['model']['name']}_{strategy_type}_FINAL_COMPRESSED.pth"
     )
-
     torch.save(model.state_dict(), compressed_path)
     print(f"✅ Physically Compressed Model Saved: {compressed_path}")
     print("=============================================================\n")
 
 
 
-# def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups, args):
 
-#     checkpoint_dir = config.get('save_dir', './exp/checkpoints')
-#     os.makedirs(checkpoint_dir, exist_ok=True)
-
-#     strategy_type = getattr(args, 'strategy', 'pdt').lower()
-
-#     # -------------------------
-#     # Pruner 생성
-#     # -------------------------
-#     pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
-#     print("[System] Initializing PDTPruner (Stable Version)")
-
-#     optimizer = optim.SGD(
-#         model.parameters(),
-#         lr=config['model'].get('base_lr', 0.01),
-#         momentum=config['model'].get('momentum', 0.9),
-#         weight_decay=config['model'].get('weight_decay', 1e-4)
-#     )
-#     criterion = nn.CrossEntropyLoss()
-
-#     total_epochs = args.epochs
-#     prune_every = args.prune_every
-#     start_epoch = args.start_epoch
-
-#     print(f"\n>>> Strategy: {strategy_type.upper()} | Total Epochs: {total_epochs}")
-#     print(f">>> Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
-
-#     stop_pruning = False   # 🔥 중요
-
-#     for epoch in range(1, total_epochs + 1):
-
-#         model.train()
-#         total_loss = 0.0
-#         torch.cuda.reset_peak_memory_stats(device)
-
-#         for batch_idx, (x, y) in enumerate(train_loader):
-#             x, y = x.to(device), y.to(device)
-#             optimizer.zero_grad()
-
-#             output = model(x)
-#             loss = criterion(output, y)
-
-#             should_prune = (
-#                 not stop_pruning
-#                 and epoch >= start_epoch
-#                 and (epoch - start_epoch) % prune_every == 0
-#                 and batch_idx == 0
-#             )
-
-#             if should_prune:
-#                 print(f"\n[DEBUG] >>> PRUNING @ Epoch {epoch}")
-
-#                 loss.backward(retain_graph=True)
-
-#                 pdt_engine.step_pruning(
-#                     loss=loss,
-#                     current_epoch=epoch,
-#                     total_epochs=total_epochs
-#                 )
-#                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
-
-#                 current_sp = pdt_engine.get_current_sparsity()
-
-#                 # 🔥 무조건 즉시 저장
-#                 ckpt_name = f"{config['model']['name']}_{strategy_type}_ep{epoch}_sp{current_sp:.2f}.pth"
-#                 torch.save(
-#                     {
-#                         'model_state_dict': model.state_dict(),
-#                         'epoch': epoch,
-#                         'sparsity': current_sp
-#                     },
-#                     os.path.join(checkpoint_dir, ckpt_name)
-#                 )
-#                 print(f"💾 Checkpoint saved: {ckpt_name}")
-
-#                 # 🔴 45% 이상이면 멈추기 (망가짐 방지)
-#                 if current_sp >= 45:
-#                     print("🛑 Sparsity limit reached. Stop further pruning.")
-#                     stop_pruning = True
-
-#                 torch.cuda.empty_cache()
-
-#             else:
-#                 loss.backward()
-
-#             pdt_engine.update_ema_and_mask_grad()
-#             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-#             optimizer.step()
-#             pdt_engine.apply_mask_to_weights()
-
-#             total_loss += loss.item()
-
-#         val_acc = evaluate(model, val_loader, device)
-#         peak_vram = torch.cuda.max_memory_allocated(device) / (1024**2)
-
-#         print(
-#             f"Epoch {epoch}/{total_epochs} | "
-#             f"Loss: {total_loss/len(train_loader):.4f} | "
-#             f"Val Acc: {val_acc:.2f}% | "
-#             f"Peak VRAM: {peak_vram:.2f} MB"
-#         )
-
-#     # -------------------------
-#     # Final 저장
-#     # -------------------------
-#     final_path = os.path.join(checkpoint_dir, f"{config['model']['name']}_{strategy_type}_final.pth")
-#     torch.save(model.state_dict(), final_path)
-#     print(f"🏁 Final Model Saved: {final_path}")
-
-
-
-# def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups, args):
-
-#     import os, json
-#     import torch
-#     import torch.nn as nn
-#     import torch.optim as optim
-#     import torch_pruning as tp
-
-#     # ----------------------------
-#     # [0] 저장 경로
-#     # ----------------------------
-#     checkpoint_dir = config.get('save_dir', './exp/checkpoints')
-#     os.makedirs(checkpoint_dir, exist_ok=True)
-
-#     strategy_type = getattr(args, 'strategy', 'pdt').lower()
-#     history_file = os.path.join(
-#         checkpoint_dir,
-#         f"{config['model']['name']}_{strategy_type}_history.json"
-#     )
-#     history_data = []
-
-#     # ----------------------------
-#     # [1] CLI override
-#     # ----------------------------
-#     strat_cfg = config.get('strategy', {})
-
-#     if args.group_selection_ratio is not None:
-#         strat_cfg['group_selection_ratio'] = args.group_selection_ratio
-#     if args.channel_keep_ratio is not None:
-#         strat_cfg['channel_keep_ratio'] = args.channel_keep_ratio
-#     if args.min_survival_ratio is not None:
-#         strat_cfg['min_survival_ratio'] = args.min_survival_ratio
-
-#     config['strategy'] = strat_cfg
-
-#     # ----------------------------
-#     # [2] Pruner 초기화
-#     # ----------------------------
-#     pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
-#     print("[System] Initializing PDTPruner (Stable Version)")
-
-#     # ----------------------------
-#     # [3] 학습 설정
-#     # ----------------------------
-#     model_cfg = config.get('model', {})
-
-#     optimizer = optim.SGD(
-#         model.parameters(),
-#         lr=model_cfg.get('base_lr', 0.01),
-#         momentum=model_cfg.get('momentum', 0.9),
-#         weight_decay=model_cfg.get('weight_decay', 1e-4)
-#     )
-
-#     criterion = nn.CrossEntropyLoss()
-
-#     total_epochs = args.epochs
-#     prune_every = args.prune_every
-#     start_epoch = args.start_epoch
-
-#     pdt_engine.total_epochs = total_epochs
-
-#     print(f"\n>>> Strategy: {strategy_type.upper()} | Total Epochs: {total_epochs}")
-#     print(f">>> Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
-
-#     stop_pruning = False
-
-#     # ----------------------------
-#     # [4] 학습 루프
-#     # ----------------------------
-#     stop_pruning = False
-#     for epoch in range(1, total_epochs + 1):
-
-#         model.train()
-#         total_loss = 0.0
-#         torch.cuda.reset_peak_memory_stats(device)
-
-#         for batch_idx, (x, y) in enumerate(train_loader):
-
-#             x, y = x.to(device), y.to(device)
-#             optimizer.zero_grad()
-
-#             output = model(x)
-#             loss = criterion(output, y)
-
-#             is_prune_step = (
-#                 epoch >= start_epoch
-#                 and (epoch - start_epoch) % prune_every == 0
-#                 and batch_idx == 0
-#                 and not stop_pruning
-#             )
-
-#             if is_prune_step:
-
-#                 loss.backward(retain_graph=True)
-
-#                 print(f"\n[DEBUG] >>> PRUNING @ Epoch {epoch}")
-
-#                 pdt_engine.step_pruning(
-#                     loss=loss,
-#                     current_epoch=epoch,
-#                     total_epochs=total_epochs
-#                 )
-
-#                 # current_sp = pdt_engine.get_current_sparsity()
-
-#                 # # 🔴 과도한 프루닝 방지
-#                 # if current_sparsity >= 50:
-#                 #     print("🛑 Sparsity limit reached. Stop further pruning.")
-#                 #     stop_pruning = True
-
-#                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
-#                 torch.cuda.empty_cache()
-
-#                 current_sp = pdt_engine.get_current_sparsity()
-
-#                 if current_sp >= 50:
-#                     print("🛑 Sparsity limit reached. Stop further pruning.")
-#                     stop_pruning = True
-
-                
-
-
-#             else:
-#                 loss.backward()
-
-#             pdt_engine.update_ema_and_mask_grad()
-#             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-#             optimizer.step()
-#             pdt_engine.apply_mask_to_weights()
-
-#             total_loss += loss.item()
-
-#         # ---- validation ----
-#         val_acc = evaluate(model, val_loader, device)
-#         peak_vram = torch.cuda.max_memory_allocated(device) / (1024**2)
-
-#         print(
-#             f"Epoch {epoch}/{total_epochs} | "
-#             f"Loss: {total_loss/len(train_loader):.4f} | "
-#             f"Val Acc: {val_acc:.2f}% | "
-#             f"Peak VRAM: {peak_vram:.2f} MB"
-#         )
-
-#         # ---- checkpoint 저장 ----
-#         if is_prune_step:
-
-#             eff = pdt_engine.get_model_efficiency()
-
-#             epoch_stats = {
-#                 'epoch': epoch,
-#                 'val_acc': val_acc,
-#                 'sparsity': current_sp,
-#                 'peak_vram_mb': peak_vram,
-#                 'model_size_mb': eff['curr_mb'],
-#                 'speedup': eff['speedup']
-#             }
-
-#             history_data.append(epoch_stats)
-
-#             with open(history_file, 'w') as f:
-#                 json.dump({'history': history_data}, f, indent=4)
-
-#             ckpt_name = (
-#                 f"{model_cfg['name']}_{strategy_type}_"
-#                 f"ep{epoch}_sp{current_sp:.1f}.pth"
-#             )
-
-#             torch.save(
-#                 {
-#                     'model_state_dict': model.state_dict(),
-#                     'sparsity': current_sp
-#                 },
-#                 os.path.join(checkpoint_dir, ckpt_name)
-#             )
-
-#             print(f"💾 Checkpoint saved: {ckpt_name}")
-
-#     # ----------------------------
-#     # [5] Final 저장
-#     # ----------------------------
-#     final_path = os.path.join(
-#         checkpoint_dir,
-#         f"{model_cfg['name']}_{strategy_type}_final.pth"
-#     )
-
-#     torch.save(model.state_dict(), final_path)
-#     print(f"🏁 Final Model Saved: {final_path}")
-
-#     # ----------------------------
-#     # [6] Physical Compression
-#     # ----------------------------
-#     print("\n================ FINAL PHYSICAL COMPRESSION ================\n")
-
-#     torch.cuda.empty_cache()
-#     torch.cuda.synchronize()
-
-#     mem_before = torch.cuda.memory_allocated(device) / (1024**2)
-
-#     input_size = 32  # CIFAR-100
-#     example_inputs = torch.randn(1, 3, input_size, input_size).to(device)
-
-#     DG = tp.DependencyGraph().build_dependency(
-#         model,
-#         example_inputs=example_inputs
-#     )
-
-#     for m in model.modules():
-
-#         if not hasattr(m, "mask"):
-#             continue
-
-#         # Conv
-#         if isinstance(m, nn.Conv2d):
-
-#             if m.groups == m.in_channels:
-#                 continue
-
-#             prune_idx = torch.where(m.mask == 0)[0].tolist()
-
-#             if len(prune_idx) == 0:
-#                 continue
-
-#             if len(prune_idx) >= m.out_channels:
-#                 continue
-
-#             pruning_group = DG.get_pruning_group(
-#                 m,
-#                 tp.prune_conv_out_channels,
-#                 prune_idx
-#             )
-#             pruning_group.prune()
-
-#         # Linear
-#         elif isinstance(m, nn.Linear):
-
-#             prune_idx = torch.where(m.mask == 0)[0].tolist()
-
-#             if len(prune_idx) == 0:
-#                 continue
-
-#             if len(prune_idx) >= m.out_features:
-#                 continue
-
-#             pruning_group = DG.get_pruning_group(
-#                 m,
-#                 tp.prune_linear_out_channels,
-#                 prune_idx
-#             )
-#             pruning_group.prune()
-
-#     torch.cuda.synchronize()
-
-#     mem_after = torch.cuda.memory_allocated(device) / (1024**2)
-
-#     print(f"Before: {mem_before:.2f} MB")
-#     print(f"After : {mem_after:.2f} MB")
-#     print(
-#         f"Saved : {mem_before - mem_after:.2f} MB "
-#         f"({((mem_before - mem_after)/mem_before)*100:.1f}% reduction)"
-#     )
-
-#     compressed_path = os.path.join(
-#         checkpoint_dir,
-#         f"{model_cfg['name']}_{strategy_type}_FINAL_COMPRESSED.pth"
-#     )
-
-#     torch.save(model.state_dict(), compressed_path)
-#     print(f"✅ Physically Compressed Model Saved: {compressed_path}\n")
 
 def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args):
     
@@ -1231,6 +963,8 @@ def evaluate(model, loader, device):
     correct, total = 0, 0
     with torch.no_grad():
         for x, y in loader:
+            if x.shape[-1] != 224 and hasattr(model, 'patch_embed'):
+                x = torch.nn.functional.interpolate(x, size=(224, 224), mode='bilinear', align_corners=False)
             x, y = x.to(device), y.to(device)
             outputs = model(x)
             correct += (outputs.argmax(1) == y).sum().item()

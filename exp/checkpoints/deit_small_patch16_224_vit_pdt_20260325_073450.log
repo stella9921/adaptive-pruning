@@ -1,0 +1,3 @@
+📝 Logging started: deit_small_patch16_224_vit_pdt_20260325_073450.log
+>>> [System] ViT detected. Input size forced to 224 for dataloader.
+[*] train_merged 폴더 생성 완료

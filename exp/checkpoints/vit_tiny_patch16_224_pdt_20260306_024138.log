@@ -1,0 +1,493 @@
+📝 Logging started: vit_tiny_patch16_224_pdt_20260306_024138.log
+>>> [System] ViT detected. Input size forced to 224 for dataloader.
+✅ CIFAR-100 Data loaded: Train(50000), Val/Test(10000)
+Experimental Mode: N/A
+Target Model: vit_tiny_patch16_224 | Dataset: cifar100
+>>> [Model] Loading Vision Transformer for Hessian Analysis: vit_tiny_patch16_224
+
+[Stage 1] Analyzing ViT Block-wise Topology for visiontransformer...
+[*] ViT: 12 transformer blocks identified for grouping.
+
+==================== Final Topology Groups ====================
+ Group  1 | Channels:  576 | Layers: blocks.0.attn.proj ... (4 layers)
+ Group  2 | Channels:  576 | Layers: blocks.1.attn.proj ... (4 layers)
+ Group  3 | Channels:  576 | Layers: blocks.2.attn.proj ... (4 layers)
+ Group  4 | Channels:  576 | Layers: blocks.3.attn.proj ... (4 layers)
+ Group  5 | Channels:  576 | Layers: blocks.4.attn.proj ... (4 layers)
+ Group  6 | Channels:  576 | Layers: blocks.5.attn.proj ... (4 layers)
+ Group  7 | Channels:  576 | Layers: blocks.6.attn.proj ... (4 layers)
+ Group  8 | Channels:  576 | Layers: blocks.7.attn.proj ... (4 layers)
+ Group  9 | Channels:  576 | Layers: blocks.8.attn.proj ... (4 layers)
+ Group 10 | Channels:  576 | Layers: blocks.9.attn.proj ... (4 layers)
+ Group 11 | Channels:  576 | Layers: blocks.10.attn.proj ... (4 layers)
+ Group 12 | Channels:  576 | Layers: blocks.11.attn.proj ... (4 layers)
+===============================================================
+[*] Total 12 groups identified.
+
+
+[Pruner Init] Identified 12 groups for pruning.
+[*] Applied Min Survival Guarantee: 40.0%
+[System] Initializing ViTPDTPruner for vit_tiny_patch16_224
+
+>>> Strategy: PDT | Total Epochs: 300
+>>> Pruning starts at Epoch 100, every 50 epochs.
+Epoch 1/300 | Loss: 4.5405 | Val Acc: 8.37% | Peak VRAM: 4506.89 MB
+Epoch 2/300 | Loss: 3.5972 | Val Acc: 27.30% | Peak VRAM: 4506.89 MB
+Epoch 3/300 | Loss: 2.6738 | Val Acc: 43.65% | Peak VRAM: 4506.89 MB
+Epoch 4/300 | Loss: 2.0592 | Val Acc: 54.13% | Peak VRAM: 4506.89 MB
+Epoch 5/300 | Loss: 1.6710 | Val Acc: 60.77% | Peak VRAM: 4506.89 MB
+Epoch 6/300 | Loss: 1.4155 | Val Acc: 65.80% | Peak VRAM: 4506.89 MB
+Epoch 7/300 | Loss: 1.2380 | Val Acc: 68.96% | Peak VRAM: 4506.89 MB
+Epoch 8/300 | Loss: 1.1070 | Val Acc: 71.56% | Peak VRAM: 4506.89 MB
+Epoch 9/300 | Loss: 1.0086 | Val Acc: 73.17% | Peak VRAM: 4506.89 MB
+Epoch 10/300 | Loss: 0.9307 | Val Acc: 74.61% | Peak VRAM: 4506.89 MB
+Epoch 11/300 | Loss: 0.8702 | Val Acc: 75.91% | Peak VRAM: 4506.89 MB
+Epoch 12/300 | Loss: 0.8165 | Val Acc: 76.86% | Peak VRAM: 4506.89 MB
+Epoch 13/300 | Loss: 0.7728 | Val Acc: 77.77% | Peak VRAM: 4506.89 MB
+Epoch 14/300 | Loss: 0.7367 | Val Acc: 78.53% | Peak VRAM: 4506.89 MB
+Epoch 15/300 | Loss: 0.7073 | Val Acc: 79.01% | Peak VRAM: 4506.89 MB
+Epoch 16/300 | Loss: 0.6781 | Val Acc: 79.31% | Peak VRAM: 4506.89 MB
+Epoch 17/300 | Loss: 0.6519 | Val Acc: 79.78% | Peak VRAM: 4506.89 MB
+Epoch 18/300 | Loss: 0.6328 | Val Acc: 80.16% | Peak VRAM: 4506.89 MB
+Epoch 19/300 | Loss: 0.6125 | Val Acc: 80.55% | Peak VRAM: 4506.89 MB
+Epoch 20/300 | Loss: 0.5956 | Val Acc: 80.88% | Peak VRAM: 4506.89 MB
+Epoch 21/300 | Loss: 0.5754 | Val Acc: 81.04% | Peak VRAM: 4506.89 MB
+Epoch 22/300 | Loss: 0.5612 | Val Acc: 81.31% | Peak VRAM: 4506.89 MB
+Epoch 23/300 | Loss: 0.5472 | Val Acc: 81.46% | Peak VRAM: 4506.89 MB
+Epoch 24/300 | Loss: 0.5341 | Val Acc: 81.79% | Peak VRAM: 4506.89 MB
+Epoch 25/300 | Loss: 0.5215 | Val Acc: 82.08% | Peak VRAM: 4506.89 MB
+Epoch 26/300 | Loss: 0.5083 | Val Acc: 82.17% | Peak VRAM: 4506.89 MB
+Epoch 27/300 | Loss: 0.4984 | Val Acc: 82.38% | Peak VRAM: 4506.89 MB
+Epoch 28/300 | Loss: 0.4873 | Val Acc: 82.67% | Peak VRAM: 4506.89 MB
+Epoch 29/300 | Loss: 0.4776 | Val Acc: 82.70% | Peak VRAM: 4506.89 MB
+Epoch 30/300 | Loss: 0.4692 | Val Acc: 82.65% | Peak VRAM: 4506.89 MB
+Epoch 31/300 | Loss: 0.4616 | Val Acc: 82.92% | Peak VRAM: 4506.89 MB
+Epoch 32/300 | Loss: 0.4507 | Val Acc: 83.17% | Peak VRAM: 4506.89 MB
+Epoch 33/300 | Loss: 0.4413 | Val Acc: 83.40% | Peak VRAM: 4506.89 MB
+Epoch 34/300 | Loss: 0.4362 | Val Acc: 83.42% | Peak VRAM: 4506.89 MB
+Epoch 35/300 | Loss: 0.4279 | Val Acc: 83.46% | Peak VRAM: 4506.89 MB
+Epoch 36/300 | Loss: 0.4197 | Val Acc: 83.58% | Peak VRAM: 4506.89 MB
+Epoch 37/300 | Loss: 0.4115 | Val Acc: 83.64% | Peak VRAM: 4506.89 MB
+Epoch 38/300 | Loss: 0.4040 | Val Acc: 83.69% | Peak VRAM: 4506.89 MB
+Epoch 39/300 | Loss: 0.3984 | Val Acc: 83.80% | Peak VRAM: 4506.89 MB
+Epoch 40/300 | Loss: 0.3960 | Val Acc: 83.80% | Peak VRAM: 4506.89 MB
+Epoch 41/300 | Loss: 0.3886 | Val Acc: 84.14% | Peak VRAM: 4506.89 MB
+Epoch 42/300 | Loss: 0.3792 | Val Acc: 84.03% | Peak VRAM: 4506.89 MB
+Epoch 43/300 | Loss: 0.3733 | Val Acc: 84.09% | Peak VRAM: 4506.89 MB
+Epoch 44/300 | Loss: 0.3677 | Val Acc: 84.23% | Peak VRAM: 4506.89 MB
+Epoch 45/300 | Loss: 0.3642 | Val Acc: 84.16% | Peak VRAM: 4506.89 MB
+Epoch 46/300 | Loss: 0.3593 | Val Acc: 84.27% | Peak VRAM: 4506.89 MB
+Epoch 47/300 | Loss: 0.3526 | Val Acc: 84.27% | Peak VRAM: 4506.89 MB
+Epoch 48/300 | Loss: 0.3468 | Val Acc: 84.29% | Peak VRAM: 4506.89 MB
+Epoch 49/300 | Loss: 0.3426 | Val Acc: 84.29% | Peak VRAM: 4506.89 MB
+Epoch 50/300 | Loss: 0.3364 | Val Acc: 84.60% | Peak VRAM: 4506.89 MB
+Epoch 51/300 | Loss: 0.3330 | Val Acc: 84.43% | Peak VRAM: 4506.89 MB
+Epoch 52/300 | Loss: 0.3282 | Val Acc: 84.61% | Peak VRAM: 4506.89 MB
+Epoch 53/300 | Loss: 0.3245 | Val Acc: 84.61% | Peak VRAM: 4506.89 MB
+Epoch 54/300 | Loss: 0.3169 | Val Acc: 84.57% | Peak VRAM: 4506.89 MB
+Epoch 55/300 | Loss: 0.3168 | Val Acc: 84.66% | Peak VRAM: 4506.89 MB
+Epoch 56/300 | Loss: 0.3119 | Val Acc: 84.67% | Peak VRAM: 4506.89 MB
+Epoch 57/300 | Loss: 0.3092 | Val Acc: 84.72% | Peak VRAM: 4506.89 MB
+Epoch 58/300 | Loss: 0.3002 | Val Acc: 84.85% | Peak VRAM: 4506.89 MB
+Epoch 59/300 | Loss: 0.2970 | Val Acc: 84.81% | Peak VRAM: 4506.89 MB
+Epoch 60/300 | Loss: 0.2929 | Val Acc: 84.72% | Peak VRAM: 4506.89 MB
+Epoch 61/300 | Loss: 0.2908 | Val Acc: 84.86% | Peak VRAM: 4506.89 MB
+Epoch 62/300 | Loss: 0.2880 | Val Acc: 84.76% | Peak VRAM: 4506.89 MB
+Epoch 63/300 | Loss: 0.2852 | Val Acc: 84.83% | Peak VRAM: 4506.89 MB
+Epoch 64/300 | Loss: 0.2797 | Val Acc: 84.90% | Peak VRAM: 4506.89 MB
+Epoch 65/300 | Loss: 0.2759 | Val Acc: 84.87% | Peak VRAM: 4506.89 MB
+Epoch 66/300 | Loss: 0.2722 | Val Acc: 84.88% | Peak VRAM: 4506.89 MB
+Epoch 67/300 | Loss: 0.2696 | Val Acc: 85.16% | Peak VRAM: 4506.89 MB
+Epoch 68/300 | Loss: 0.2658 | Val Acc: 85.17% | Peak VRAM: 4506.89 MB
+Epoch 69/300 | Loss: 0.2587 | Val Acc: 85.05% | Peak VRAM: 4506.89 MB
+Epoch 70/300 | Loss: 0.2595 | Val Acc: 85.00% | Peak VRAM: 4506.89 MB
+Epoch 71/300 | Loss: 0.2556 | Val Acc: 85.16% | Peak VRAM: 4506.89 MB
+Epoch 72/300 | Loss: 0.2511 | Val Acc: 84.99% | Peak VRAM: 4506.89 MB
+Epoch 73/300 | Loss: 0.2486 | Val Acc: 85.20% | Peak VRAM: 4506.89 MB
+Epoch 74/300 | Loss: 0.2459 | Val Acc: 85.20% | Peak VRAM: 4506.89 MB
+Epoch 75/300 | Loss: 0.2408 | Val Acc: 85.20% | Peak VRAM: 4506.89 MB
+Epoch 76/300 | Loss: 0.2391 | Val Acc: 85.19% | Peak VRAM: 4506.89 MB
+Epoch 77/300 | Loss: 0.2349 | Val Acc: 85.19% | Peak VRAM: 4506.89 MB
+Epoch 78/300 | Loss: 0.2305 | Val Acc: 85.06% | Peak VRAM: 4506.89 MB
+Epoch 79/300 | Loss: 0.2297 | Val Acc: 85.19% | Peak VRAM: 4506.89 MB
+Epoch 80/300 | Loss: 0.2281 | Val Acc: 85.25% | Peak VRAM: 4506.89 MB
+Epoch 81/300 | Loss: 0.2234 | Val Acc: 85.27% | Peak VRAM: 4506.89 MB
+Epoch 82/300 | Loss: 0.2208 | Val Acc: 85.31% | Peak VRAM: 4506.89 MB
+Epoch 83/300 | Loss: 0.2185 | Val Acc: 85.25% | Peak VRAM: 4506.89 MB
+Epoch 84/300 | Loss: 0.2157 | Val Acc: 85.24% | Peak VRAM: 4506.89 MB
+Epoch 85/300 | Loss: 0.2111 | Val Acc: 85.40% | Peak VRAM: 4506.89 MB
+Epoch 86/300 | Loss: 0.2096 | Val Acc: 85.35% | Peak VRAM: 4506.89 MB
+Epoch 87/300 | Loss: 0.2071 | Val Acc: 85.32% | Peak VRAM: 4506.89 MB
+Epoch 88/300 | Loss: 0.2015 | Val Acc: 85.50% | Peak VRAM: 4506.89 MB
+Epoch 89/300 | Loss: 0.2018 | Val Acc: 85.44% | Peak VRAM: 4506.89 MB
+Epoch 90/300 | Loss: 0.1998 | Val Acc: 85.57% | Peak VRAM: 4506.89 MB
+Epoch 91/300 | Loss: 0.1964 | Val Acc: 85.39% | Peak VRAM: 4506.89 MB
+Epoch 92/300 | Loss: 0.1956 | Val Acc: 85.67% | Peak VRAM: 4506.89 MB
+Epoch 93/300 | Loss: 0.1922 | Val Acc: 85.67% | Peak VRAM: 4506.89 MB
+Epoch 94/300 | Loss: 0.1878 | Val Acc: 85.60% | Peak VRAM: 4506.89 MB
+Epoch 95/300 | Loss: 0.1872 | Val Acc: 85.47% | Peak VRAM: 4506.89 MB
+Epoch 96/300 | Loss: 0.1852 | Val Acc: 85.56% | Peak VRAM: 4506.89 MB
+Epoch 97/300 | Loss: 0.1807 | Val Acc: 85.54% | Peak VRAM: 4506.89 MB
+Epoch 98/300 | Loss: 0.1784 | Val Acc: 85.44% | Peak VRAM: 4506.89 MB
+Epoch 99/300 | Loss: 0.1771 | Val Acc: 85.58% | Peak VRAM: 4506.89 MB
+
+[System] Saving Baseline Dense Model before pruning starts...
+📊 Dense Baseline - Acc: 85.58%, Size: 20.89 MB
+💾 Saved Baseline: vit_tiny_patch16_224_DENSE_BASELINE.pth
+
+
+[DEBUG] >>> PRUNING @ Epoch 100
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 100 ===
+
+============================== ViT PDT Pruning Report: Epoch 100 ==============================
+ [*] Pruned this step: 423 units | VRAM: 4455.4MB
+ Group  1 |  192/ 192 |     0.0% | Hessian: 4.296979
+ Group  2 |  192/ 192 |     0.0% | Hessian: 6.708424
+ Group  3 |  192/ 192 |     0.0% | Hessian: 12.510324
+ Group  4 |  192/ 192 |     0.0% | Hessian: 8.964048
+ Group  5 |  192/ 192 |     0.0% | Hessian: 9.786793
+ Group  6 |  192/ 192 |     0.0% | Hessian: 6.386288
+ Group  7 |  192/ 192 |     0.0% | Hessian: 4.627498
+ Group  8 |  192/ 192 |     0.0% | Hessian: 2.301318
+ Group  9 |  189/ 192 |     1.6% | Hessian: 1.153694
+ Group 10 |  110/ 192 |    42.7% | Hessian: 0.544006
+ Group 11 |   46/ 192 |    76.0% | Hessian: 0.454746
+ Group 12 |    0/ 192 |   100.0% | Hessian: 0.083483
+
+[Scientific Metrics] 🟢 Size: 18.72MB | 🔵 Sparsity: 10.38% | 🟡 Speedup: 1.12x
+=========================================================================================
+
+ [*] ViT Pruning Complete: 423 units pruned.
+
+[Scientific Metrics - Epoch 100]
+ 🟢 Model Size: 20.89 MB -> 18.72 MB
+ 🔵 Sparsity: 8.05 %
+ 🟡 Speedup: 1.12x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep100_sp8.05.pth
+Epoch 100/300 | Loss: 1.6126 | Val Acc: 70.26% | Peak VRAM: 19662.38 MB
+Epoch 101/300 | Loss: 1.0191 | Val Acc: 73.79% | Peak VRAM: 4508.67 MB
+Epoch 102/300 | Loss: 0.8355 | Val Acc: 75.57% | Peak VRAM: 4508.67 MB
+Epoch 103/300 | Loss: 0.7394 | Val Acc: 76.29% | Peak VRAM: 4508.67 MB
+Epoch 104/300 | Loss: 0.6699 | Val Acc: 77.07% | Peak VRAM: 4508.67 MB
+Epoch 105/300 | Loss: 0.6251 | Val Acc: 77.81% | Peak VRAM: 4508.67 MB
+Epoch 106/300 | Loss: 0.5859 | Val Acc: 78.27% | Peak VRAM: 4508.67 MB
+Epoch 107/300 | Loss: 0.5562 | Val Acc: 78.73% | Peak VRAM: 4508.67 MB
+Epoch 108/300 | Loss: 0.5302 | Val Acc: 79.19% | Peak VRAM: 4508.67 MB
+Epoch 109/300 | Loss: 0.5090 | Val Acc: 79.53% | Peak VRAM: 4508.67 MB
+Epoch 110/300 | Loss: 0.4883 | Val Acc: 79.78% | Peak VRAM: 4508.67 MB
+Epoch 111/300 | Loss: 0.4703 | Val Acc: 80.03% | Peak VRAM: 4508.67 MB
+Epoch 112/300 | Loss: 0.4553 | Val Acc: 80.25% | Peak VRAM: 4508.67 MB
+Epoch 113/300 | Loss: 0.4410 | Val Acc: 80.43% | Peak VRAM: 4508.67 MB
+Epoch 114/300 | Loss: 0.4274 | Val Acc: 80.58% | Peak VRAM: 4508.67 MB
+Epoch 115/300 | Loss: 0.4161 | Val Acc: 80.70% | Peak VRAM: 4508.67 MB
+Epoch 116/300 | Loss: 0.4032 | Val Acc: 80.82% | Peak VRAM: 4508.67 MB
+Epoch 117/300 | Loss: 0.3945 | Val Acc: 80.98% | Peak VRAM: 4508.67 MB
+Epoch 118/300 | Loss: 0.3841 | Val Acc: 80.98% | Peak VRAM: 4508.67 MB
+Epoch 119/300 | Loss: 0.3751 | Val Acc: 81.20% | Peak VRAM: 4508.67 MB
+Epoch 120/300 | Loss: 0.3635 | Val Acc: 81.53% | Peak VRAM: 4508.67 MB
+Epoch 121/300 | Loss: 0.3586 | Val Acc: 81.47% | Peak VRAM: 4508.67 MB
+Epoch 122/300 | Loss: 0.3515 | Val Acc: 81.60% | Peak VRAM: 4508.67 MB
+Epoch 123/300 | Loss: 0.3435 | Val Acc: 81.41% | Peak VRAM: 4508.67 MB
+Epoch 124/300 | Loss: 0.3399 | Val Acc: 81.57% | Peak VRAM: 4508.67 MB
+Epoch 125/300 | Loss: 0.3321 | Val Acc: 81.76% | Peak VRAM: 4508.67 MB
+Epoch 126/300 | Loss: 0.3227 | Val Acc: 81.56% | Peak VRAM: 4508.67 MB
+Epoch 127/300 | Loss: 0.3176 | Val Acc: 81.91% | Peak VRAM: 4508.67 MB
+Epoch 128/300 | Loss: 0.3102 | Val Acc: 82.01% | Peak VRAM: 4508.67 MB
+Epoch 129/300 | Loss: 0.3065 | Val Acc: 81.90% | Peak VRAM: 4508.67 MB
+Epoch 130/300 | Loss: 0.3014 | Val Acc: 82.08% | Peak VRAM: 4508.67 MB
+Epoch 131/300 | Loss: 0.2943 | Val Acc: 82.23% | Peak VRAM: 4508.67 MB
+Epoch 132/300 | Loss: 0.2887 | Val Acc: 82.16% | Peak VRAM: 4508.67 MB
+Epoch 133/300 | Loss: 0.2837 | Val Acc: 82.21% | Peak VRAM: 4508.67 MB
+Epoch 134/300 | Loss: 0.2789 | Val Acc: 82.15% | Peak VRAM: 4508.67 MB
+Epoch 135/300 | Loss: 0.2747 | Val Acc: 82.47% | Peak VRAM: 4508.67 MB
+Epoch 136/300 | Loss: 0.2715 | Val Acc: 82.56% | Peak VRAM: 4508.67 MB
+Epoch 137/300 | Loss: 0.2661 | Val Acc: 82.41% | Peak VRAM: 4508.67 MB
+Epoch 138/300 | Loss: 0.2606 | Val Acc: 82.56% | Peak VRAM: 4508.67 MB
+Epoch 139/300 | Loss: 0.2562 | Val Acc: 82.72% | Peak VRAM: 4508.67 MB
+Epoch 140/300 | Loss: 0.2518 | Val Acc: 82.69% | Peak VRAM: 4508.67 MB
+Epoch 141/300 | Loss: 0.2488 | Val Acc: 82.85% | Peak VRAM: 4508.67 MB
+Epoch 142/300 | Loss: 0.2444 | Val Acc: 82.66% | Peak VRAM: 4508.67 MB
+Epoch 143/300 | Loss: 0.2401 | Val Acc: 82.76% | Peak VRAM: 4508.67 MB
+Epoch 144/300 | Loss: 0.2360 | Val Acc: 82.90% | Peak VRAM: 4508.67 MB
+Epoch 145/300 | Loss: 0.2313 | Val Acc: 82.80% | Peak VRAM: 4508.67 MB
+Epoch 146/300 | Loss: 0.2290 | Val Acc: 82.72% | Peak VRAM: 4508.67 MB
+Epoch 147/300 | Loss: 0.2264 | Val Acc: 82.86% | Peak VRAM: 4508.67 MB
+Epoch 148/300 | Loss: 0.2218 | Val Acc: 82.97% | Peak VRAM: 4508.67 MB
+Epoch 149/300 | Loss: 0.2176 | Val Acc: 82.93% | Peak VRAM: 4508.67 MB
+
+[DEBUG] >>> PRUNING @ Epoch 150
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 150 ===
+
+============================== ViT PDT Pruning Report: Epoch 150 ==============================
+ [*] Pruned this step: 398 units | VRAM: 4457.2MB
+ Group  1 |  161/ 192 |    16.1% | Hessian: 3558.406250
+ Group  2 |  160/ 192 |    16.7% | Hessian: 7594.862305
+ Group  3 |  192/ 192 |     0.0% | Hessian: 10751.437500
+ Group  4 |  191/ 192 |     0.5% | Hessian: 10319.191406
+ Group  5 |  192/ 192 |     0.0% | Hessian: 9743.860352
+ Group  6 |  190/ 192 |     1.0% | Hessian: 7670.794434
+ Group  7 |  186/ 192 |     3.1% | Hessian: 8260.975586
+ Group  8 |  149/ 192 |    22.4% | Hessian: 5251.894531
+ Group  9 |   58/ 192 |    69.8% | Hessian: 5600.341309
+ Group 10 |    4/ 192 |    97.9% | Hessian: 4148.237305
+ Group 11 |    0/ 192 |   100.0% | Hessian: 2082.375977
+ Group 12 |    0/ 192 |   100.0% | Hessian: 1595.429443
+
+[Scientific Metrics] 🟢 Size: 16.68MB | 🔵 Sparsity: 20.15% | 🟡 Speedup: 1.25x
+=========================================================================================
+
+ [*] ViT Pruning Complete: 398 units pruned.
+
+[Scientific Metrics - Epoch 150]
+ 🟢 Model Size: 20.89 MB -> 16.68 MB
+ 🔵 Sparsity: 15.62 %
+ 🟡 Speedup: 1.25x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep150_sp15.62.pth
+Epoch 150/300 | Loss: 2.7413 | Val Acc: 44.55% | Peak VRAM: 19663.82 MB
+Epoch 151/300 | Loss: 1.8721 | Val Acc: 52.37% | Peak VRAM: 4503.32 MB
+Epoch 152/300 | Loss: 1.5998 | Val Acc: 56.74% | Peak VRAM: 4503.32 MB
+Epoch 153/300 | Loss: 1.4376 | Val Acc: 59.84% | Peak VRAM: 4503.32 MB
+Epoch 154/300 | Loss: 1.3187 | Val Acc: 61.86% | Peak VRAM: 4503.32 MB
+Epoch 155/300 | Loss: 1.2295 | Val Acc: 63.23% | Peak VRAM: 4503.32 MB
+Epoch 156/300 | Loss: 1.1601 | Val Acc: 64.56% | Peak VRAM: 4503.32 MB
+Epoch 157/300 | Loss: 1.1007 | Val Acc: 65.41% | Peak VRAM: 4503.32 MB
+Epoch 158/300 | Loss: 1.0524 | Val Acc: 66.67% | Peak VRAM: 4503.32 MB
+Epoch 159/300 | Loss: 1.0083 | Val Acc: 67.81% | Peak VRAM: 4503.32 MB
+Epoch 160/300 | Loss: 0.9721 | Val Acc: 68.37% | Peak VRAM: 4503.32 MB
+Epoch 161/300 | Loss: 0.9367 | Val Acc: 68.96% | Peak VRAM: 4503.32 MB
+Epoch 162/300 | Loss: 0.9083 | Val Acc: 69.34% | Peak VRAM: 4503.32 MB
+Epoch 163/300 | Loss: 0.8825 | Val Acc: 69.71% | Peak VRAM: 4503.32 MB
+Epoch 164/300 | Loss: 0.8614 | Val Acc: 70.12% | Peak VRAM: 4503.32 MB
+Epoch 165/300 | Loss: 0.8361 | Val Acc: 70.65% | Peak VRAM: 4503.32 MB
+Epoch 166/300 | Loss: 0.8131 | Val Acc: 70.87% | Peak VRAM: 4503.32 MB
+Epoch 167/300 | Loss: 0.7922 | Val Acc: 71.20% | Peak VRAM: 4503.32 MB
+Epoch 168/300 | Loss: 0.7760 | Val Acc: 71.84% | Peak VRAM: 4503.32 MB
+Epoch 169/300 | Loss: 0.7627 | Val Acc: 71.92% | Peak VRAM: 4503.32 MB
+Epoch 170/300 | Loss: 0.7426 | Val Acc: 72.33% | Peak VRAM: 4503.32 MB
+Epoch 171/300 | Loss: 0.7259 | Val Acc: 72.46% | Peak VRAM: 4503.32 MB
+Epoch 172/300 | Loss: 0.7151 | Val Acc: 72.78% | Peak VRAM: 4503.32 MB
+Epoch 173/300 | Loss: 0.6994 | Val Acc: 72.81% | Peak VRAM: 4503.32 MB
+Epoch 174/300 | Loss: 0.6860 | Val Acc: 73.27% | Peak VRAM: 4503.32 MB
+Epoch 175/300 | Loss: 0.6745 | Val Acc: 73.36% | Peak VRAM: 4503.32 MB
+Epoch 176/300 | Loss: 0.6635 | Val Acc: 73.64% | Peak VRAM: 4503.32 MB
+Epoch 177/300 | Loss: 0.6548 | Val Acc: 73.91% | Peak VRAM: 4503.32 MB
+Epoch 178/300 | Loss: 0.6423 | Val Acc: 74.16% | Peak VRAM: 4503.32 MB
+Epoch 179/300 | Loss: 0.6339 | Val Acc: 74.30% | Peak VRAM: 4503.32 MB
+Epoch 180/300 | Loss: 0.6243 | Val Acc: 74.51% | Peak VRAM: 4503.32 MB
+Epoch 181/300 | Loss: 0.6114 | Val Acc: 74.73% | Peak VRAM: 4503.32 MB
+Epoch 182/300 | Loss: 0.6017 | Val Acc: 74.65% | Peak VRAM: 4503.32 MB
+Epoch 183/300 | Loss: 0.5928 | Val Acc: 75.12% | Peak VRAM: 4503.32 MB
+Epoch 184/300 | Loss: 0.5840 | Val Acc: 74.92% | Peak VRAM: 4503.32 MB
+Epoch 185/300 | Loss: 0.5801 | Val Acc: 75.13% | Peak VRAM: 4503.32 MB
+Epoch 186/300 | Loss: 0.5733 | Val Acc: 75.17% | Peak VRAM: 4503.32 MB
+Epoch 187/300 | Loss: 0.5631 | Val Acc: 75.28% | Peak VRAM: 4503.32 MB
+Epoch 188/300 | Loss: 0.5507 | Val Acc: 75.32% | Peak VRAM: 4503.32 MB
+Epoch 189/300 | Loss: 0.5466 | Val Acc: 75.63% | Peak VRAM: 4503.32 MB
+Epoch 190/300 | Loss: 0.5422 | Val Acc: 75.85% | Peak VRAM: 4503.32 MB
+Epoch 191/300 | Loss: 0.5334 | Val Acc: 75.77% | Peak VRAM: 4503.32 MB
+Epoch 192/300 | Loss: 0.5253 | Val Acc: 76.20% | Peak VRAM: 4503.32 MB
+Epoch 193/300 | Loss: 0.5195 | Val Acc: 76.14% | Peak VRAM: 4503.32 MB
+Epoch 194/300 | Loss: 0.5147 | Val Acc: 76.35% | Peak VRAM: 4503.32 MB
+Epoch 195/300 | Loss: 0.5062 | Val Acc: 76.23% | Peak VRAM: 4503.32 MB
+Epoch 196/300 | Loss: 0.5004 | Val Acc: 76.48% | Peak VRAM: 4503.32 MB
+Epoch 197/300 | Loss: 0.4946 | Val Acc: 76.89% | Peak VRAM: 4503.32 MB
+Epoch 198/300 | Loss: 0.4888 | Val Acc: 76.75% | Peak VRAM: 4503.32 MB
+Epoch 199/300 | Loss: 0.4810 | Val Acc: 76.69% | Peak VRAM: 4503.32 MB
+
+[DEBUG] >>> PRUNING @ Epoch 200
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 200 ===
+
+============================== ViT PDT Pruning Report: Epoch 200 ==============================
+ [*] Pruned this step: 370 units | VRAM: 4451.9MB
+ Group  1 |   89/ 192 |    53.6% | Hessian: 5.799740
+ Group  2 |   83/ 192 |    56.8% | Hessian: 9.836041
+ Group  3 |  192/ 192 |     0.0% | Hessian: 18.141113
+ Group  4 |  190/ 192 |     1.0% | Hessian: 10.133841
+ Group  5 |  189/ 192 |     1.6% | Hessian: 8.115896
+ Group  6 |  159/ 192 |    17.2% | Hessian: 5.094452
+ Group  7 |  147/ 192 |    23.4% | Hessian: 5.050757
+ Group  8 |   58/ 192 |    69.8% | Hessian: 3.993076
+ Group  9 |    6/ 192 |    96.9% | Hessian: 5.819280
+ Group 10 |    0/ 192 |   100.0% | Hessian: 3.981493
+ Group 11 |    0/ 192 |   100.0% | Hessian: 4.435043
+ Group 12 |    0/ 192 |   100.0% | Hessian: 4.691867
+
+[Scientific Metrics] 🟢 Size: 14.78MB | 🔵 Sparsity: 29.24% | 🟡 Speedup: 1.41x
+=========================================================================================
+
+ [*] ViT Pruning Complete: 370 units pruned.
+
+[Scientific Metrics - Epoch 200]
+ 🟢 Model Size: 20.89 MB -> 14.78 MB
+ 🔵 Sparsity: 22.66 %
+ 🟡 Speedup: 1.41x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep200_sp22.66.pth
+Epoch 200/300 | Loss: 3.7286 | Val Acc: 21.45% | Peak VRAM: 19665.60 MB
+Epoch 201/300 | Loss: 2.9016 | Val Acc: 29.58% | Peak VRAM: 4499.76 MB
+Epoch 202/300 | Loss: 2.5741 | Val Acc: 34.69% | Peak VRAM: 4499.76 MB
+Epoch 203/300 | Loss: 2.3586 | Val Acc: 38.56% | Peak VRAM: 4499.76 MB
+Epoch 204/300 | Loss: 2.2050 | Val Acc: 41.46% | Peak VRAM: 4499.76 MB
+Epoch 205/300 | Loss: 2.0865 | Val Acc: 43.97% | Peak VRAM: 4499.76 MB
+Epoch 206/300 | Loss: 1.9874 | Val Acc: 46.08% | Peak VRAM: 4499.76 MB
+Epoch 207/300 | Loss: 1.9072 | Val Acc: 47.67% | Peak VRAM: 4499.76 MB
+Epoch 208/300 | Loss: 1.8352 | Val Acc: 49.22% | Peak VRAM: 4499.76 MB
+Epoch 209/300 | Loss: 1.7758 | Val Acc: 50.59% | Peak VRAM: 4499.76 MB
+Epoch 210/300 | Loss: 1.7202 | Val Acc: 51.79% | Peak VRAM: 4499.76 MB
+Epoch 211/300 | Loss: 1.6773 | Val Acc: 52.30% | Peak VRAM: 4499.76 MB
+Epoch 212/300 | Loss: 1.6298 | Val Acc: 53.58% | Peak VRAM: 4499.76 MB
+Epoch 213/300 | Loss: 1.5934 | Val Acc: 54.27% | Peak VRAM: 4499.76 MB
+Epoch 214/300 | Loss: 1.5555 | Val Acc: 54.77% | Peak VRAM: 4499.76 MB
+Epoch 215/300 | Loss: 1.5239 | Val Acc: 55.65% | Peak VRAM: 4499.76 MB
+Epoch 216/300 | Loss: 1.4963 | Val Acc: 56.37% | Peak VRAM: 4499.76 MB
+Epoch 217/300 | Loss: 1.4656 | Val Acc: 56.35% | Peak VRAM: 4499.76 MB
+Epoch 218/300 | Loss: 1.4411 | Val Acc: 57.49% | Peak VRAM: 4499.76 MB
+Epoch 219/300 | Loss: 1.4144 | Val Acc: 57.76% | Peak VRAM: 4499.76 MB
+Epoch 220/300 | Loss: 1.3921 | Val Acc: 58.09% | Peak VRAM: 4499.76 MB
+Epoch 221/300 | Loss: 1.3713 | Val Acc: 58.67% | Peak VRAM: 4499.76 MB
+Epoch 222/300 | Loss: 1.3516 | Val Acc: 59.32% | Peak VRAM: 4499.76 MB
+Epoch 223/300 | Loss: 1.3315 | Val Acc: 59.32% | Peak VRAM: 4499.76 MB
+Epoch 224/300 | Loss: 1.3097 | Val Acc: 59.75% | Peak VRAM: 4499.76 MB
+Epoch 225/300 | Loss: 1.2963 | Val Acc: 60.07% | Peak VRAM: 4499.76 MB
+Epoch 226/300 | Loss: 1.2805 | Val Acc: 60.69% | Peak VRAM: 4499.76 MB
+Epoch 227/300 | Loss: 1.2633 | Val Acc: 61.07% | Peak VRAM: 4499.76 MB
+Epoch 228/300 | Loss: 1.2471 | Val Acc: 61.25% | Peak VRAM: 4499.76 MB
+Epoch 229/300 | Loss: 1.2336 | Val Acc: 61.52% | Peak VRAM: 4499.76 MB
+Epoch 230/300 | Loss: 1.2233 | Val Acc: 61.67% | Peak VRAM: 4499.76 MB
+Epoch 231/300 | Loss: 1.2060 | Val Acc: 61.87% | Peak VRAM: 4499.76 MB
+Epoch 232/300 | Loss: 1.1926 | Val Acc: 62.48% | Peak VRAM: 4499.76 MB
+Epoch 233/300 | Loss: 1.1774 | Val Acc: 62.44% | Peak VRAM: 4499.76 MB
+Epoch 234/300 | Loss: 1.1667 | Val Acc: 62.91% | Peak VRAM: 4499.76 MB
+Epoch 235/300 | Loss: 1.1552 | Val Acc: 63.05% | Peak VRAM: 4499.76 MB
+Epoch 236/300 | Loss: 1.1477 | Val Acc: 63.32% | Peak VRAM: 4499.76 MB
+Epoch 237/300 | Loss: 1.1344 | Val Acc: 63.30% | Peak VRAM: 4499.76 MB
+Epoch 238/300 | Loss: 1.1243 | Val Acc: 63.93% | Peak VRAM: 4499.76 MB
+Epoch 239/300 | Loss: 1.1115 | Val Acc: 64.06% | Peak VRAM: 4499.76 MB
+Epoch 240/300 | Loss: 1.1027 | Val Acc: 64.11% | Peak VRAM: 4499.76 MB
+Epoch 241/300 | Loss: 1.0913 | Val Acc: 64.41% | Peak VRAM: 4499.76 MB
+Epoch 242/300 | Loss: 1.0859 | Val Acc: 64.29% | Peak VRAM: 4499.76 MB
+Epoch 243/300 | Loss: 1.0715 | Val Acc: 64.51% | Peak VRAM: 4499.76 MB
+Epoch 244/300 | Loss: 1.0621 | Val Acc: 64.73% | Peak VRAM: 4499.76 MB
+Epoch 245/300 | Loss: 1.0528 | Val Acc: 64.96% | Peak VRAM: 4499.76 MB
+Epoch 246/300 | Loss: 1.0486 | Val Acc: 65.04% | Peak VRAM: 4499.76 MB
+Epoch 247/300 | Loss: 1.0394 | Val Acc: 65.31% | Peak VRAM: 4499.76 MB
+Epoch 248/300 | Loss: 1.0315 | Val Acc: 65.44% | Peak VRAM: 4499.76 MB
+Epoch 249/300 | Loss: 1.0215 | Val Acc: 65.40% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 250
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 250 ===
+
+============================== ViT PDT Pruning Report: Epoch 250 ==============================
+ [*] Pruned this step: 334 units | VRAM: 4448.3MB
+ Group  1 |    1/ 192 |    99.5% | Hessian: 15.177711
+ Group  2 |    2/ 192 |    99.0% | Hessian: 22.388065
+ Group  3 |  192/ 192 |     0.0% | Hessian: 81.287491
+ Group  4 |  189/ 192 |     1.6% | Hessian: 49.629982
+ Group  5 |  185/ 192 |     3.6% | Hessian: 39.191841
+ Group  6 |  117/ 192 |    39.1% | Hessian: 30.818838
+ Group  7 |   92/ 192 |    52.1% | Hessian: 42.200500
+ Group  8 |    1/ 192 |    99.5% | Hessian: 31.174793
+ Group  9 |    0/ 192 |   100.0% | Hessian: 30.977299
+ Group 10 |    0/ 192 |   100.0% | Hessian: 39.408886
+ Group 11 |    0/ 192 |   100.0% | Hessian: 49.081604
+ Group 12 |    0/ 192 |   100.0% | Hessian: 54.935837
+
+[Scientific Metrics] 🟢 Size: 13.07MB | 🔵 Sparsity: 37.44% | 🟡 Speedup: 1.60x
+=========================================================================================
+
+ [*] ViT Pruning Complete: 334 units pruned.
+
+[Scientific Metrics - Epoch 250]
+ 🟢 Model Size: 20.89 MB -> 13.07 MB
+ 🔵 Sparsity: 29.01 %
+ 🟡 Speedup: 1.60x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep250_sp29.01.pth
+Epoch 250/300 | Loss: 4.2525 | Val Acc: 12.74% | Peak VRAM: 19660.26 MB
+Epoch 251/300 | Loss: 3.5158 | Val Acc: 18.53% | Peak VRAM: 4499.76 MB
+Epoch 252/300 | Loss: 3.2430 | Val Acc: 22.55% | Peak VRAM: 4499.76 MB
+Epoch 253/300 | Loss: 3.0568 | Val Acc: 26.03% | Peak VRAM: 4499.76 MB
+Epoch 254/300 | Loss: 2.9192 | Val Acc: 28.21% | Peak VRAM: 4499.76 MB
+Epoch 255/300 | Loss: 2.8103 | Val Acc: 29.68% | Peak VRAM: 4499.76 MB
+Epoch 256/300 | Loss: 2.7275 | Val Acc: 31.92% | Peak VRAM: 4499.76 MB
+Epoch 257/300 | Loss: 2.6526 | Val Acc: 32.75% | Peak VRAM: 4499.76 MB
+Epoch 258/300 | Loss: 2.5842 | Val Acc: 34.19% | Peak VRAM: 4499.76 MB
+Epoch 259/300 | Loss: 2.5267 | Val Acc: 35.21% | Peak VRAM: 4499.76 MB
+Epoch 260/300 | Loss: 2.4705 | Val Acc: 36.22% | Peak VRAM: 4499.76 MB
+Epoch 261/300 | Loss: 2.4256 | Val Acc: 37.23% | Peak VRAM: 4499.76 MB
+Epoch 262/300 | Loss: 2.3841 | Val Acc: 37.93% | Peak VRAM: 4499.76 MB
+Epoch 263/300 | Loss: 2.3407 | Val Acc: 38.94% | Peak VRAM: 4499.76 MB
+Epoch 264/300 | Loss: 2.3052 | Val Acc: 39.42% | Peak VRAM: 4499.76 MB
+Epoch 265/300 | Loss: 2.2690 | Val Acc: 40.24% | Peak VRAM: 4499.76 MB
+Epoch 266/300 | Loss: 2.2405 | Val Acc: 40.64% | Peak VRAM: 4499.76 MB
+Epoch 267/300 | Loss: 2.2049 | Val Acc: 41.33% | Peak VRAM: 4499.76 MB
+Epoch 268/300 | Loss: 2.1750 | Val Acc: 42.19% | Peak VRAM: 4499.76 MB
+Epoch 269/300 | Loss: 2.1498 | Val Acc: 42.81% | Peak VRAM: 4499.76 MB
+Epoch 270/300 | Loss: 2.1234 | Val Acc: 42.78% | Peak VRAM: 4499.76 MB
+Epoch 271/300 | Loss: 2.1058 | Val Acc: 43.47% | Peak VRAM: 4499.76 MB
+Epoch 272/300 | Loss: 2.0728 | Val Acc: 43.82% | Peak VRAM: 4499.76 MB
+Epoch 273/300 | Loss: 2.0558 | Val Acc: 44.63% | Peak VRAM: 4499.76 MB
+Epoch 274/300 | Loss: 2.0411 | Val Acc: 44.63% | Peak VRAM: 4499.76 MB
+Epoch 275/300 | Loss: 2.0151 | Val Acc: 45.14% | Peak VRAM: 4499.76 MB
+Epoch 276/300 | Loss: 1.9931 | Val Acc: 45.60% | Peak VRAM: 4499.76 MB
+Epoch 277/300 | Loss: 1.9830 | Val Acc: 45.97% | Peak VRAM: 4499.76 MB
+Epoch 278/300 | Loss: 1.9593 | Val Acc: 46.25% | Peak VRAM: 4499.76 MB
+Epoch 279/300 | Loss: 1.9448 | Val Acc: 46.48% | Peak VRAM: 4499.76 MB
+Epoch 280/300 | Loss: 1.9208 | Val Acc: 47.24% | Peak VRAM: 4499.76 MB
+Epoch 281/300 | Loss: 1.9114 | Val Acc: 47.40% | Peak VRAM: 4499.76 MB
+Epoch 282/300 | Loss: 1.8929 | Val Acc: 47.09% | Peak VRAM: 4499.76 MB
+Epoch 283/300 | Loss: 1.8798 | Val Acc: 47.57% | Peak VRAM: 4499.76 MB
+Epoch 284/300 | Loss: 1.8664 | Val Acc: 48.32% | Peak VRAM: 4499.76 MB
+Epoch 285/300 | Loss: 1.8559 | Val Acc: 48.74% | Peak VRAM: 4499.76 MB
+Epoch 286/300 | Loss: 1.8392 | Val Acc: 48.65% | Peak VRAM: 4499.76 MB
+Epoch 287/300 | Loss: 1.8293 | Val Acc: 48.64% | Peak VRAM: 4499.76 MB
+Epoch 288/300 | Loss: 1.8192 | Val Acc: 49.16% | Peak VRAM: 4499.76 MB
+Epoch 289/300 | Loss: 1.8081 | Val Acc: 49.35% | Peak VRAM: 4499.76 MB
+Epoch 290/300 | Loss: 1.7938 | Val Acc: 49.91% | Peak VRAM: 4499.76 MB
+Epoch 291/300 | Loss: 1.7793 | Val Acc: 50.02% | Peak VRAM: 4499.76 MB
+Epoch 292/300 | Loss: 1.7720 | Val Acc: 50.16% | Peak VRAM: 4499.76 MB
+Epoch 293/300 | Loss: 1.7587 | Val Acc: 50.33% | Peak VRAM: 4499.76 MB
+Epoch 294/300 | Loss: 1.7486 | Val Acc: 50.19% | Peak VRAM: 4499.76 MB
+Epoch 295/300 | Loss: 1.7352 | Val Acc: 50.78% | Peak VRAM: 4499.76 MB
+Epoch 296/300 | Loss: 1.7243 | Val Acc: 51.18% | Peak VRAM: 4499.76 MB
+Epoch 297/300 | Loss: 1.7157 | Val Acc: 50.97% | Peak VRAM: 4499.76 MB
+Epoch 298/300 | Loss: 1.7011 | Val Acc: 51.07% | Peak VRAM: 4499.76 MB
+Epoch 299/300 | Loss: 1.7046 | Val Acc: 51.32% | Peak VRAM: 4499.76 MB
+
+[DEBUG] >>> PRUNING @ Epoch 300
+
+[DEBUG] === ViT MCPrune (EMA-Hessian) Running: Epoch 300 ===
+
+============================== ViT PDT Pruning Report: Epoch 300 ==============================
+ [*] Pruned this step: 286 units | VRAM: 4448.3MB
+ Group  1 |    0/ 192 |   100.0% | Hessian: 1345519.250000
+ Group  2 |    0/ 192 |   100.0% | Hessian: 9180147.000000
+ Group  3 |  187/ 192 |     2.6% | Hessian: 12570059.000000
+ Group  4 |  174/ 192 |     9.4% | Hessian: 9979998.000000
+ Group  5 |  119/ 192 |    38.0% | Hessian: 5592380.000000
+ Group  6 |   12/ 192 |    93.8% | Hessian: 2196729.000000
+ Group  7 |    1/ 192 |    99.5% | Hessian: 3744305.500000
+ Group  8 |    0/ 192 |   100.0% | Hessian: 2218002.750000
+ Group  9 |    0/ 192 |   100.0% | Hessian: 3845745.750000
+ Group 10 |    0/ 192 |   100.0% | Hessian: 5592700.000000
+ Group 11 |    0/ 192 |   100.0% | Hessian: 6331978.000000
+ Group 12 |    0/ 192 |   100.0% | Hessian: 7395371.000000
+
+[Scientific Metrics] 🟢 Size: 11.60MB | 🔵 Sparsity: 44.46% | 🟡 Speedup: 1.80x
+=========================================================================================
+
+ [*] ViT Pruning Complete: 286 units pruned.
+
+[Scientific Metrics - Epoch 300]
+ 🟢 Model Size: 20.89 MB -> 11.60 MB
+ 🔵 Sparsity: 34.45 %
+ 🟡 Speedup: 1.80x
+💾 Checkpoint saved: vit_tiny_patch16_224_pdt_ep300_sp34.45.pth
+Epoch 300/300 | Loss: 4.0686 | Val Acc: 12.68% | Peak VRAM: 19656.70 MB
+
+🏁 Final Model Saved: ./exp/checkpoints/vit_tiny_patch16_224_pdt_final.pth
+
+================ FINAL PHYSICAL COMPRESSION ================
+
