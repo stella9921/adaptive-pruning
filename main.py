@@ -694,7 +694,6 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
             else:
                 # 프루닝 안 할 때는 그냥 백워드
-                loss.backward()
                 t_step_start = time.time()
                 loss.backward()
                 pdt_engine.update_ema_and_mask_grad()
