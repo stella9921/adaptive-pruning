@@ -9,4 +9,5 @@ epochs: 30
 dataset:
   name: imagenet100
   data_dir: /home/stella/data/imagenet100
+  # data_dir: C:/Users/이현수/Downloads/archive
   num_workers: 8

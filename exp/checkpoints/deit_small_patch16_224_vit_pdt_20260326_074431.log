@@ -1,0 +1,164 @@
+📝 Logging started: deit_small_patch16_224_vit_pdt_20260326_074431.log
+>>> [System] ViT detected. Input size forced to 224 for dataloader.
+[*] Train classes: 100
+✅ imagenet100 loaded: Train(130000), Val(5000)
+   Val dir: /home/stella/data/imagenet100/val.X
+Experimental Mode: pdt
+Target Model: deit_small_patch16_224 | Dataset: imagenet100
+>>> [Model] Loading Vision Transformer: deit_small_patch16_224
+>>> [System] ViT head replaced: 384 → 100
+>>> [System] Head warmup 시작 (5 epochs, head only)...
+  [Head Warmup] Epoch 1/5 | Val Acc: 88.22%
+  [Head Warmup] Epoch 2/5 | Val Acc: 87.86%
+  [Head Warmup] Epoch 3/5 | Val Acc: 88.42%
+  [Head Warmup] Epoch 4/5 | Val Acc: 88.32%
+  [Head Warmup] Epoch 5/5 | Val Acc: 88.26%
+>>> [System] Head warmup 완료. 전체 fine-tuning 시작.
+[*] ViT Topology: 12 blocks → 24 groups (num_heads=6, head_dim=64)
+>>> [System] Flash Attention disabled for Hessian computation.
+
+[Pruner Init] Identified 24 groups for pruning.
+[*] Applied Min Survival Guarantee: 10.0%
+[System] Initializing ViTPDTPruner for deit_small_patch16_224
+
+>>> Strategy: VIT_PDT | Total Epochs: 2
+>>> Pruning starts at Epoch 1, every 1 epochs.
+
+[DEBUG] >>> PRUNING @ Epoch 1
+
+[DEBUG] === ViT PDT Pruning (k-horizon=5): Epoch 1 ===
+ [k-horizon time]: 13.46s
+
+============================== ViT PDT k-horizon Pruning Report ==============================
+ k_horizon=5 | Pruned: 33308 units | Overhead: 14.04s
+ [ATTN] blocks.0.attn.qkv                        |    1/   6 |  83.3% pruned
+ [FFN] blocks.0.mlp.fc1                         |   32/1536 |  97.9% pruned
+ [ATTN] blocks.1.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.1.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.2.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.2.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.3.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.3.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.4.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.4.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.5.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.5.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.6.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.6.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.7.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.7.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.8.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.8.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.9.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.9.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.10.attn.qkv                       |    0/   6 | 100.0% pruned
+ [FFN] blocks.10.mlp.fc1                        |  308/1536 |  79.9% pruned
+ [ATTN] blocks.11.attn.qkv                       |    6/   6 |   0.0% pruned
+ [FFN] blocks.11.mlp.fc1                        | 1503/1536 |   2.1% pruned
+
+ Size: 8.02MB | Sparsity(weight): 90.09% | Speedup: 10.09x
+===================================================================
+🧹 Post-Pruning Memory Cleared & Graph Destroyed.
+
+[Scientific Metrics - Epoch 1]
+ 🟢 Model Size: 81.00 MB -> 8.02 MB
+ 🔵 Sparsity: 90.00 %
+ 🟡 Speedup: 10.09x
+💾 Checkpoint saved: deit_small_patch16_224_vit_pdt_ep1_sp90.00.pth
+ [Normal step time] batch 100: 0.0543s
+ [Normal step time] batch 200: 0.0517s
+ [Normal step time] batch 300: 0.0518s
+ [Normal step time] batch 400: 0.0520s
+ [Normal step time] batch 500: 0.0520s
+ [Normal step time] batch 600: 0.0517s
+ [Normal step time] batch 700: 0.0580s
+ [Normal step time] batch 800: 0.0516s
+ [Normal step time] batch 900: 0.0517s
+ [Normal step time] batch 1000: 0.0516s
+ [Normal step time] batch 1100: 0.0517s
+ [Normal step time] batch 1200: 0.0516s
+ [Normal step time] batch 1300: 0.0518s
+ [Normal step time] batch 1400: 0.0516s
+ [Normal step time] batch 1500: 0.0517s
+ [Normal step time] batch 1600: 0.0517s
+ [Normal step time] batch 1700: 0.0517s
+ [Normal step time] batch 1800: 0.0516s
+ [Normal step time] batch 1900: 0.0517s
+ [Normal step time] batch 2000: 0.0516s
+Epoch 1/2 | Loss: 3.4141 | Val Acc: 27.28% | Peak VRAM: 21540.07 MB
+
+[DEBUG] >>> PRUNING @ Epoch 2
+
+[DEBUG] === ViT PDT Pruning (k-horizon=5): Epoch 2 ===
+ [k-horizon time]: 12.96s
+
+============================== ViT PDT k-horizon Pruning Report ==============================
+ k_horizon=5 | Pruned: 382 units | Overhead: 13.00s
+ [ATTN] blocks.0.attn.qkv                        |    1/   6 |  83.3% pruned
+ [FFN] blocks.0.mlp.fc1                         |   32/1536 |  97.9% pruned
+ [ATTN] blocks.1.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.1.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.2.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.2.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.3.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.3.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.4.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.4.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.5.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.5.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.6.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.6.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.7.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.7.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.8.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.8.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.9.attn.qkv                        |    0/   6 | 100.0% pruned
+ [FFN] blocks.9.mlp.fc1                         |    0/1536 | 100.0% pruned
+ [ATTN] blocks.10.attn.qkv                       |    0/   6 | 100.0% pruned
+ [FFN] blocks.10.mlp.fc1                        |  308/1536 |  79.9% pruned
+ [ATTN] blocks.11.attn.qkv                       |    5/   6 |  16.7% pruned
+ [FFN] blocks.11.mlp.fc1                        | 1313/1536 |  14.5% pruned
+
+ Size: 7.09MB | Sparsity(weight): 91.24% | Speedup: 11.42x
+===================================================================
+🧹 Post-Pruning Memory Cleared & Graph Destroyed.
+
+[Scientific Metrics - Epoch 2]
+ 🟢 Model Size: 81.00 MB -> 7.09 MB
+ 🔵 Sparsity: 91.03 %
+ 🟡 Speedup: 11.42x
+💾 Checkpoint saved: deit_small_patch16_224_vit_pdt_ep2_sp91.03.pth
+ [Normal step time] batch 100: 0.0520s
+ [Normal step time] batch 200: 0.0519s
+ [Normal step time] batch 300: 0.0521s
+ [Normal step time] batch 400: 0.0518s
+ [Normal step time] batch 500: 0.0518s
+ [Normal step time] batch 600: 0.0518s
+ [Normal step time] batch 700: 0.0519s
+ [Normal step time] batch 800: 0.0519s
+ [Normal step time] batch 900: 0.0518s
+ [Normal step time] batch 1000: 0.0518s
+ [Normal step time] batch 1100: 0.0520s
+ [Normal step time] batch 1200: 0.0533s
+ [Normal step time] batch 1300: 0.0519s
+ [Normal step time] batch 1400: 0.0522s
+ [Normal step time] batch 1500: 0.0518s
+ [Normal step time] batch 1600: 0.0522s
+ [Normal step time] batch 1700: 0.0522s
+ [Normal step time] batch 1800: 0.0521s
+ [Normal step time] batch 1900: 0.0519s
+ [Normal step time] batch 2000: 0.0516s
+Epoch 2/2 | Loss: 2.9348 | Val Acc: 32.00% | Peak VRAM: 21702.40 MB
+
+🏁 Final Model Saved: ./exp/checkpoints/deit_small_patch16_224_vit_pdt_final.pth
+
+================ FINAL PHYSICAL COMPRESSION ================
+
+[Compressed] blocks.0.attn.qkv: 5 heads removed
+[Compressed] blocks.0.mlp.fc1: 1504 neurons removed
+[Compressed] blocks.10.mlp.fc1: 1228 neurons removed
+[Compressed] blocks.11.attn.qkv: 1 heads removed
+[Compressed] blocks.11.mlp.fc1: 223 neurons removed
+✅ Physically Compressed Model Saved: ./exp/checkpoints/deit_small_patch16_224_vit_pdt_FINAL_COMPRESSED.pth
+=============================================================
+

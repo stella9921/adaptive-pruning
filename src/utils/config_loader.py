@@ -44,13 +44,13 @@ def load_config():
     base_path = 'configs/base.yaml'
     config = {}
     if os.path.exists(base_path):
-        with open(base_path, 'r') as f:
+        with open(base_path, 'r', encoding='utf-8') as f:
             config = yaml.safe_load(f)
 
     # --- 2. Model 설정 병합 ---
     model_config_path = get_real_path(args.model, 'configs/model')
     if os.path.exists(model_config_path):
-        with open(model_config_path, 'r') as f:
+        with open(model_config_path, 'r', encoding='utf-8') as f:
             model_config = yaml.safe_load(f)
             if 'model' not in config: config['model'] = {}
             config['model'].update(model_config)
@@ -62,7 +62,7 @@ def load_config():
     # --- 3. Strategy 설정 병합 ---
     strategy_config_path = get_real_path(args.strategy, 'configs/strategy')
     if os.path.exists(strategy_config_path):
-        with open(strategy_config_path, 'r') as f:
+        with open(strategy_config_path, 'r', encoding='utf-8') as f:
             config['strategy'] = yaml.safe_load(f)
     else:
         raise FileNotFoundError(f"Strategy config file not found: {strategy_config_path}")

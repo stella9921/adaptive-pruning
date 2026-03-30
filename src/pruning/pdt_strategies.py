@@ -533,6 +533,7 @@ class ViTPDTPruner(PDTPruner):
         # k-horizon sensitivity 계산
         # s(g,c,K) = Σᵢ₌₀ᴷ | g(l+i,c)ᵀΔw + ½ΔwᵀH(l+i,c)Δw |
         # ────────────────────────────────────────────────
+        t_khorizon_start = time.time()
         import gc
         group_k_sensitivity = {}  # {g_idx: tensor [n_units]}
 
@@ -636,6 +637,9 @@ class ViTPDTPruner(PDTPruner):
 
             rep.hessian_score.copy_(avg_sensitivity)
             group_k_sensitivity[g_idx] = avg_sensitivity
+        t_khorizon_end = time.time()
+        print(f" [k-horizon time]: {t_khorizon_end - t_khorizon_start:.2f}s")
+
 
         # ────────────────────────────────────────────────
         # 점수 산출: S(g,c,K) = Ŵ_g^(EMA) × s(g,c,K)

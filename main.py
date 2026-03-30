@@ -78,9 +78,12 @@ def main():
     class Logger(object):
         def __init__(self):
             self.terminal = sys.stdout
-            self.log = open(os.path.join(log_dir, log_filename), "a")
+            self.log = open(os.path.join(log_dir, log_filename), "a",encoding='utf-8')
         def write(self, message):
-            self.terminal.write(message)
+            try:
+                self.terminal.write(message)
+            except UnicodeEncodeError:
+                self.terminal.write(message.encode('utf-8', errors='replace').decode('cp949', errors='replace'))
             self.log.write(message)
         def flush(self): pass
 
