@@ -26,7 +26,7 @@ def get_dataloaders(config):
                   if isinstance(dataset_cfg, dict) else 4
 
     # ImageNet / ImageNet-100
-    if dataset_name.lower() in ['imagenet', 'imagenet100']:
+    if dataset_name.lower() in ['imagenet', 'imagenet100', 'imagenet1k']:
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                          std=[0.229, 0.224, 0.225])
         transform_train = transforms.Compose([
@@ -41,6 +41,44 @@ def get_dataloaders(config):
             transforms.ToTensor(),
             normalize,
         ])
+
+         # ↓↓↓ 여기에 arrow 코드 추가 ↓↓↓
+        arrow_path = os.path.join(data_path, 'default/0.0.0')
+        if os.path.exists(arrow_path):
+            from datasets import load_from_disk
+            from torch.utils.data import Dataset
+            from PIL import Image
+
+            print(f"[*] HuggingFace arrow 포맷 감지: {arrow_path}")
+            hf_dataset = load_from_disk(arrow_path)
+
+            class HFImageNetDataset(Dataset):
+                def __init__(self, hf_split, transform=None):
+                    self.data = hf_split
+                    self.transform = transform
+                def __len__(self):
+                    return len(self.data)
+                def __getitem__(self, idx):
+                    item = self.data[idx]
+                    img = item['image']
+                    if not isinstance(img, Image.Image):
+                        img = Image.fromarray(img)
+                    img = img.convert('RGB')
+                    label = item['label']
+                    if self.transform:
+                        img = self.transform(img)
+                    return img, label
+
+            train_set = HFImageNetDataset(hf_dataset['train'], transform=transform_train)
+            val_set = HFImageNetDataset(hf_dataset['validation'], transform=transform_test)
+
+            print(f"✅ ImageNet-1k loaded: Train({len(train_set)}), Val({len(val_set)})")
+
+            train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True,
+                                      num_workers=num_workers, pin_memory=True)
+            val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False,
+                                    num_workers=num_workers, pin_memory=True)
+            return train_loader, val_loader
 
         # train 폴더들을 심볼릭 링크로 통합 (label 겹침 방지)
         merged_train = os.path.join(data_path, 'train_merged')
