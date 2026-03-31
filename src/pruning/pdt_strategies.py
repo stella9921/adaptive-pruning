@@ -1121,3 +1121,127 @@ class TPPPruner(PDTPruner):
             
         else:
             print("[DEBUG] 🚨 FATAL: Still 0 candidates for TPP.")
+
+class ViTHAPPruner(ViTPDTPruner):
+    """
+    ViT 전용 HAP Pruner.
+    ViTPDTPruner와 동일한 topology grouping 사용,
+    Hessian 계산만 HAP 방식 (trace 기반)으로 교체.
+    """
+    def step_pruning(self, loss, current_epoch, total_epochs):
+        t_start = time.time()
+        print(f"\n[DEBUG] === ViT HAP Pruning: Epoch {current_epoch} ===")
+
+        all_modules = dict(self.model.named_modules())
+        if not self.topology_groups:
+            print("[WARNING] No ViT topology groups.")
+            return
+
+        progress = current_epoch / total_epochs
+        total_target_keep_ratio = 1.0 - (progress * (1.0 - self.final_keep_ratio))
+
+        # ── HAP: 그룹별 Hessian trace 계산 ──
+        target_params = []
+        for g in self.topology_groups:
+            m = all_modules.get(g['names'][0])
+            if m is not None and hasattr(m, 'weight'):
+                target_params.append(m.weight)
+
+        hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, k=1)
+
+        for g_idx, g in enumerate(self.topology_groups):
+            rep = all_modules.get(g['names'][0])
+            if rep is None or not hasattr(rep, 'weight'):
+                continue
+            hv = hv_list[g_idx]
+
+            with torch.no_grad():
+                if g['type'] == 'ffn':
+                    h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
+                elif g['type'] == 'attn':
+                    num_heads = g['num_heads']
+                    head_dim = g['head_dim']
+                    h_energy = torch.zeros(num_heads, device=hv.device)
+                    for h in range(num_heads):
+                        s, e = h * head_dim, (h + 1) * head_dim
+                        if e <= hv.shape[0]:
+                            h_energy[h] = hv[s:e].pow(2).mean()
+                rep.hessian_score.copy_(h_energy)
+
+        # ── 점수 산출 (EMA × HAP trace) ──
+        target_unit_scores = []
+        target_unit_costs = []
+        target_unit_metadata = []
+
+        for g in self.topology_groups:
+            rep = all_modules.get(g['names'][0])
+            if rep is None or not hasattr(rep, 'mask'):
+                continue
+            alive = torch.where(rep.mask > 0.5)[0].cpu().numpy()
+            for i in alive:
+                score = rep.grad_ema[i].item() * (
+                    rep.hessian_score[i].item() * self.lambda_h)
+                if g['type'] == 'ffn':
+                    cost = sum(
+                        all_modules[n].weight.nelement() / all_modules[n].weight.shape[0]
+                        for n in g['names'] if n in all_modules)
+                else:
+                    head_dim = g['head_dim']
+                    cost = head_dim * (
+                        all_modules[g['names'][0]].weight.shape[1] * 3 +
+                        all_modules[g['names'][1]].weight.shape[0])
+                target_unit_scores.append(score)
+                target_unit_costs.append(cost)
+                target_unit_metadata.append((g, int(i)))
+
+        # ── Lagrangian 최적화 및 마스크 집행 ──
+        if not target_unit_scores:
+            return
+
+        current_alive_ratio = 1.0 - (self.get_current_sparsity() / 100.0)
+        target_ratio = total_target_keep_ratio / (current_alive_ratio + 1e-7)
+
+        optimal_mask_flags = lagrangian_optimization(
+            np.array(target_unit_scores),
+            np.array(target_unit_costs),
+            np.sum(target_unit_costs) * target_ratio
+        )
+
+        if np.all(optimal_mask_flags == 1) and target_ratio < 0.999:
+            num_force = int(len(optimal_mask_flags) * (1 - target_ratio))
+            optimal_mask_flags[np.argsort(target_unit_scores)[:num_force]] = 0
+
+        pruned_count = 0
+        with torch.no_grad():
+            for idx, is_alive in enumerate(optimal_mask_flags):
+                if not is_alive:
+                    g_obj, unit_idx = target_unit_metadata[idx]
+                    rep = all_modules.get(g_obj['names'][0])
+                    if rep is not None and hasattr(rep, 'mask'):
+                        alive_count = rep.mask.sum().item()
+                        total_count = rep.mask.numel()
+                        if alive_count / total_count <= self.min_survival_ratio:
+                            continue
+                    for name in g_obj['names']:
+                        m = all_modules.get(name)
+                        if m is not None and hasattr(m, 'mask') and unit_idx < m.mask.size(0):
+                            m.mask.data[unit_idx] = 0.0
+                            pruned_count += 1
+
+        self.apply_mask_to_weights()
+        torch.cuda.empty_cache()
+        t_end = time.time()
+
+        eff = self.get_model_efficiency()
+        true_sp = self.get_true_sparsity()
+        print(f"\n{'='*30} ViT HAP Pruning Report {'='*30}")
+        print(f" Pruned: {pruned_count} units | Overhead: {t_end - t_start:.2f}s")
+        for g in self.topology_groups:
+            m = all_modules.get(g['names'][0])
+            if m is None or not hasattr(m, 'mask'):
+                continue
+            t = m.mask.numel()
+            a = int(m.mask.sum().item())
+            print(f" [{g['type'].upper()}] {g['names'][0]:40s} | {a:4d}/{t:4d} | {(1-a/t)*100:5.1f}% pruned")
+        print(f"\n Size: {eff['curr_mb']:.2f}MB | Sparsity(weight): {true_sp:.2f}% | Speedup: {eff['speedup']:.2f}x")
+        print('='*67)

@@ -1,0 +1,7 @@
+nohup: ignoring input
+
+==================================================
+🔥 SYSTEM CHECK: Raw Args -> ['main.py', '--model', 'configs/model/deit_small.yaml', '--strategy', 'vit_hap.yaml', '--epochs', '150', '--start_epoch', '40', '--prune_every', '30', '--channel_keep_ratio', '0.5', '--batch_size', '64']
+==================================================
+
+🔥 DEBUG: Final Batch Size fixed to -> 64

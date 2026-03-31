@@ -19,7 +19,7 @@ from src.data.dataloader import get_dataloaders
 from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
-from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner,DFPCPruner,TPPPruner,ViTPDTPruner
+from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner,DFPCPruner,TPPPruner,ViTPDTPruner,ViTHAPPruner
 
 def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     """Stage 1(Topology)과 Stage 4(Resource)를 동시에 분석"""
@@ -64,7 +64,8 @@ def main():
     # --- 로그 파일 자동 저장 설정 시작 ---
 
     # ViT 모델은 224x224 해상도가 필수이므로 설정을 강제 업데이트
-    if "vit" in config['model']['name'].lower():
+    # if "vit" in config['model']['name'].lower():
+    if any(k in config['model']['name'].lower() for k in ['vit', 'deit', 'transformer']):
         config['model']['input_size'] = 224
         print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")    
 
@@ -102,7 +103,8 @@ def main():
     dataset_cfg = config.get('dataset', {})
     dataset_name = dataset_cfg if isinstance(dataset_cfg, str) else dataset_cfg.get('name', 'cifar100')
 
-    if "vit" in config['model']['name'].lower():
+    # if "vit" in config['model']['name'].lower():
+    if any(k in config['model']['name'].lower() for k in ['vit', 'deit', 'transformer']):
         # ViT 모델 구조상 224x224 해상도가 필수
         config['model']['input_size'] = 224
         print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")
@@ -577,11 +579,15 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # -------------------------
     model_name = config['model']['name'].lower()
     if "vit" in model_name or "deit" in model_name or "transformer" in model_name:
-        pdt_engine = ViTPDTPruner(model, config, args, topology_groups=topology_groups)
-        print(f"[System] Initializing ViTPDTPruner for {model_name}")
+        if strategy_type == 'vit_hap':
+            pdt_engine = ViTHAPPruner(model, config, args, topology_groups=topology_groups)
+            print(f"[System] Initializing ViTHAPPruner for {model_name}")
+        else:
+            pdt_engine = ViTPDTPruner(model, config, args, topology_groups=topology_groups)
+            print(f"[System] Initializing ViTPDTPruner for {model_name}")
     else:
         pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
-        print(f"[System] Initializing PDTPruner (Stable Version) for {model_name}")
+        print(f"[System] Initializing PDTPruner for {model_name}")
 
 
 
@@ -629,7 +635,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         prune_step_index = None
 
         for batch_idx, (x, y) in enumerate(train_loader):
-            if "vit" in config['model']['name'].lower() and x.shape[-1] != 224:
+            # if "vit" in config['model']['name'].lower() and x.shape[-1] != 224:
+            if x.shape[-1] != 224 and hasattr(model, 'patch_embed'):
                 x = torch.nn.functional.interpolate(x, size=(224, 224), mode='bilinear', align_corners=False)
             
             x, y = x.to(device), y.to(device)
