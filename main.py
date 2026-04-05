@@ -163,7 +163,7 @@ def main():
         print(">>> [System] Head warmup 완료. 전체 fine-tuning 시작.")
     
     # [System] ImageNet-100 대응 FC 가중치 이식
-    if ('imagenet' in str(dataset_name)) and not is_vit_model:
+    if ('imagenet' in str(dataset_name)) and not is_vit_model and config['model'].get('num_classes', 100) != 1000:
         print(">>> [System] Transferring Pretrained Weights to FC Layer (1000 -> 100)...")
         temp_config = config['model'].copy()
         temp_config['num_classes'] = 1000

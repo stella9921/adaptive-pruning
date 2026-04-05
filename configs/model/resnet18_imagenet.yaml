@@ -1,0 +1,12 @@
+name: "resnet18"
+num_classes: 1000
+input_size: 224
+base_lr: 0.01
+momentum: 0.9
+weight_decay: 0.0001
+epochs: 90
+batch_size: 128
+dataset:
+  name: "imagenet"
+  data_dir: "/home/stella/data/imagenet1k_full/images"
+  num_workers: 8

@@ -1,0 +1,6 @@
+
+==================================================
+🔥 SYSTEM CHECK: Raw Args -> ['main.py', ' ', '--model', 'resnet18_imagenet', ' ', '--strategy', 'pdt', ' ', '--epochs', '1', ' ', '--start_epoch', '1', ' ', '--prune_every', '1', ' ', '--batch_size', '32', ' ']
+==================================================
+
+🔥 DEBUG: Final Batch Size fixed to -> 32

@@ -1,0 +1,275 @@
+nohup: ignoring input
+
+==================================================
+🔥 SYSTEM CHECK: Raw Args -> ['main.py', '--model', 'configs/model/deit_small.yaml', '--strategy', 'vit_pdt.yaml', '--epochs', '100', '--start_epoch', '20', '--prune_every', '20', '--channel_keep_ratio', '0.5', '--batch_size', '64']
+==================================================
+
+🔥 DEBUG: Final Batch Size fixed to -> 64
+>>> [System] ViT detected. Input size forced to 224 for dataloader.
+📝 Logging started: deit_small_patch16_224_vit_pdt.yaml_20260401_132621.log
+>>> [System] ViT detected. Input size forced to 224 for dataloader.
+[*] Train classes: 1000
+✅ imagenet loaded: Train(1281167), Val(50000)
+   Val dir: /home/stella/data/imagenet1k_full/images/val
+Experimental Mode: pdt
+Target Model: deit_small_patch16_224 | Dataset: imagenet
+>>> [Model] Loading Vision Transformer: deit_small_patch16_224
+[*] ViT Topology: 12 blocks → 24 groups (num_heads=6, head_dim=64)
+>>> [System] Flash Attention disabled for Hessian computation.
+
+[Pruner Init] Identified 24 groups for pruning.
+[*] Applied Min Survival Guarantee: 30.0%
+[System] Initializing ViTPDTPruner for deit_small_patch16_224
+
+>>> Strategy: VIT_PDT.YAML | Total Epochs: 100
+>>> Pruning starts at Epoch 20, every 20 epochs.
+Epoch 1/100 | Loss: 1.4524 | Val Acc: 71.04% | Peak VRAM: 4683.02 MB
+Epoch 2/100 | Loss: 1.2875 | Val Acc: 71.02% | Peak VRAM: 4683.21 MB
+Epoch 3/100 | Loss: 1.2743 | Val Acc: 70.63% | Peak VRAM: 4683.21 MB
+Epoch 4/100 | Loss: 1.2768 | Val Acc: 70.55% | Peak VRAM: 4683.21 MB
+Epoch 5/100 | Loss: 1.2771 | Val Acc: 70.62% | Peak VRAM: 4683.21 MB
+Epoch 6/100 | Loss: 1.2788 | Val Acc: 70.36% | Peak VRAM: 4683.21 MB
+Epoch 7/100 | Loss: 1.2843 | Val Acc: 69.71% | Peak VRAM: 4683.21 MB
+Epoch 8/100 | Loss: 1.2883 | Val Acc: 70.34% | Peak VRAM: 4683.21 MB
+Epoch 9/100 | Loss: 1.2919 | Val Acc: 69.96% | Peak VRAM: 4683.21 MB
+Epoch 10/100 | Loss: 1.2919 | Val Acc: 69.44% | Peak VRAM: 4683.21 MB
+Epoch 11/100 | Loss: 1.2955 | Val Acc: 69.37% | Peak VRAM: 4683.21 MB
+Epoch 12/100 | Loss: 1.2961 | Val Acc: 69.71% | Peak VRAM: 4683.21 MB
+Epoch 13/100 | Loss: 1.2987 | Val Acc: 69.78% | Peak VRAM: 4683.21 MB
+Epoch 14/100 | Loss: 1.2982 | Val Acc: 69.57% | Peak VRAM: 4683.21 MB
+Epoch 15/100 | Loss: 1.2976 | Val Acc: 69.71% | Peak VRAM: 4683.21 MB
+Epoch 16/100 | Loss: 1.2959 | Val Acc: 68.89% | Peak VRAM: 4683.21 MB
+Epoch 17/100 | Loss: 1.2959 | Val Acc: 69.72% | Peak VRAM: 4683.21 MB
+Epoch 18/100 | Loss: 1.2919 | Val Acc: 69.24% | Peak VRAM: 4683.21 MB
+Epoch 19/100 | Loss: 1.2901 | Val Acc: 69.35% | Peak VRAM: 4683.21 MB
+
+[DEBUG] >>> PRUNING @ Epoch 20
+
+[DEBUG] === ViT PDT Pruning (k-horizon=5): Epoch 20 ===
+
+============================== ViT PDT k-horizon Pruning Report ==============================
+ k_horizon=5 | Pruned: 2566 units
+ [ATTN] blocks.0.attn.qkv                        |    5/   6 |  16.7% pruned
+ [FFN] blocks.0.mlp.fc1                         | 1518/1536 |   1.2% pruned
+ [ATTN] blocks.1.attn.qkv                        |    4/   6 |  33.3% pruned
+ [FFN] blocks.1.mlp.fc1                         | 1496/1536 |   2.6% pruned
+ [ATTN] blocks.2.attn.qkv                        |    5/   6 |  16.7% pruned
+ [FFN] blocks.2.mlp.fc1                         | 1414/1536 |   7.9% pruned
+ [ATTN] blocks.3.attn.qkv                        |    4/   6 |  33.3% pruned
+ [FFN] blocks.3.mlp.fc1                         | 1359/1536 |  11.5% pruned
+ [ATTN] blocks.4.attn.qkv                        |    4/   6 |  33.3% pruned
+ [FFN] blocks.4.mlp.fc1                         | 1409/1536 |   8.3% pruned
+ [ATTN] blocks.5.attn.qkv                        |    5/   6 |  16.7% pruned
+ [FFN] blocks.5.mlp.fc1                         | 1493/1536 |   2.8% pruned
+ [ATTN] blocks.6.attn.qkv                        |    4/   6 |  33.3% pruned
+ [FFN] blocks.6.mlp.fc1                         | 1525/1536 |   0.7% pruned
+ [ATTN] blocks.7.attn.qkv                        |    5/   6 |  16.7% pruned
+ [FFN] blocks.7.mlp.fc1                         | 1529/1536 |   0.5% pruned
+ [ATTN] blocks.8.attn.qkv                        |    5/   6 |  16.7% pruned
+ [FFN] blocks.8.mlp.fc1                         | 1534/1536 |   0.1% pruned
+ [ATTN] blocks.9.attn.qkv                        |    5/   6 |  16.7% pruned
+ [FFN] blocks.9.mlp.fc1                         | 1533/1536 |   0.2% pruned
+ [ATTN] blocks.10.attn.qkv                       |    5/   6 |  16.7% pruned
+ [FFN] blocks.10.mlp.fc1                        | 1497/1536 |   2.5% pruned
+ [ATTN] blocks.11.attn.qkv                       |    2/   6 |  66.7% pruned
+ [FFN] blocks.11.mlp.fc1                        |  861/1536 |  43.9% pruned
+
+ Size: 70.17MB | Sparsity: 13.37% | Speedup: 1.15x
+===================================================================
+🧹 Post-Pruning Memory Cleared & Graph Destroyed.
+
+[Scientific Metrics - Epoch 20]
+ 🟢 Model Size: 81.00 MB -> 70.17 MB
+ 🔵 Sparsity: 6.93 %
+ 🟡 Speedup: 1.15x
+💾 Checkpoint saved: deit_small_patch16_224_vit_pdt.yaml_ep20_sp6.93.pth
+Epoch 20/100 | Loss: 1.4091 | Val Acc: 68.08% | Peak VRAM: 21705.45 MB
+Epoch 21/100 | Loss: 1.3661 | Val Acc: 68.32% | Peak VRAM: 4686.46 MB
+Epoch 22/100 | Loss: 1.3527 | Val Acc: 68.22% | Peak VRAM: 4686.46 MB
+Epoch 23/100 | Loss: 1.3429 | Val Acc: 68.15% | Peak VRAM: 4686.46 MB
+Epoch 24/100 | Loss: 1.3366 | Val Acc: 68.27% | Peak VRAM: 4686.46 MB
+Epoch 25/100 | Loss: 1.3290 | Val Acc: 68.41% | Peak VRAM: 4686.46 MB
+Epoch 26/100 | Loss: 1.3251 | Val Acc: 67.87% | Peak VRAM: 4686.46 MB
+Epoch 27/100 | Loss: 1.3217 | Val Acc: 68.49% | Peak VRAM: 4686.46 MB
+Epoch 28/100 | Loss: 1.3173 | Val Acc: 68.28% | Peak VRAM: 4686.46 MB
+Epoch 29/100 | Loss: 1.3138 | Val Acc: 68.81% | Peak VRAM: 4686.46 MB
+Epoch 30/100 | Loss: 1.3104 | Val Acc: 68.70% | Peak VRAM: 4686.46 MB
+Epoch 31/100 | Loss: 1.3082 | Val Acc: 68.81% | Peak VRAM: 4686.46 MB
+Epoch 32/100 | Loss: 1.3005 | Val Acc: 68.58% | Peak VRAM: 4686.46 MB
+Epoch 33/100 | Loss: 1.3001 | Val Acc: 69.01% | Peak VRAM: 4686.46 MB
+Epoch 34/100 | Loss: 1.2980 | Val Acc: 68.73% | Peak VRAM: 4686.46 MB
+Epoch 35/100 | Loss: 1.2966 | Val Acc: 68.64% | Peak VRAM: 4686.46 MB
+Epoch 36/100 | Loss: 1.2951 | Val Acc: 68.65% | Peak VRAM: 4686.46 MB
+Epoch 37/100 | Loss: 1.2896 | Val Acc: 68.93% | Peak VRAM: 4686.46 MB
+Epoch 38/100 | Loss: 1.2877 | Val Acc: 68.70% | Peak VRAM: 4686.46 MB
+Epoch 39/100 | Loss: 1.2860 | Val Acc: 68.47% | Peak VRAM: 4686.46 MB
+
+[DEBUG] >>> PRUNING @ Epoch 40
+
+[DEBUG] === ViT PDT Pruning (k-horizon=5): Epoch 40 ===
+
+============================== ViT PDT k-horizon Pruning Report ==============================
+ k_horizon=5 | Pruned: 1842 units
+ [ATTN] blocks.0.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.0.mlp.fc1                         | 1424/1536 |   7.3% pruned
+ [ATTN] blocks.1.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.1.mlp.fc1                         | 1425/1536 |   7.2% pruned
+ [ATTN] blocks.2.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.2.mlp.fc1                         | 1362/1536 |  11.3% pruned
+ [ATTN] blocks.3.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.3.mlp.fc1                         | 1284/1536 |  16.4% pruned
+ [ATTN] blocks.4.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.4.mlp.fc1                         | 1328/1536 |  13.5% pruned
+ [ATTN] blocks.5.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.5.mlp.fc1                         | 1409/1536 |   8.3% pruned
+ [ATTN] blocks.6.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.6.mlp.fc1                         | 1495/1536 |   2.7% pruned
+ [ATTN] blocks.7.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.7.mlp.fc1                         | 1507/1536 |   1.9% pruned
+ [ATTN] blocks.8.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.8.mlp.fc1                         | 1510/1536 |   1.7% pruned
+ [ATTN] blocks.9.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.9.mlp.fc1                         | 1512/1536 |   1.6% pruned
+ [ATTN] blocks.10.attn.qkv                       |    2/   6 |  66.7% pruned
+ [FFN] blocks.10.mlp.fc1                        | 1399/1536 |   8.9% pruned
+ [ATTN] blocks.11.attn.qkv                       |    2/   6 |  66.7% pruned
+ [FFN] blocks.11.mlp.fc1                        |  621/1536 |  59.6% pruned
+
+ Size: 56.68MB | Sparsity: 30.02% | Speedup: 1.43x
+===================================================================
+🧹 Post-Pruning Memory Cleared & Graph Destroyed.
+
+[Scientific Metrics - Epoch 40]
+ 🟢 Model Size: 81.00 MB -> 56.68 MB
+ 🔵 Sparsity: 11.91 %
+ 🟡 Speedup: 1.43x
+💾 Checkpoint saved: deit_small_patch16_224_vit_pdt.yaml_ep40_sp11.91.pth
+Epoch 40/100 | Loss: 1.7951 | Val Acc: 62.59% | Peak VRAM: 21703.93 MB
+Epoch 41/100 | Loss: 1.6072 | Val Acc: 64.63% | Peak VRAM: 4681.71 MB
+Epoch 42/100 | Loss: 1.5560 | Val Acc: 64.68% | Peak VRAM: 4681.71 MB
+Epoch 43/100 | Loss: 1.5246 | Val Acc: 65.02% | Peak VRAM: 4681.71 MB
+Epoch 44/100 | Loss: 1.5048 | Val Acc: 65.11% | Peak VRAM: 4681.71 MB
+Epoch 45/100 | Loss: 1.4881 | Val Acc: 65.64% | Peak VRAM: 4681.71 MB
+Epoch 46/100 | Loss: 1.4744 | Val Acc: 65.91% | Peak VRAM: 4681.71 MB
+Epoch 47/100 | Loss: 1.4653 | Val Acc: 66.48% | Peak VRAM: 4681.71 MB
+Epoch 48/100 | Loss: 1.4555 | Val Acc: 66.24% | Peak VRAM: 4681.71 MB
+Epoch 49/100 | Loss: 1.4496 | Val Acc: 66.28% | Peak VRAM: 4681.71 MB
+Epoch 50/100 | Loss: 1.4419 | Val Acc: 66.15% | Peak VRAM: 4681.71 MB
+Epoch 51/100 | Loss: 1.4356 | Val Acc: 66.37% | Peak VRAM: 4681.71 MB
+Epoch 52/100 | Loss: 1.4299 | Val Acc: 66.32% | Peak VRAM: 4681.71 MB
+Epoch 53/100 | Loss: 1.4258 | Val Acc: 66.39% | Peak VRAM: 4681.71 MB
+Epoch 54/100 | Loss: 1.4232 | Val Acc: 66.47% | Peak VRAM: 4681.71 MB
+Epoch 55/100 | Loss: 1.4177 | Val Acc: 66.58% | Peak VRAM: 4681.71 MB
+Epoch 56/100 | Loss: 1.4154 | Val Acc: 66.12% | Peak VRAM: 4681.71 MB
+Epoch 57/100 | Loss: 1.4082 | Val Acc: 66.55% | Peak VRAM: 4681.71 MB
+Epoch 58/100 | Loss: 1.4064 | Val Acc: 66.31% | Peak VRAM: 4681.71 MB
+Epoch 59/100 | Loss: 1.4038 | Val Acc: 66.21% | Peak VRAM: 4681.71 MB
+
+[DEBUG] >>> PRUNING @ Epoch 60
+
+[DEBUG] === ViT PDT Pruning (k-horizon=5): Epoch 60 ===
+
+============================== ViT PDT k-horizon Pruning Report ==============================
+ k_horizon=5 | Pruned: 4946 units
+ [ATTN] blocks.0.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.0.mlp.fc1                         | 1243/1536 |  19.1% pruned
+ [ATTN] blocks.1.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.1.mlp.fc1                         | 1297/1536 |  15.6% pruned
+ [ATTN] blocks.2.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.2.mlp.fc1                         | 1217/1536 |  20.8% pruned
+ [ATTN] blocks.3.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.3.mlp.fc1                         | 1096/1536 |  28.6% pruned
+ [ATTN] blocks.4.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.4.mlp.fc1                         | 1195/1536 |  22.2% pruned
+ [ATTN] blocks.5.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.5.mlp.fc1                         | 1318/1536 |  14.2% pruned
+ [ATTN] blocks.6.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.6.mlp.fc1                         | 1348/1536 |  12.2% pruned
+ [ATTN] blocks.7.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.7.mlp.fc1                         | 1326/1536 |  13.7% pruned
+ [ATTN] blocks.8.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.8.mlp.fc1                         | 1368/1536 |  10.9% pruned
+ [ATTN] blocks.9.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.9.mlp.fc1                         | 1141/1536 |  25.7% pruned
+ [ATTN] blocks.10.attn.qkv                       |    2/   6 |  66.7% pruned
+ [FFN] blocks.10.mlp.fc1                        |  793/1536 |  48.4% pruned
+ [ATTN] blocks.11.attn.qkv                       |    2/   6 |  66.7% pruned
+ [FFN] blocks.11.mlp.fc1                        |  461/1536 |  70.0% pruned
+
+ Size: 49.44MB | Sparsity: 38.96% | Speedup: 1.64x
+===================================================================
+🧹 Post-Pruning Memory Cleared & Graph Destroyed.
+
+[Scientific Metrics - Epoch 60]
+ 🟢 Model Size: 81.00 MB -> 49.44 MB
+ 🔵 Sparsity: 25.28 %
+ 🟡 Speedup: 1.64x
+💾 Checkpoint saved: deit_small_patch16_224_vit_pdt.yaml_ep60_sp25.28.pth
+Epoch 60/100 | Loss: 1.4717 | Val Acc: 66.10% | Peak VRAM: 21698.52 MB
+Epoch 61/100 | Loss: 1.4481 | Val Acc: 65.89% | Peak VRAM: 4676.36 MB
+Epoch 62/100 | Loss: 1.4415 | Val Acc: 66.02% | Peak VRAM: 4676.36 MB
+Epoch 63/100 | Loss: 1.4364 | Val Acc: 66.85% | Peak VRAM: 4676.36 MB
+Epoch 64/100 | Loss: 1.4336 | Val Acc: 66.51% | Peak VRAM: 4676.36 MB
+Epoch 65/100 | Loss: 1.4287 | Val Acc: 66.46% | Peak VRAM: 4676.36 MB
+Epoch 66/100 | Loss: 1.4232 | Val Acc: 66.54% | Peak VRAM: 4676.36 MB
+Epoch 67/100 | Loss: 1.4219 | Val Acc: 66.34% | Peak VRAM: 4676.36 MB
+Epoch 68/100 | Loss: 1.4212 | Val Acc: 66.26% | Peak VRAM: 4676.36 MB
+Epoch 69/100 | Loss: 1.4181 | Val Acc: 66.05% | Peak VRAM: 4676.36 MB
+Epoch 70/100 | Loss: 1.4174 | Val Acc: 66.79% | Peak VRAM: 4676.36 MB
+Epoch 71/100 | Loss: 1.4136 | Val Acc: 66.92% | Peak VRAM: 4676.36 MB
+Epoch 72/100 | Loss: 1.4134 | Val Acc: 66.51% | Peak VRAM: 4676.36 MB
+Epoch 73/100 | Loss: 1.4097 | Val Acc: 66.04% | Peak VRAM: 4676.36 MB
+Epoch 74/100 | Loss: 1.4072 | Val Acc: 66.54% | Peak VRAM: 4676.36 MB
+Epoch 75/100 | Loss: 1.4077 | Val Acc: 66.54% | Peak VRAM: 4676.36 MB
+Epoch 76/100 | Loss: 1.4042 | Val Acc: 67.09% | Peak VRAM: 4676.36 MB
+Epoch 77/100 | Loss: 1.4035 | Val Acc: 66.77% | Peak VRAM: 4676.36 MB
+Epoch 78/100 | Loss: 1.4036 | Val Acc: 66.30% | Peak VRAM: 4676.36 MB
+Epoch 79/100 | Loss: 1.3992 | Val Acc: 66.75% | Peak VRAM: 4676.36 MB
+
+[DEBUG] >>> PRUNING @ Epoch 80
+
+[DEBUG] === ViT PDT Pruning (k-horizon=5): Epoch 80 ===
+
+============================== ViT PDT k-horizon Pruning Report ==============================
+ k_horizon=5 | Pruned: 3268 units
+ [ATTN] blocks.0.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.0.mlp.fc1                         | 1149/1536 |  25.2% pruned
+ [ATTN] blocks.1.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.1.mlp.fc1                         | 1208/1536 |  21.4% pruned
+ [ATTN] blocks.2.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.2.mlp.fc1                         | 1181/1536 |  23.1% pruned
+ [ATTN] blocks.3.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.3.mlp.fc1                         | 1016/1536 |  33.9% pruned
+ [ATTN] blocks.4.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.4.mlp.fc1                         | 1157/1536 |  24.7% pruned
+ [ATTN] blocks.5.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.5.mlp.fc1                         | 1122/1536 |  27.0% pruned
+ [ATTN] blocks.6.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.6.mlp.fc1                         | 1217/1536 |  20.8% pruned
+ [ATTN] blocks.7.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.7.mlp.fc1                         | 1087/1536 |  29.2% pruned
+ [ATTN] blocks.8.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.8.mlp.fc1                         |  993/1536 |  35.4% pruned
+ [ATTN] blocks.9.attn.qkv                        |    2/   6 |  66.7% pruned
+ [FFN] blocks.9.mlp.fc1                         |  993/1536 |  35.4% pruned
+ [ATTN] blocks.10.attn.qkv                       |    2/   6 |  66.7% pruned
+ [FFN] blocks.10.mlp.fc1                        |  585/1536 |  61.9% pruned
+ [ATTN] blocks.11.attn.qkv                       |    2/   6 |  66.7% pruned
+ [FFN] blocks.11.mlp.fc1                        |  461/1536 |  70.0% pruned
+
+ Size: 44.65MB | Sparsity: 44.87% | Speedup: 1.81x
+===================================================================
+🧹 Post-Pruning Memory Cleared & Graph Destroyed.
+
+[Scientific Metrics - Epoch 80]
+ 🟢 Model Size: 81.00 MB -> 44.65 MB
+ 🔵 Sparsity: 34.11 %
+ 🟡 Speedup: 1.81x
+💾 Checkpoint saved: deit_small_patch16_224_vit_pdt.yaml_ep80_sp34.11.pth
+Epoch 80/100 | Loss: 1.4622 | Val Acc: 66.51% | Peak VRAM: 21693.18 MB
+Epoch 81/100 | Loss: 1.4439 | Val Acc: 66.27% | Peak VRAM: 4675.77 MB
+Epoch 82/100 | Loss: 1.4411 | Val Acc: 66.11% | Peak VRAM: 4675.77 MB
+Epoch 83/100 | Loss: 1.4365 | Val Acc: 66.15% | Peak VRAM: 4675.77 MB
+/home/stella/anaconda3/envs/pdt_2/lib/python3.10/site-packages/torch_pruning/dependency/graph.py:390: UserWarning: Unwrapped parameters detected: ['cls_token', 'pos_embed'].
+ Torch-Pruning will prune the last non-singleton dimension of these parameters. If you wish to change this behavior, please provide an unwrapped_parameters argument.
+  warnings.warn(warning_str)

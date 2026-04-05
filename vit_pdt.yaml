@@ -7,7 +7,7 @@ min_survival_ratio: 0.3
 ema_decay: 0.95
 lambda_h: 0.005
 hessian_iter: 3
-k_horizon: 1
+k_horizon: 5
 
 start_epoch: 5
 prune_every: 5

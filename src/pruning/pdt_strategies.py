@@ -674,10 +674,27 @@ class ViTPDTPruner(PDTPruner):
             optimal_mask_flags[np.argsort(target_unit_scores)[:num_force]] = 0
 
         pruned_count = 0
+        group_alive_count = {}  # ← 추가
+
+
         with torch.no_grad():
             for idx, is_alive in enumerate(optimal_mask_flags):
                 if not is_alive:
                     g_obj, unit_idx = target_unit_metadata[idx]
+                    g_name = g_obj['names'][0]
+                    rep = all_modules.get(g_name)
+
+                    # ← min_survival_ratio 체크 추가
+                    if rep is not None and hasattr(rep, 'mask'):
+                        if g_name not in group_alive_count:
+                            group_alive_count[g_name] = int(rep.mask.sum().item())
+                        alive_count = group_alive_count[g_name]
+                        total_count = rep.mask.numel()
+                        if (alive_count - 1) / total_count <= self.min_survival_ratio:
+                            continue
+                        group_alive_count[g_name] -= 1
+
+
                     for name in g_obj['names']:
                         m = all_modules.get(name)
                         if m is not None and hasattr(m, 'mask') and unit_idx < m.mask.size(0):
@@ -1220,7 +1237,7 @@ class ViTHAPPruner(ViTPDTPruner):
                     if rep is not None and hasattr(rep, 'mask'):
                         alive_count = rep.mask.sum().item()
                         total_count = rep.mask.numel()
-                        if alive_count / total_count <= self.min_survival_ratio:
+                        if (alive_count-1) / total_count <= self.min_survival_ratio:
                             continue
                     for name in g_obj['names']:
                         m = all_modules.get(name)

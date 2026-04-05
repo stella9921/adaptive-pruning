@@ -5,7 +5,7 @@
 #   ema_decay: 0.95
 #   lambda_h: 0.0005
 #   hessian_iter: 10
-#   k_horizon: 25
+#   k_horizon: 5
 #   #그룹 선정 비율
 #   group_selection_ratio: 0.9
 #   #최종적으로 생존 채널 비율 
@@ -19,7 +19,7 @@ strategy:
   ema_decay: 0.95
   lambda_h: 0.0005
   hessian_iter: 10
-  k_horizon: 25
+  k_horizon: 5
   #그룹 선정 비율
   group_selection_ratio: 0.9
   #최종적으로 생존 채널 비율 
