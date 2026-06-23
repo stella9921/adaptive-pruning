@@ -186,16 +186,35 @@ class PDTPruner(BasePruner):
                 num_force = int(len(optimal_mask_flags) * (1 - target_ratio))
                 optimal_mask_flags[np.argsort(target_unit_scores)[:num_force]] = 0
 
+            remaining_by_group = {}
+            min_keep_by_group = {}
+            for g in group_info_list:
+                if not g['layers']:
+                    continue
+                base_layer = g['layers'][0]
+                if not hasattr(base_layer, 'mask'):
+                    continue
+                group_key = id(g)
+                remaining_by_group[group_key] = int(base_layer.mask.sum().item())
+                min_keep_by_group[group_key] = max(
+                    1,
+                    int(base_layer.mask.numel() * self.min_survival_ratio)
+                )
+
             with torch.no_grad():
                 for idx, is_alive in enumerate(optimal_mask_flags):
                     if not is_alive:
                         g_obj, ch_idx = target_unit_metadata[idx]
+                        group_key = id(g_obj)
+                        if remaining_by_group.get(group_key, 0) <= min_keep_by_group.get(group_key, 1):
+                            continue
                         for ln in g_obj['names']:
                             l_obj = find_layer(ln)
                             if l_obj is not None and hasattr(l_obj, 'mask'):
                                 if ch_idx < l_obj.mask.size(0):
                                     l_obj.mask.data[ch_idx] = 0.0
-                                    pruned_count += 1
+                        remaining_by_group[group_key] -= 1
+                        pruned_count += 1
             self.apply_mask_to_weights()
             torch.cuda.empty_cache()
 

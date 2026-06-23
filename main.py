@@ -199,7 +199,7 @@ def main():
     if strategy_method == 'pat':
         execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args)
     # [main.py 하단]
-    elif strategy_method == 'pdt':
+    elif strategy_method == 'pdt' or strategy_method.startswith('pdt-'):
         # 인자 순서: model, config, train, val, test, device, topology_groups, args
         execute_pdt_experiment(
             model, 
@@ -609,9 +609,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         )
     criterion = nn.CrossEntropyLoss()
 
-    total_epochs = args.epochs
-    prune_every = args.prune_every
-    start_epoch = args.start_epoch
+    model_cfg = config.get('model', {})
+    strat_cfg = config.get('strategy', {})
+    total_epochs = args.epochs if args.epochs is not None else model_cfg.get('epochs', config.get('epochs', 300))
+    prune_every = args.prune_every if args.prune_every is not None else strat_cfg.get('prune_every', 20)
+    start_epoch = args.start_epoch if args.start_epoch is not None else strat_cfg.get('start_epoch', 1)
+    pdt_engine.total_epochs = total_epochs
 
     print(f"\n>>> Strategy: {strategy_type.upper()} | Total Epochs: {total_epochs}")
     print(f">>> Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")

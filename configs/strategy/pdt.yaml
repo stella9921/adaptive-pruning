@@ -1,7 +1,6 @@
 strategy:
   method: "pdt"
   start_epoch: 50
-  method: "PDT-Blackwell-Custom"
   ema_decay: 0.95
   lambda_h: 0.0005
   hessian_iter: 10
