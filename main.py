@@ -714,7 +714,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 pdt_engine.update_ema_and_mask_grad()
                 torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
                 optimizer.step()
-                pdt_engine.apply_mask_to_weights()
+                pdt_engine.apply_mask_to_weights(optimizer=optimizer)
                 t_step_end = time.time()
                 if batch_idx % 100 == 0:
                     print(f" [Normal step time] batch {batch_idx}: {t_step_end - t_step_start:.4f}s")
@@ -724,7 +724,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             pdt_engine.update_ema_and_mask_grad()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
-            pdt_engine.apply_mask_to_weights()
+            pdt_engine.apply_mask_to_weights(optimizer=optimizer)
 
             # 🔥 step-level peak 기록
             torch.cuda.synchronize()

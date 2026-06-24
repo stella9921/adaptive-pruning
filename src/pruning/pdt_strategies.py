@@ -70,8 +70,16 @@ class PDTPruner(BasePruner):
                 mask = m.mask
                 m_view = mask.view(-1, 1, 1, 1) if m.weight.dim() == 4 else mask.view(-1, 1)
                 m.weight.data.mul_(m_view)
+                if optimizer is not None and m.weight in optimizer.state:
+                    for state_value in optimizer.state[m.weight].values():
+                        if torch.is_tensor(state_value) and state_value.shape == m.weight.shape:
+                            state_value.mul_(m_view)
                 if hasattr(m, 'bias') and m.bias is not None:
                     m.bias.data.mul_(mask)
+                    if optimizer is not None and m.bias in optimizer.state:
+                        for state_value in optimizer.state[m.bias].values():
+                            if torch.is_tensor(state_value) and state_value.shape == m.bias.shape:
+                                state_value.mul_(mask)
 
     def update_ema_and_mask_grad(self):
         with torch.no_grad():
