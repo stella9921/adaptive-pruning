@@ -142,6 +142,7 @@ class PDTPruner(BasePruner):
 
         # [핵심 수정] 모든 타입의 레이어를 일단 수집
         group_info_list = []
+        module_name_by_id = {id(m): name for name, m in all_modules.items()}
         for idx, group in enumerate(active_groups):
             # Conv/Linear 뿐만 아니라 마스크가 있는 모든 레이어를 찾음
             score_layers = []
@@ -171,11 +172,10 @@ class PDTPruner(BasePruner):
 
         # --- [이후 Hessian 및 Pruning 로직] ---
         target_param_layers = [
-            (name, m.weight)
+            (module_name_by_id.get(id(m), "<unnamed>"), m.weight)
             for g in group_info_list
-            for name in g['names']
-            for m in [find_layer(name)]
-            if m is not None and hasattr(m, 'weight')
+            for m in g['layers']
+            if hasattr(m, 'weight')
         ]
         target_params = [param for _, param in target_param_layers]
         print(f"[Hessian Input] Passing {len(target_params)} layer weights to HVP.")
