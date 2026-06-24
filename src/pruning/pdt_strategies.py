@@ -14,7 +14,8 @@ class PDTPruner(BasePruner):
         super().__init__(model, config)
         
         strat_cfg = config.get('strategy', {})
-        self.group_selection_ratio = strat_cfg.get('group_selection_ratio', 1.0)
+        self.group_selection_ratio = float(strat_cfg.get('group_selection_ratio', 1.0))
+        self.group_selection_ratio = min(max(self.group_selection_ratio, 0.0), 1.0)
         self.final_keep_ratio = strat_cfg.get('channel_keep_ratio', 0.2)
         self.min_survival_ratio = strat_cfg.get('min_survival_ratio', 0.4)
 
@@ -81,6 +82,29 @@ class PDTPruner(BasePruner):
                     g = m.weight.grad.pow(2).reshape(m.weight.shape[0], -1).mean(1)
                     m.grad_ema.mul_(self.ema_decay).add_(g, alpha=1 - self.ema_decay)
 
+    def _select_candidate_groups(self, group_info_list):
+        if not group_info_list or self.group_selection_ratio >= 1.0:
+            return group_info_list
+
+        scores = [g['w_g'] for g in group_info_list]
+        if max(scores) - min(scores) <= 1e-12:
+            print("[Group Selection] Skipped: Grad-EMA scores are not differentiated yet.")
+            return group_info_list
+
+        n_select = max(1, int(np.ceil(len(group_info_list) * self.group_selection_ratio)))
+        selected = sorted(group_info_list, key=lambda g: g['w_g'])[:n_select]
+        selected_ids = {id(g) for g in selected}
+        print(
+            f"[Group Selection] Selected {n_select}/{len(group_info_list)} "
+            f"low-Grad-EMA groups as pruning candidates."
+        )
+        for g in selected[:10]:
+            names = ", ".join(g['names'][:3])
+            if len(g['names']) > 3:
+                names += ", ..."
+            print(f"  - group {g['id']:02d} | grad_ema={g['w_g']:.6e} | {names}")
+        return [g for g in group_info_list if id(g) in selected_ids]
+
     def step_pruning(self, loss, current_epoch, total_epochs):
         all_modules = dict(self.model.named_modules())
         def find_layer(name):
@@ -143,8 +167,22 @@ class PDTPruner(BasePruner):
                 if isinstance(m, (nn.Conv2d, nn.Linear)):
                     group_info_list.append({'id': 999, 'layers': [m], 'w_g': 0.0, 'names': [name]})
 
+        group_info_list = self._select_candidate_groups(group_info_list)
+
         # --- [이후 Hessian 및 Pruning 로직] ---
-        target_params = [m.weight for g in group_info_list for m in g['layers'] if hasattr(m, 'weight')]
+        target_param_layers = [
+            (name, m.weight)
+            for g in group_info_list
+            for name in g['names']
+            for m in [find_layer(name)]
+            if m is not None and hasattr(m, 'weight')
+        ]
+        target_params = [param for _, param in target_param_layers]
+        print(f"[Hessian Input] Passing {len(target_params)} layer weights to HVP.")
+        for name, _ in target_param_layers[:15]:
+            print(f"  - {name}")
+        if len(target_param_layers) > 15:
+            print(f"  - ... ({len(target_param_layers) - 15} more)")
         hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, self.k_horizon)
 
         target_unit_scores, target_unit_costs, target_unit_metadata = [], [], []

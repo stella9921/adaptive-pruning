@@ -621,6 +621,10 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
     stop_pruning = False
     history_data = []
+    debug_stop_after_first_prune = (
+        str(config.get('strategy', {}).get('debug_stop_after_first_prune', '')).lower() in ('1', 'true', 'yes')
+        or os.getenv('MCPRUNE_STOP_AFTER_FIRST_PRUNE') == '1'
+    )
 
     # ============================================================
     # ======================= TRAIN LOOP =========================
@@ -665,6 +669,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
                 # Hessian 계산을 위해 그래프 유지하며 백워드
                 loss.backward(retain_graph=True)
+                if debug_stop_after_first_prune:
+                    pdt_engine.update_ema_and_mask_grad()
 
                 pdt_engine.step_pruning(
                     loss=loss,
@@ -673,6 +679,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 )
 
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
+                if debug_stop_after_first_prune:
+                    print("[DEBUG] Stop after first pruning step requested. Exiting PDT experiment early.")
+                    return
 
                 # [메모리 해제 핵심] 찌꺼기를 완전히 지웁니다.
                 import gc
