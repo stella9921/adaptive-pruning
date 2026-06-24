@@ -217,7 +217,12 @@ class PDTPruner(BasePruner):
 
         if target_unit_scores and (current_alive_ratio > total_target_keep_ratio - 0.05):
             target_ratio = total_target_keep_ratio / (current_alive_ratio + 1e-7)
-            optimal_mask_flags = lagrangian_optimization(np.array(target_unit_scores), np.array(target_unit_costs), np.sum(target_unit_costs) * target_ratio)
+            optimal_mask_flags = lagrangian_optimization(
+                np.array(target_unit_scores),
+                np.array(target_unit_costs),
+                np.sum(target_unit_costs) * target_ratio,
+                unit_metadata=target_unit_metadata
+            )
             
             # FORCE
             if np.all(optimal_mask_flags == 1) and target_ratio < 0.999:

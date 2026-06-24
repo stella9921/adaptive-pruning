@@ -111,6 +111,25 @@ def lagrangian_optimization(unit_scores, unit_costs, budget, unit_metadata=None)
                 best_idx = group_indices[np.argmax(scores[group_indices])]
                 best_unit_mask[best_idx] = True
 
+        # Keep the group-safety restore within the requested resource budget
+        # whenever there is more than one surviving unit in a group.
+        group_ids = [m[0]['id'] for m in unit_metadata]
+        while np.sum(unit_costs[best_unit_mask]) > budget:
+            removable = []
+            for idx, keep in enumerate(best_unit_mask):
+                if not keep:
+                    continue
+                g_id = group_ids[idx]
+                group_indices = [i for i, gid in enumerate(group_ids) if gid == g_id]
+                if np.sum(best_unit_mask[group_indices]) > 1:
+                    removable.append(idx)
+
+            if not removable:
+                break
+
+            remove_idx = min(removable, key=lambda i: efficiencies[i])
+            best_unit_mask[remove_idx] = False
+
     # 4. 최종 예산 초과 여부 재확인 (강제 복구로 인해 예산이 넘칠 경우 미세 조정)
     # 이 부분은 필요 시 추가 (보통 1-2개 복구로는 크게 안 넘음)
 
