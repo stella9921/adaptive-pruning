@@ -71,9 +71,10 @@ def main():
         print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")    
 
  
-    log_dir = config.get('save_dir', './exp/logs')
+    log_dir = config.get('log_dir', './exp/logs')
     os.makedirs(log_dir, exist_ok=True)
-    log_filename = f"{config['model']['name']}_{getattr(args, 'strategy', 'pdt')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    strategy_preset = config['strategy'].get('preset', 'pdt')
+    log_filename = f"{config['model']['name']}_{strategy_preset}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
     
     class Logger(object):
         def __init__(self):
@@ -576,7 +577,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     checkpoint_dir = config.get('save_dir', './exp/checkpoints')
     os.makedirs(checkpoint_dir, exist_ok=True)
 
-    strategy_type = getattr(args, 'strategy', 'pdt').lower()
+    strategy_type = config['strategy'].get('preset', 'pdt').lower()
 
     # -------------------------
     # Pruner 생성

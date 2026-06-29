@@ -1,6 +1,7 @@
-method: "PAT"
-type: "amplification"
-channel_keep_ratio: 40.0
-p: 2.5                # VGG16 최적 p=2.5, ResNet18 최적 p=1.5 반영
-n_rounds: 5
-finetune_epochs: 3
+strategy:
+  method: "PAT"
+  type: "amplification"
+  channel_keep_ratio: 40.0
+  p: 2.5
+  n_rounds: 5
+  finetune_epochs: 3
