@@ -11,11 +11,26 @@ import sys
 from datetime import datetime
 import time
 import json
+import re
+from contextlib import nullcontext
 
 # 기존 모듈 임포트
 from src.pruning.topology_manager import get_model_topology
 from src.pruning.optimizer import lagrangian_optimization
 from src.utils.config_loader import load_config
+from src.utils.measure import (
+    measure_cuda_memory,
+    measure_flops,
+    measure_inference,
+    measure_module_memory,
+    measure_model_resources,
+    measure_pruning_structure,
+    measure_training_state_memory,
+    save_epoch_metrics,
+    save_pruning_tables,
+    save_run_metadata,
+)
+from src.utils.visualization import save_history_plots, save_pruning_plots
 from src.data.dataloader import get_dataloaders
 from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
@@ -39,9 +54,16 @@ def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     except Exception as e:
         print(f"[*] FX Parsing Warning: {e}")
 
+    if not config.get('profiling', {}).get('pytorch', False):
+        print("[*] Detailed PyTorch profiling skipped (use --profile_pytorch).")
+        return None
+
     # [Stage 4] Resource Profiling
+    activities = [ProfilerActivity.CPU]
+    if torch.cuda.is_available():
+        activities.append(ProfilerActivity.CUDA)
     with torch.no_grad():
-        with profile(activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], 
+        with profile(activities=activities,
                      with_flops=True, profile_memory=True) as prof:
             with record_function("model_inference"):
                 model(inputs)
@@ -71,10 +93,39 @@ def main():
         print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")    
 
  
-    log_dir = config.get('log_dir', './exp/logs')
-    os.makedirs(log_dir, exist_ok=True)
     strategy_preset = config['strategy'].get('preset', 'pdt')
-    log_filename = f"{config['model']['name']}_{strategy_preset}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    dataset_cfg = config.get('dataset', 'dataset')
+    dataset_tag = (
+        dataset_cfg if isinstance(dataset_cfg, str)
+        else dataset_cfg.get('name', 'dataset')
+    )
+    if args.dataset is not None:
+        dataset_tag = args.dataset
+        config['dataset'] = args.dataset
+    slug = lambda value: re.sub(r'[^a-zA-Z0-9._-]+', '-', str(value)).strip('-')
+    ratio_tag = f"{config['strategy']['pruning_ratio'] * 100:05.1f}".replace('.', 'p')
+    run_timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
+    run_id = "__".join([
+        slug(config['model']['name']),
+        slug(dataset_tag),
+        slug(strategy_preset),
+        f"prune-{ratio_tag}",
+        run_timestamp,
+    ])
+    run_dir = os.path.join(config.get('exp_root', './exp'), 'runs', run_id)
+    log_dir = os.path.join(run_dir, 'logs')
+    config['run_id'] = run_id
+    config['run_dir'] = run_dir
+    config['checkpoint_dir'] = os.path.join(run_dir, 'checkpoints')
+    config['profiling'] = {
+        'pytorch': bool(args.profile_pytorch),
+        'nvtx': bool(args.profile_nvtx),
+    }
+    os.makedirs(log_dir, exist_ok=True)
+    os.makedirs(config['checkpoint_dir'], exist_ok=True)
+    for dirname in ('metrics', 'plots', 'profiles'):
+        os.makedirs(os.path.join(run_dir, dirname), exist_ok=True)
+    log_filename = f"{run_id}__run.log"
     
     class Logger(object):
         def __init__(self):
@@ -102,6 +153,13 @@ def main():
         config['strategy']['start_epoch'] = args.start_epoch
     if hasattr(args, 'lr') and args.lr is not None:
         config['model']['base_lr'] = args.lr
+    metadata_path = save_run_metadata(config, sys.argv)
+    print(f"[Experiment] run_id={run_id}")
+    print(f"[Experiment] metadata={metadata_path}")
+    if args.profile_pytorch:
+        print("[Profiler] PyTorch operation and memory profiling enabled.")
+    if args.profile_nvtx:
+        print("[Profiler] NVTX ranges enabled for Nsight Systems/Compute.")
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -569,7 +627,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         print(">>> [System] Flash Attention disabled for Hessian computation.")
 
 
-    checkpoint_dir = config.get('save_dir', './exp/checkpoints')
+    checkpoint_dir = config.get('checkpoint_dir', config.get('save_dir', './exp/checkpoints'))
     os.makedirs(checkpoint_dir, exist_ok=True)
 
     strategy_type = config['strategy'].get('preset', 'pdt').lower()
@@ -687,13 +745,72 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 if debug_stop_after_first_prune:
                     pdt_engine.update_ema_and_mask_grad()
 
-                pdt_engine.step_pruning(
-                    loss=loss,
-                    current_epoch=epoch,
-                    total_epochs=total_epochs
+                nvtx_context = (
+                    torch.cuda.nvtx.range("MCPrune/PruningStep")
+                    if args.profile_nvtx and torch.cuda.is_available()
+                    else nullcontext()
                 )
+                if args.profile_pytorch:
+                    activities = [ProfilerActivity.CPU]
+                    if torch.cuda.is_available():
+                        activities.append(ProfilerActivity.CUDA)
+                    with profile(
+                        activities=activities,
+                        record_shapes=True,
+                        profile_memory=True,
+                        with_stack=False,
+                    ) as prune_profiler:
+                        with nvtx_context:
+                            pdt_engine.step_pruning(
+                                loss=loss,
+                                current_epoch=epoch,
+                                total_epochs=total_epochs,
+                            )
+                    profile_prefix = (
+                        f"{config['run_id']}__pytorch-profile__epoch-{epoch:03d}"
+                    )
+                    profile_dir = os.path.join(config['run_dir'], 'profiles')
+                    trace_path = os.path.join(profile_dir, f"{profile_prefix}.json")
+                    summary_path = os.path.join(profile_dir, f"{profile_prefix}.txt")
+                    prune_profiler.export_chrome_trace(trace_path)
+                    with open(summary_path, 'w', encoding='utf-8') as stream:
+                        stream.write(
+                            prune_profiler.key_averages().table(
+                                sort_by=(
+                                    'self_cuda_time_total'
+                                    if torch.cuda.is_available()
+                                    else 'self_cpu_time_total'
+                                ),
+                                row_limit=100,
+                            )
+                        )
+                    print(f"[Profiler] PyTorch trace saved: {trace_path}")
+                else:
+                    with nvtx_context:
+                        pdt_engine.step_pruning(
+                            loss=loss,
+                            current_epoch=epoch,
+                            total_epochs=total_epochs,
+                        )
 
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
+                snapshot = measure_pruning_structure(
+                    model,
+                    topology_groups,
+                    getattr(pdt_engine, 'last_group_selection', []),
+                )
+                snapshot['module_memory'] = measure_module_memory(model, x)
+                snapshot_paths = save_pruning_tables(
+                    snapshot, config['run_dir'], config['run_id'], epoch
+                )
+                snapshot_paths += save_pruning_plots(
+                    snapshot, config['run_dir'], config['run_id'], epoch
+                )
+                if snapshot_paths:
+                    print(
+                        f"[Visualization] saved {len(snapshot_paths)} files "
+                        f"under {config['run_dir']}"
+                    )
                 eff = pdt_engine.get_model_efficiency()
                 current_sp = eff['sparsity']
                 channel_sp = pdt_engine.get_current_sparsity()
@@ -720,7 +837,10 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 print(f" 🔵 Sparsity: {current_sp:.2f} %")
                 print(f" 🟡 Speedup: {eff['speedup']:.2f}x")
 
-                ckpt_name = f"{config['model']['name']}_{strategy_type}_ep{epoch}_sp{current_sp:.2f}.pth"
+                ckpt_name = (
+                    f"{config['run_id']}__checkpoint__epoch-{epoch:03d}"
+                    f"__sparsity-{current_sp:.2f}.pth"
+                )
                 torch.save({
                     'model_state_dict': model.state_dict(),
                     'epoch': epoch,
@@ -806,19 +926,38 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
         # print(f"💾 Epoch Checkpoint Saved: {epoch_ckpt_name}")
 
+        model_metrics = measure_model_resources(model)
+        cuda_metrics = measure_cuda_memory()
+        state_metrics = measure_training_state_memory(model, optimizer)
+        inference_metrics = measure_inference(model, x)
+        flops_metrics = measure_flops(model, x)
         history_data.append({
-            "epoch": epoch,
-            "val_acc": val_acc,
-            "peak_vram": peak_vram,
-            "target_pruning_ratio": strat_cfg['pruning_ratio'],
-            "actual_pruning_ratio": pdt_engine.get_model_efficiency()['sparsity'] / 100.0,
+            'epoch': epoch,
+            'train_loss': total_loss / len(train_loader),
+            'val_accuracy': val_acc,
+            'target_pruning_ratio': strat_cfg['pruning_ratio'],
+            **model_metrics,
+            **cuda_metrics,
+            **state_metrics,
+            **inference_metrics,
+            **flops_metrics,
         })
+        save_epoch_metrics(history_data, config['run_dir'], config['run_id'])
+        save_history_plots(history_data, config['run_dir'], config['run_id'])
 
     # ============================================================
     # ===================== FINAL SAVE ============================
     # ============================================================
 
-    final_path = os.path.join(checkpoint_dir, f"{config['model']['name']}_{strategy_type}_final.pth")
+    final_test_acc = evaluate(model, test_loader, device)
+    if history_data:
+        history_data[-1]['test_accuracy'] = final_test_acc
+        save_epoch_metrics(history_data, config['run_dir'], config['run_id'])
+    print(f"[Final Metrics] Test Accuracy: {final_test_acc:.2f}%")
+
+    final_path = os.path.join(
+        checkpoint_dir, f"{config['run_id']}__checkpoint__final.pth"
+    )
     torch.save(model.state_dict(), final_path)
     print(f"\n🏁 Final Model Saved: {final_path}")
 
@@ -925,7 +1064,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
     compressed_path = os.path.join(
         checkpoint_dir,
-        f"{config['model']['name']}_{strategy_type}_FINAL_COMPRESSED.pth"
+        f"{config['run_id']}__checkpoint__physically-compressed.pth"
     )
     torch.save(model.state_dict(), compressed_path)
     print(f"✅ Physically Compressed Model Saved: {compressed_path}")
@@ -937,7 +1076,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
 def execute_pat_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups,args):
     
-    checkpoint_dir = config.get('save_dir', './exp/checkpoints')
+    checkpoint_dir = config.get('checkpoint_dir', config.get('save_dir', './exp/checkpoints'))
     os.makedirs(checkpoint_dir, exist_ok=True)
     base_ckpt_path = os.path.join(checkpoint_dir, f"{config['model']['name']}_base.pth")
     

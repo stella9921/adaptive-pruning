@@ -56,6 +56,8 @@ def load_config():
     parser.add_argument('--group_selection_ratio', type=float, default=None)
     parser.add_argument('--pruning_ratio', type=float, default=None)
     parser.add_argument('--min_survival_ratio', type=float, default=None)
+    parser.add_argument('--profile_pytorch', action='store_true')
+    parser.add_argument('--profile_nvtx', action='store_true')
     args, _ = parser.parse_known_args()
 
     def get_real_path(input_path, base_dir):

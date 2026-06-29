@@ -8,6 +8,7 @@ import sys
 import time
 import gc
 import os
+from contextlib import nullcontext
 class PDTPruner(BasePruner):
 
 
@@ -51,6 +52,12 @@ class PDTPruner(BasePruner):
         
         print(f"\n[Pruner Init] Identified {len(self.topology_groups)} groups for pruning.")
         print(f"[*] Applied Min Survival Guarantee: {self.min_survival_ratio*100:.1f}%")
+
+    def _nvtx_range(self, name):
+        enabled = self.config.get('profiling', {}).get('nvtx', False)
+        if enabled and torch.cuda.is_available():
+            return torch.cuda.nvtx.range(name)
+        return nullcontext()
 
     def _check_buffers(self):
         for m in self.layers:
@@ -154,24 +161,44 @@ class PDTPruner(BasePruner):
                     m.grad_ema.mul_(self.ema_decay).add_(g, alpha=1 - self.ema_decay)
 
     def _select_candidate_groups(self, group_info_list):
-        if not group_info_list or self.group_selection_ratio >= 1.0:
+        if not group_info_list:
+            self.last_group_selection = []
             return group_info_list
 
         scores = [g['w_g'] for g in group_info_list]
-        if max(scores) - min(scores) <= 1e-12:
+        scores_differentiated = max(scores) - min(scores) > 1e-12
+        if not scores_differentiated:
             print("[Group Selection] Skipped: Grad-EMA scores are not differentiated yet.")
-            return group_info_list
 
-        n_select = max(1, int(np.ceil(len(group_info_list) * self.group_selection_ratio)))
         ranked_groups = sorted(group_info_list, key=lambda g: g['w_g'])
+        if self.group_selection_ratio >= 1.0 or not scores_differentiated:
+            n_select = len(ranked_groups)
+        else:
+            n_select = max(
+                1, int(np.ceil(len(group_info_list) * self.group_selection_ratio))
+            )
+        selected = ranked_groups[:n_select]
+        selected_ids = {id(g) for g in selected}
+        self.last_group_selection = [
+            {
+                'rank': rank,
+                'group_id': g['id'],
+                'grad_ema': g['w_g'],
+                'selected': id(g) in selected_ids,
+                'configured_ratio': self.group_selection_ratio,
+                'selected_groups': n_select,
+                'total_groups': len(ranked_groups),
+                'layers': ', '.join(g['names']),
+            }
+            for rank, g in enumerate(ranked_groups, 1)
+        ]
+
         if os.getenv('MCPRUNE_DEBUG_GROUP_SELECTION') == '1':
             print("[Group Selection] Grad-EMA ranking, low to high")
             for rank, g in enumerate(ranked_groups, 1):
                 names = ", ".join(g['names'])
                 print(f"  rank {rank:02d} | group {g['id']:02d} | grad_ema={g['w_g']:.6e} | {names}")
 
-        selected = ranked_groups[:n_select]
-        selected_ids = {id(g) for g in selected}
         print(
             f"[Group Selection] Selected {n_select}/{len(group_info_list)} "
             f"low-Grad-EMA groups as pruning candidates."
@@ -246,7 +273,8 @@ class PDTPruner(BasePruner):
                 if isinstance(m, (nn.Conv2d, nn.Linear)):
                     group_info_list.append({'id': 999, 'layers': [m], 'w_g': 0.0, 'names': [name]})
 
-        group_info_list = self._select_candidate_groups(group_info_list)
+        with self._nvtx_range("MCPrune/GroupSelection"):
+            group_info_list = self._select_candidate_groups(group_info_list)
 
         # --- [이후 Hessian 및 Pruning 로직] ---
         debug_hvp_alignment = os.getenv('MCPRUNE_DEBUG_HVP_ALIGNMENT') == '1'
@@ -277,7 +305,10 @@ class PDTPruner(BasePruner):
             duplicate_hvp_names = sorted({name for name in hvp_names if hvp_names.count(name) > 1})
             print(f"[HVP Alignment] HVP input layers: {hvp_names}")
             print(f"[HVP Alignment] Duplicate HVP input layers: {duplicate_hvp_names or 'none'}")
-        hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, self.k_horizon)
+        with self._nvtx_range("MCPrune/HVP"):
+            hv_list = self.engine.get_k_step_hessian_selective(
+                loss, target_params, self.k_horizon
+            )
 
         target_unit_scores, target_unit_costs, target_unit_metadata = [], [], []
         hv_idx = 0
@@ -311,12 +342,13 @@ class PDTPruner(BasePruner):
 
         if target_unit_scores and (current_alive_ratio > target_remaining_ratio - 0.05):
             target_ratio = target_remaining_ratio / (current_alive_ratio + 1e-7)
-            optimal_mask_flags = lagrangian_optimization(
-                np.array(target_unit_scores),
-                np.array(target_unit_costs),
-                np.sum(target_unit_costs) * target_ratio,
-                unit_metadata=target_unit_metadata
-            )
+            with self._nvtx_range("MCPrune/ResourceAllocation"):
+                optimal_mask_flags = lagrangian_optimization(
+                    np.array(target_unit_scores),
+                    np.array(target_unit_costs),
+                    np.sum(target_unit_costs) * target_ratio,
+                    unit_metadata=target_unit_metadata
+                )
             
             # FORCE
             if np.all(optimal_mask_flags == 1) and target_ratio < 0.999:
