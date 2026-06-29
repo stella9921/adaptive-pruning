@@ -8,7 +8,7 @@ class PATPruner(BasePruner):
     def __init__(self, model, config, sensitivity_si, topology_groups=None):
         super().__init__(model, config)
         self.sensitivity_si = sensitivity_si  # 사전 계산된 민감도 {block_name: si}
-        self.global_target = config['strategy']['channel_keep_ratio']
+        self.global_pruning_percent = config['strategy']['pruning_ratio'] * 100.0
         self.topology_groups = topology_groups
         
         # 모델별 프루닝 가능 블록 찾기
@@ -45,7 +45,7 @@ class PATPruner(BasePruner):
     #             ratio = ratios.get(name, 0.0)
                 
     #             # 수치가 0~100 사이일 경우 0~1 사이로 변환
-    #             channel_keep_ratio = min(ratio / 100.0, 0.99) if ratio > 1 else ratio
+    #             pruning_ratio = min(ratio / 100.0, 0.99) if ratio > 1 else ratio
                 
     #             # 2. 중요도(L1-norm) 기반 필터 선택
     #             # ResNet/VGG 등 모델 구조에 맞춰 가중치 텐서 추출
@@ -61,7 +61,7 @@ class PATPruner(BasePruner):
                 
     #             # 남길 채널 개수 계산 (최소 1개는 유지)
     #             num_channels = importance.numel()
-    #             num_keep = max(1, int(num_channels * (1 - channel_keep_ratio)))
+    #             num_keep = max(1, int(num_channels * (1 - pruning_ratio)))
                 
     #             # 중요도가 높은 순서대로 인덱스 추출
     #             keep_idx = importance.argsort(descending=True)[:num_keep].tolist()
@@ -157,7 +157,7 @@ class PATPruner(BasePruner):
         
         pr_temp = {}
         for n in fi.keys():
-            pr_temp[n] = self.global_target * (beta * fi[n] + (1 - beta) * wi[n])
+            pr_temp[n] = self.global_pruning_percent * (beta * fi[n] + (1 - beta) * wi[n])
         return self._balance(pr_temp)
 
     # def _get_wi(self, p):
@@ -169,12 +169,15 @@ class PATPruner(BasePruner):
 
     def _apply_score(self, fi, wi):
         sum_fw = sum(fi[n] * wi[n] for n in fi.keys())
-        pr_temp = {n: self.global_target * fi[n] * (wi[n] / (sum_fw + EPS)) for n in fi.keys()}
+        pr_temp = {
+            n: self.global_pruning_percent * fi[n] * (wi[n] / (sum_fw + EPS))
+            for n in fi.keys()
+        }
         return self._balance(pr_temp)
 
     def _balance(self, pr_dict):
         actual_sum = sum(pr_dict.values())
-        if abs(actual_sum - self.global_target) > EPS and actual_sum > 0:
-            scale = self.global_target / actual_sum
+        if abs(actual_sum - self.global_pruning_percent) > EPS and actual_sum > 0:
+            scale = self.global_pruning_percent / actual_sum
             return {n: r * scale for n, r in pr_dict.items()}
         return pr_dict

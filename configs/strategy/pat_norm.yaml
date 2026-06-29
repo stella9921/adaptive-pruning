@@ -1,6 +1,6 @@
 strategy:
   method: "PAT"
   type: "normalization"
-  channel_keep_ratio: 40.0
+  pruning_ratio: 0.4
   n_rounds: 5
   finetune_epochs: 3

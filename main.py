@@ -51,7 +51,7 @@ def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
 
 # [여기에 넣으세요!] 어떤 함수도 시작되기 전, 파일의 생얼 부분입니다.
 print("\n" + "="*50, flush=True)
-print(f"🔥 SYSTEM CHECK: Raw Args -> {sys.argv}", flush=True)
+print(f"[System] Raw Args -> {sys.argv}", flush=True)
 print("="*50 + "\n", flush=True)
 def main():
     # 1. 설정 및 데이터 준비
@@ -61,7 +61,7 @@ def main():
     if args.batch_size:
         config['batch_size'] = args.batch_size
     
-    print(f"🔥 DEBUG: Final Batch Size fixed to -> {config['batch_size']}", flush=True)
+    print(f"[Config] batch_size={config['batch_size']}", flush=True)
     # --- 로그 파일 자동 저장 설정 시작 ---
 
     # ViT 모델은 224x224 해상도가 필수이므로 설정을 강제 업데이트
@@ -84,7 +84,9 @@ def main():
             try:
                 self.terminal.write(message)
             except UnicodeEncodeError:
-                self.terminal.write(message.encode('utf-8', errors='replace').decode('cp949', errors='replace'))
+                encoding = self.terminal.encoding or 'utf-8'
+                safe_message = message.encode(encoding, errors='replace').decode(encoding)
+                self.terminal.write(safe_message)
             self.log.write(message)
         def flush(self): pass
 
@@ -92,8 +94,6 @@ def main():
     print(f"📝 Logging started: {log_filename}")
     
     # [System] CLI 인자가 YAML 설정을 덮어쓰도록 명시적으로 우선순위 부여
-    if hasattr(args, 'channel_keep_ratio') and args.channel_keep_ratio is not None:
-        config['strategy']['channel_keep_ratio'] = args.channel_keep_ratio
     if hasattr(args, 'group_selection_ratio') and args.group_selection_ratio is not None:
         config['strategy']['group_selection_ratio'] = args.group_selection_ratio
     if hasattr(args, 'lambda_h') and args.lambda_h is not None:
@@ -229,8 +229,6 @@ def main():
 #     strat_cfg = config.get('strategy', {})
 #     if args.group_selection_ratio is not None:
 #         strat_cfg['group_selection_ratio'] = args.group_selection_ratio
-#     if args.channel_keep_ratio is not None:
-#         strat_cfg['channel_keep_ratio'] = args.channel_keep_ratio
 #     if args.min_survival_ratio is not None:
 #         strat_cfg['min_survival_ratio'] = args.min_survival_ratio
     
@@ -328,7 +326,6 @@ def main():
 #                         'config': {
 #                             'model': config['model']['name'],
 #                             'strategy': strategy_type,
-#                             'target_keep_ratio': config['strategy']['channel_keep_ratio']
 #                         },
 #                         'history': history_data
 #                     }, f, indent=4)
@@ -408,8 +405,6 @@ def main():
 #     strat_cfg = config.get('strategy', {})
 #     if args.group_selection_ratio is not None:
 #         strat_cfg['group_selection_ratio'] = args.group_selection_ratio
-#     if args.channel_keep_ratio is not None:
-#         strat_cfg['channel_keep_ratio'] = args.channel_keep_ratio
 #     if args.min_survival_ratio is not None:
 #         strat_cfg['min_survival_ratio'] = args.min_survival_ratio
     
@@ -587,8 +582,23 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         pdt_engine = ViTPDTPruner(model, config, args, topology_groups=topology_groups)
         print(f"[System] Initializing ViTPDTPruner for {model_name}")
     else:
-        pdt_engine = PDTPruner(model, config, args, topology_groups=topology_groups)
-        print(f"[System] Initializing PDTPruner (Stable Version) for {model_name}")
+        pruner_name = config['strategy'].get('pruner', 'mcprune').lower()
+        pruner_classes = {
+            'mcprune': PDTPruner,
+            'hap': HAPPruner,
+            'snows': SNOWSPruner,
+            'ato': ATOPruner,
+            'st': STPruner,
+            'dfpc': DFPCPruner,
+            'tpp': TPPPruner,
+        }
+        if pruner_name not in pruner_classes:
+            raise ValueError(f"Unknown PDT-family pruner: {pruner_name}")
+        pruner_class = pruner_classes[pruner_name]
+        pdt_engine = pruner_class(
+            model, config, args, topology_groups=topology_groups
+        )
+        print(f"[System] Initializing {pruner_class.__name__} for {model_name}")
 
 
 
@@ -618,6 +628,10 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     pdt_engine.total_epochs = total_epochs
 
     print(f"\n>>> Strategy: {strategy_type.upper()} | Total Epochs: {total_epochs}")
+    print(
+        f">>> Target pruning ratio: {strat_cfg['pruning_ratio']:.1%} "
+        f"| Target keep ratio: {1.0 - strat_cfg['pruning_ratio']:.1%}"
+    )
     print(f">>> Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
 
     stop_pruning = False
@@ -680,6 +694,16 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 )
 
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
+                eff = pdt_engine.get_model_efficiency()
+                current_sp = eff['sparsity']
+                channel_sp = pdt_engine.get_current_sparsity()
+                target_sp = strat_cfg['pruning_ratio'] * 100.0
+                sparsity_gap = current_sp - target_sp
+                print(
+                    f"[Ratio Check] basis=params target={target_sp:.2f}% "
+                    f"actual={current_sp:.2f}% gap={sparsity_gap:+.2f}%p "
+                    f"channel_sparsity={channel_sp:.2f}%"
+                )
                 if debug_stop_after_first_prune:
                     print("[DEBUG] Stop after first pruning step requested. Exiting PDT experiment early.")
                     return
@@ -691,9 +715,6 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 torch.cuda.empty_cache() # 3. GPU 메모리 반환
                 print("🧹 Post-Pruning Memory Cleared & Graph Destroyed.")
 
-                current_sp = pdt_engine.get_current_sparsity()
-                eff = pdt_engine.get_model_efficiency()
-
                 print(f"\n[Scientific Metrics - Epoch {epoch}]")
                 print(f" 🟢 Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
                 print(f" 🔵 Sparsity: {current_sp:.2f} %")
@@ -704,6 +725,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                     'model_state_dict': model.state_dict(),
                     'epoch': epoch,
                     'sparsity': current_sp,
+                    'target_pruning_ratio': strat_cfg['pruning_ratio'],
+                    'sparsity_gap_percent_point': sparsity_gap,
                     'metrics': eff
                 }, os.path.join(checkpoint_dir, ckpt_name))
                 print(f"💾 Checkpoint saved: {ckpt_name}")
@@ -786,7 +809,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         history_data.append({
             "epoch": epoch,
             "val_acc": val_acc,
-            "peak_vram": peak_vram
+            "peak_vram": peak_vram,
+            "target_pruning_ratio": strat_cfg['pruning_ratio'],
+            "actual_pruning_ratio": pdt_engine.get_model_efficiency()['sparsity'] / 100.0,
         })
 
     # ============================================================

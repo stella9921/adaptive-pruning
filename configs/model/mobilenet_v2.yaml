@@ -15,7 +15,7 @@
 #   method: pdt
 #   start_epoch: 60
 #   prune_every: 20
-#   channel_keep_ratio: 0.7
+#   pruning_ratio: 0.3
 #   min_survival_ratio: 0.1
 name: "mobilenet_v2"
 num_classes: 100

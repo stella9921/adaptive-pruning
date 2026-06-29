@@ -1,8 +1,9 @@
 strategy:
   method: "PDT"
+  pruner: "mcprune"
   type: "grad_ema"
   ema_decay: 0.9
-  channel_keep_ratio: 0.4
+  pruning_ratio: 0.6
   start_epoch: 25
   prune_every: 15
   min_keep_ratio: 0.2

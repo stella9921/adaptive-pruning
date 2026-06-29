@@ -7,6 +7,7 @@ from .optimizer import lagrangian_optimization
 import sys
 import time
 import gc
+import os
 class PDTPruner(BasePruner):
 
 
@@ -16,13 +17,10 @@ class PDTPruner(BasePruner):
         strat_cfg = config.get('strategy', {})
         self.group_selection_ratio = float(strat_cfg.get('group_selection_ratio', 1.0))
         self.group_selection_ratio = min(max(self.group_selection_ratio, 0.0), 1.0)
-        self.final_keep_ratio = strat_cfg.get('channel_keep_ratio', 0.2)
+        self.pruning_ratio = float(strat_cfg.get('pruning_ratio', 0.8))
         self.min_survival_ratio = strat_cfg.get('min_survival_ratio', 0.4)
 
         # args 우선순위 적용
-        if args:
-            if hasattr(args, 'channel_keep_ratio') and args.channel_keep_ratio is not None:
-                self.final_keep_ratio = args.channel_keep_ratio
 
         self.ema_decay = strat_cfg.get('ema_decay', 0.95)
         self.lambda_h = strat_cfg.get('lambda_h', 0.005)
@@ -65,10 +63,44 @@ class PDTPruner(BasePruner):
                 m.register_buffer("hessian_score", torch.zeros(n_f, device=self.device))
 
     def apply_mask_to_weights(self, optimizer=None):
+        debug_mask_consistency = os.getenv('MCPRUNE_DEBUG_MASK_CONSISTENCY') == '1'
+        if debug_mask_consistency and not hasattr(self, '_mask_debug_count'):
+            self._mask_debug_count = 0
+        max_debug_events = int(os.getenv('MCPRUNE_DEBUG_MASK_CONSISTENCY_MAX', '8'))
+        debug_this_call = (
+            debug_mask_consistency
+            and self._mask_debug_count < max_debug_events
+        )
+        pruned_units = 0
+        weight_nonzero_before = 0
+        weight_nonzero_after = 0
+        state_nonzero_before = 0
+        state_nonzero_after = 0
+
         with torch.no_grad():
             for m in self.layers:
                 mask = m.mask
                 m_view = mask.view(-1, 1, 1, 1) if m.weight.dim() == 4 else mask.view(-1, 1)
+                if debug_this_call:
+                    pruned_mask = mask <= 0.5
+                    if pruned_mask.any():
+                        pruned_units += int(pruned_mask.sum().item())
+                        w_pruned_view = (
+                            pruned_mask.view(-1, 1, 1, 1)
+                            if m.weight.dim() == 4
+                            else pruned_mask.view(-1, 1)
+                        )
+                        w_pruned_view = w_pruned_view.expand_as(m.weight)
+                        weight_nonzero_before += int(
+                            (m.weight.data[w_pruned_view] != 0).sum().item()
+                        )
+                        if optimizer is not None and m.weight in optimizer.state:
+                            for state_value in optimizer.state[m.weight].values():
+                                if torch.is_tensor(state_value) and state_value.shape == m.weight.shape:
+                                    state_nonzero_before += int(
+                                        (state_value[w_pruned_view] != 0).sum().item()
+                                    )
+
                 m.weight.data.mul_(m_view)
                 if optimizer is not None and m.weight in optimizer.state:
                     for state_value in optimizer.state[m.weight].values():
@@ -80,6 +112,37 @@ class PDTPruner(BasePruner):
                         for state_value in optimizer.state[m.bias].values():
                             if torch.is_tensor(state_value) and state_value.shape == m.bias.shape:
                                 state_value.mul_(mask)
+
+                if debug_this_call:
+                    pruned_mask = mask <= 0.5
+                    if pruned_mask.any():
+                        w_pruned_view = (
+                            pruned_mask.view(-1, 1, 1, 1)
+                            if m.weight.dim() == 4
+                            else pruned_mask.view(-1, 1)
+                        )
+                        w_pruned_view = w_pruned_view.expand_as(m.weight)
+                        weight_nonzero_after += int(
+                            (m.weight.data[w_pruned_view] != 0).sum().item()
+                        )
+                        if optimizer is not None and m.weight in optimizer.state:
+                            for state_value in optimizer.state[m.weight].values():
+                                if torch.is_tensor(state_value) and state_value.shape == m.weight.shape:
+                                    state_nonzero_after += int(
+                                        (state_value[w_pruned_view] != 0).sum().item()
+                                    )
+
+        if debug_this_call and pruned_units > 0:
+            print(
+                "[Mask Consistency] "
+                f"pruned_units={pruned_units} "
+                f"weight_nonzero_before={weight_nonzero_before} "
+                f"weight_nonzero_after={weight_nonzero_after} "
+                f"optimizer_state_nonzero_before={state_nonzero_before} "
+                f"optimizer_state_nonzero_after={state_nonzero_after} "
+                f"optimizer={'enabled' if optimizer is not None else 'missing'}"
+            )
+            self._mask_debug_count += 1
 
     def update_ema_and_mask_grad(self):
         with torch.no_grad():
@@ -100,7 +163,14 @@ class PDTPruner(BasePruner):
             return group_info_list
 
         n_select = max(1, int(np.ceil(len(group_info_list) * self.group_selection_ratio)))
-        selected = sorted(group_info_list, key=lambda g: g['w_g'])[:n_select]
+        ranked_groups = sorted(group_info_list, key=lambda g: g['w_g'])
+        if os.getenv('MCPRUNE_DEBUG_GROUP_SELECTION') == '1':
+            print("[Group Selection] Grad-EMA ranking, low to high")
+            for rank, g in enumerate(ranked_groups, 1):
+                names = ", ".join(g['names'])
+                print(f"  rank {rank:02d} | group {g['id']:02d} | grad_ema={g['w_g']:.6e} | {names}")
+
+        selected = ranked_groups[:n_select]
         selected_ids = {id(g) for g in selected}
         print(
             f"[Group Selection] Selected {n_select}/{len(group_info_list)} "
@@ -144,7 +214,7 @@ class PDTPruner(BasePruner):
 
         actual_total = getattr(self, 'total_epochs', total_epochs)
         progress = current_epoch / actual_total
-        total_target_keep_ratio = 1.0 - (progress * (1.0 - self.final_keep_ratio))
+        target_remaining_ratio = 1.0 - (progress * self.pruning_ratio)
         
         print(f"\n[DEBUG] !!! PRUNING TRIGGERED !!! Epoch {current_epoch}/{actual_total}")
 
@@ -179,6 +249,17 @@ class PDTPruner(BasePruner):
         group_info_list = self._select_candidate_groups(group_info_list)
 
         # --- [이후 Hessian 및 Pruning 로직] ---
+        debug_hvp_alignment = os.getenv('MCPRUNE_DEBUG_HVP_ALIGNMENT') == '1'
+        if debug_hvp_alignment:
+            print("[HVP Alignment] Selected scoring layers by group")
+            for g in group_info_list:
+                layer_names = [
+                    module_name_by_id.get(id(m), "<unnamed>")
+                    for m in g['layers']
+                    if hasattr(m, 'weight')
+                ]
+                print(f"  group {g['id']:02d}: {layer_names}")
+
         target_param_layers = [
             (module_name_by_id.get(id(m), "<unnamed>"), m.weight)
             for g in group_info_list
@@ -191,6 +272,11 @@ class PDTPruner(BasePruner):
             print(f"  - {name}")
         if len(target_param_layers) > 15:
             print(f"  - ... ({len(target_param_layers) - 15} more)")
+        if debug_hvp_alignment:
+            hvp_names = [name for name, _ in target_param_layers]
+            duplicate_hvp_names = sorted({name for name in hvp_names if hvp_names.count(name) > 1})
+            print(f"[HVP Alignment] HVP input layers: {hvp_names}")
+            print(f"[HVP Alignment] Duplicate HVP input layers: {duplicate_hvp_names or 'none'}")
         hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, self.k_horizon)
 
         target_unit_scores, target_unit_costs, target_unit_metadata = [], [], []
@@ -223,8 +309,8 @@ class PDTPruner(BasePruner):
         current_alive_ratio = 1.0 - (curr_sp / 100.0)
         pruned_count = 0
 
-        if target_unit_scores and (current_alive_ratio > total_target_keep_ratio - 0.05):
-            target_ratio = total_target_keep_ratio / (current_alive_ratio + 1e-7)
+        if target_unit_scores and (current_alive_ratio > target_remaining_ratio - 0.05):
+            target_ratio = target_remaining_ratio / (current_alive_ratio + 1e-7)
             optimal_mask_flags = lagrangian_optimization(
                 np.array(target_unit_scores),
                 np.array(target_unit_costs),
@@ -237,35 +323,110 @@ class PDTPruner(BasePruner):
                 num_force = int(len(optimal_mask_flags) * (1 - target_ratio))
                 optimal_mask_flags[np.argsort(target_unit_scores)[:num_force]] = 0
 
-            remaining_by_group = {}
-            min_keep_by_group = {}
+            remaining_by_layer = {}
+            min_keep_by_layer = {}
+            layer_name_by_id = {id(m): name for name, m in all_modules.items()}
+            debug_min_survival = os.getenv('MCPRUNE_DEBUG_MIN_SURVIVAL') == '1'
             for g in group_info_list:
-                if not g['layers']:
-                    continue
-                base_layer = g['layers'][0]
-                if not hasattr(base_layer, 'mask'):
-                    continue
-                group_key = id(g)
-                remaining_by_group[group_key] = int(base_layer.mask.sum().item())
-                min_keep_by_group[group_key] = max(
-                    1,
-                    int(base_layer.mask.numel() * self.min_survival_ratio)
-                )
+                for layer in g['layers']:
+                    if not hasattr(layer, 'mask'):
+                        continue
+                    layer_key = id(layer)
+                    if layer_key in remaining_by_layer:
+                        continue
+                    remaining_by_layer[layer_key] = int(layer.mask.sum().item())
+                    min_keep_by_layer[layer_key] = max(
+                        1,
+                        int(layer.mask.numel() * self.min_survival_ratio)
+                    )
+                    if debug_min_survival:
+                        print(
+                            f"[Min Survival] layer={layer_name_by_id.get(layer_key, '<unnamed>')} "
+                            f"alive_before={remaining_by_layer[layer_key]} "
+                            f"min_keep={min_keep_by_layer[layer_key]} "
+                            f"ratio={self.min_survival_ratio:.2f}"
+                        )
 
             with torch.no_grad():
                 for idx, is_alive in enumerate(optimal_mask_flags):
                     if not is_alive:
                         g_obj, ch_idx = target_unit_metadata[idx]
-                        group_key = id(g_obj)
-                        if remaining_by_group.get(group_key, 0) <= min_keep_by_group.get(group_key, 1):
-                            continue
+                        affected_layers = []
                         for ln in g_obj['names']:
                             l_obj = find_layer(ln)
-                            if l_obj is not None and hasattr(l_obj, 'mask'):
-                                if ch_idx < l_obj.mask.size(0):
-                                    l_obj.mask.data[ch_idx] = 0.0
-                        remaining_by_group[group_key] -= 1
+                            if l_obj is not None and hasattr(l_obj, 'mask') and ch_idx < l_obj.mask.size(0):
+                                affected_layers.append(l_obj)
+
+                        if any(
+                            remaining_by_layer.get(id(layer), 0) <= min_keep_by_layer.get(id(layer), 1)
+                            for layer in affected_layers
+                        ):
+                            if debug_min_survival:
+                                blocked = [
+                                    layer_name_by_id.get(id(layer), '<unnamed>')
+                                    for layer in affected_layers
+                                    if remaining_by_layer.get(id(layer), 0) <= min_keep_by_layer.get(id(layer), 1)
+                                ]
+                                print(
+                                    f"[Min Survival] block prune group={g_obj['id']:02d} "
+                                    f"unit={ch_idx} blocked_layers={blocked}"
+                                )
+                            continue
+                        for l_obj in affected_layers:
+                            l_obj.mask.data[ch_idx] = 0.0
+                            remaining_by_layer[id(l_obj)] -= 1
                         pruned_count += 1
+
+                total_param_cost = sum(m.weight.numel() for m in self.layers)
+                current_pruned_cost = sum(
+                    m.weight.numel() * (1.0 - m.mask.float().mean().item())
+                    for m in self.layers
+                )
+                target_pruned_cost = (
+                    total_param_cost * progress * self.pruning_ratio
+                )
+                repair_count = 0
+
+                if current_pruned_cost < target_pruned_cost:
+                    repair_order = np.argsort(
+                        np.asarray(target_unit_scores)
+                        / (np.asarray(target_unit_costs) + 1e-12)
+                    )
+                    for idx in repair_order:
+                        if current_pruned_cost >= target_pruned_cost:
+                            break
+
+                        g_obj, ch_idx = target_unit_metadata[idx]
+                        affected_layers = [
+                            layer for layer in g_obj['layers']
+                            if hasattr(layer, 'mask') and ch_idx < layer.mask.size(0)
+                        ]
+                        if not affected_layers or all(
+                            layer.mask[ch_idx] <= 0.5 for layer in affected_layers
+                        ):
+                            continue
+                        if any(
+                            remaining_by_layer.get(id(layer), 0)
+                            <= min_keep_by_layer.get(id(layer), 1)
+                            for layer in affected_layers
+                        ):
+                            continue
+
+                        unit_cost = 0.0
+                        for layer in affected_layers:
+                            if layer.mask[ch_idx] > 0.5:
+                                layer.mask.data[ch_idx] = 0.0
+                                remaining_by_layer[id(layer)] -= 1
+                                unit_cost += layer.weight.numel() / layer.weight.shape[0]
+                        current_pruned_cost += unit_cost
+                        pruned_count += 1
+                        repair_count += 1
+
+                print(
+                    f"[Ratio Repair] additional_units={repair_count} "
+                    f"target_param_cost={target_pruned_cost:.0f} "
+                    f"actual_param_cost={current_pruned_cost:.0f}"
+                )
             self.apply_mask_to_weights()
             torch.cuda.empty_cache()
 
@@ -281,7 +442,10 @@ class PDTPruner(BasePruner):
             print(f" Group {g['id']:2d} | {a:4d}/{t:4d} | {(1-a/t)*100:>7.1f}% | Hessian: {m.hessian_score.mean().item():.6f}")
 
         eff = self.get_model_efficiency()
-        print(f"\n[Scientific Metrics] 🟢 Size: {eff['curr_mb']:.2f}MB | 🔵 Sparsity: {eff['sparsity']:.2f}% | 🟡 Speedup: {eff['speedup']:.2f}x")
+        print(
+            f"\n[Scientific Metrics] Size: {eff['curr_mb']:.2f}MB | "
+            f"Sparsity: {eff['sparsity']:.2f}% | Speedup: {eff['speedup']:.2f}x"
+        )
         print(f"{'='*89}\n")
 
     
@@ -337,14 +501,39 @@ class PDTPruner(BasePruner):
         """라그랑주 대신 모든 경쟁 기법이 공통으로 사용할 Global Ranking 실행부"""
         # 1. 현재 목표 Sparsity에 따라 자를 개수 계산
         progress = epoch /  total_epochs  
-        total_target_sparsity = progress * (1.0 - self.final_keep_ratio)
+        total_target_sparsity = progress * self.pruning_ratio
         
         num_total = len(scores)
-        num_to_prune = int(num_total * total_target_sparsity)
+        total_param_cost = sum(m.weight.numel() for m in self.layers)
+        current_pruned_cost = sum(
+            m.weight.numel() * (1.0 - m.mask.float().mean().item())
+            for m in self.layers
+        )
+        target_pruned_cost = total_param_cost * total_target_sparsity
+        selected_indices = []
+
+        for idx in np.argsort(scores):
+            if current_pruned_cost >= target_pruned_cost:
+                break
+            group_obj, channel_idx = metadata[idx]
+            unit_cost = 0.0
+            for layer_name in group_obj['names']:
+                layer = self.model.get_submodule(layer_name.replace('_', '.'))
+                if (
+                    hasattr(layer, 'mask')
+                    and channel_idx < layer.mask.size(0)
+                    and layer.mask[channel_idx] > 0.5
+                ):
+                    unit_cost += layer.weight.numel() / layer.weight.shape[0]
+            if unit_cost > 0:
+                selected_indices.append(idx)
+                current_pruned_cost += unit_cost
+
+        num_to_prune = len(selected_indices)
 
         if num_to_prune > 0:
             # 2. 점수가 낮은 순서대로 정렬 (Global Ranking)
-            indices = np.argsort(scores)[:num_to_prune]
+            indices = selected_indices
             for idx in indices:
                 group_obj, channel_idx = metadata[idx]
                 for ln in group_obj['names']:
@@ -358,6 +547,10 @@ class PDTPruner(BasePruner):
         
         print(f"\n{'='*30} {method_name} Global Pruning: Epoch {epoch} {'='*30}")
         print(f" [*] Method: {method_name} | Pruned: {num_to_prune}")
+        print(
+            f" [Ratio Budget] target_param_cost={target_pruned_cost:.0f} "
+            f"actual_param_cost={current_pruned_cost:.0f}"
+        )
         
         # 3.학회용 측정치 출력 (통합 호출)
         eff = self.get_model_efficiency()
@@ -593,7 +786,7 @@ class ViTPDTPruner(PDTPruner):
             return
 
         progress = current_epoch / total_epochs
-        total_target_keep_ratio = 1.0 - (progress * (1.0 - self.final_keep_ratio))
+        target_remaining_ratio = 1.0 - (progress * self.pruning_ratio)
 
         # topology_groups의 대표 레이어 순서 리스트
         # blocks.0.attn.qkv → blocks.0.mlp.fc1 → blocks.1.attn.qkv → ...
@@ -751,7 +944,7 @@ class ViTPDTPruner(PDTPruner):
             return
 
         current_alive_ratio = 1.0 - (self.get_current_sparsity() / 100.0)
-        target_ratio = total_target_keep_ratio / (current_alive_ratio + 1e-7)
+        target_ratio = target_remaining_ratio / (current_alive_ratio + 1e-7)
 
         optimal_mask_flags = lagrangian_optimization(
             np.array(target_unit_scores),
@@ -827,8 +1020,7 @@ class HAPPruner(PDTPruner):
 
         # 2. 전체 목표 Sparsity 계산 (스케줄링)
         progress = current_epoch / total_epochs
-        # total_target_sparsity = progress * (1.0 - self.final_keep_ratio)
-        total_target_sparsity = min(progress * 2.0, 1.0) * (1.0 - self.final_keep_ratio)
+        total_target_sparsity = min(progress * 2.0, 1.0) * self.pruning_ratio
 
         # 3. Hessian Trace 계산 및 레이어별 민감도 산출
         target_params = [m.weight for name, m in target_layers]
@@ -919,6 +1111,57 @@ class HAPPruner(PDTPruner):
         #             actual_pruned_total += num_prune
 
         # 6. 물리적 가중치 적용 및 결과 출력
+        total_param_cost = sum(m.weight.numel() for _, m in target_layers)
+        target_pruned_cost = total_param_cost * total_target_sparsity
+        current_pruned_cost = sum(
+            m.weight.numel() * (1.0 - m.mask.float().mean().item())
+            for _, m in target_layers
+        )
+        restored_units = 0
+        added_units = 0
+
+        with torch.no_grad():
+            if current_pruned_cost > target_pruned_cost:
+                pruned_candidates = []
+                for _, layer in target_layers:
+                    unit_cost = layer.weight.numel() / layer.weight.shape[0]
+                    for channel_idx in torch.where(layer.mask <= 0.5)[0].tolist():
+                        pruned_candidates.append(
+                            (layer.hessian_score[channel_idx].item(), layer, channel_idx, unit_cost)
+                        )
+                for _, layer, channel_idx, unit_cost in sorted(
+                    pruned_candidates, key=lambda item: item[0], reverse=True
+                ):
+                    if current_pruned_cost <= target_pruned_cost:
+                        break
+                    layer.mask[channel_idx] = 1.0
+                    current_pruned_cost -= unit_cost
+                    actual_pruned_total -= 1
+                    restored_units += 1
+            elif current_pruned_cost < target_pruned_cost:
+                alive_candidates = []
+                for _, layer in target_layers:
+                    unit_cost = layer.weight.numel() / layer.weight.shape[0]
+                    for channel_idx in torch.where(layer.mask > 0.5)[0].tolist():
+                        alive_candidates.append(
+                            (layer.hessian_score[channel_idx].item(), layer, channel_idx, unit_cost)
+                        )
+                for _, layer, channel_idx, unit_cost in sorted(
+                    alive_candidates, key=lambda item: item[0]
+                ):
+                    if current_pruned_cost >= target_pruned_cost:
+                        break
+                    layer.mask[channel_idx] = 0.0
+                    current_pruned_cost += unit_cost
+                    actual_pruned_total += 1
+                    added_units += 1
+
+        print(
+            f"[Ratio Repair] restored_units={restored_units} "
+            f"additional_units={added_units} "
+            f"target_param_cost={target_pruned_cost:.0f} "
+            f"actual_param_cost={current_pruned_cost:.0f}"
+        )
         self.apply_mask_to_weights()
         
         print(f"\n{'='*30} HAP Emergency Pruning: Epoch {current_epoch} {'='*30}")

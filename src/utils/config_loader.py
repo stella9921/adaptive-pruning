@@ -24,6 +24,24 @@ def _normalize_strategy_config(data, path):
         raise ValueError(f"Strategy config is missing required key 'method': {path}")
     return strategy
 
+
+def _apply_pruning_target(strategy, args, parser):
+    """Normalize every method to one removal ratio in the [0, 1) range."""
+    if args.pruning_ratio is not None:
+        pruning_ratio = args.pruning_ratio
+    elif 'pruning_ratio' in strategy:
+        pruning_ratio = strategy['pruning_ratio']
+    else:
+        raise ValueError("Strategy config is missing required key 'pruning_ratio'")
+
+    pruning_ratio = float(pruning_ratio)
+    if not 0.0 <= pruning_ratio < 1.0:
+        raise ValueError(
+            f"pruning_ratio must satisfy 0 <= ratio < 1, got {pruning_ratio}"
+        )
+
+    strategy['pruning_ratio'] = pruning_ratio
+
 def load_config():
     parser = argparse.ArgumentParser(description='Adaptive Pruning Experiment')
     parser.add_argument('--model', type=str, default='resnet18')
@@ -36,7 +54,7 @@ def load_config():
     parser.add_argument('--epochs', type=int, default=None)
     parser.add_argument('--lambda_h', type=float, default=None)
     parser.add_argument('--group_selection_ratio', type=float, default=None)
-    parser.add_argument('--channel_keep_ratio', type=float, default=None)
+    parser.add_argument('--pruning_ratio', type=float, default=None)
     parser.add_argument('--min_survival_ratio', type=float, default=None)
     args, _ = parser.parse_known_args()
 
@@ -74,6 +92,7 @@ def load_config():
 
     preset_name = os.path.splitext(os.path.basename(strategy_config_path))[0]
     config['strategy']['preset'] = preset_name
+    _apply_pruning_target(config['strategy'], args, parser)
     config.setdefault('config_sources', {})
     config['config_sources'].update({
         'base': base_path,
@@ -87,6 +106,7 @@ def load_config():
     print(
         f"[Config] preset={preset_name} "
         f"method={config['strategy']['method']} "
+        f"pruning_ratio={config['strategy']['pruning_ratio']:.4f} "
         f"file={strategy_config_path}"
     )
 

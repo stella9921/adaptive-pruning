@@ -5,7 +5,7 @@ input_shape: [1, 3, 224, 224]
 # --- MCPrune 핵심 설정 ---
 strategy:
   name: "ViTPDTPruner"              # 우리가 만든 ViT 전용 클래스 이름
-  channel_keep_ratio: 0.2           # 최종적으로 남길 비율 (80% 프루닝)
+  pruning_ratio: 0.8
   min_survival_ratio: 0.1           # 각 레이어당 최소 10%는 남김
   ema_decay: 0.95                   # Gradient EMA 업데이트 가중치
   lambda_h: 0.005                   # Hessian 중요도 반영 계수
