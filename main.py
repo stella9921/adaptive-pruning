@@ -5,7 +5,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, TensorDataset
 import torch_pruning as tp
 import sys
 from datetime import datetime
@@ -31,6 +31,8 @@ from src.utils.measure import (
     save_run_metadata,
 )
 from src.utils.visualization import save_history_plots, save_pruning_plots
+from src.utils.reproducibility import set_reproducibility
+from src.utils.training import build_scheduler
 from src.data.dataloader import get_dataloaders
 from src.models import get_model, get_prune_fn
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
@@ -78,10 +80,25 @@ print("="*50 + "\n", flush=True)
 def main():
     # 1. 설정 및 데이터 준비
     config, args = load_config()
+    seed = args.seed if args.seed is not None else config.get('seed', 42)
+    config['reproducibility'] = set_reproducibility(
+        seed=seed,
+        deterministic=(args.deterministic or config.get('deterministic', False)),
+    )
     # print(f"DEBUG: Current Batch Size is {config.get('batch_size', args.batch_size)}")
     # [강제 수정] 명령어로 들어온 batch_size가 무시되지 않도록 직접 박아넣습니다.
     if args.batch_size:
         config['batch_size'] = args.batch_size
+    if args.smoke_test:
+        config['batch_size'] = 8
+        config['model']['epochs'] = 1
+        config['strategy'].update({
+            'start_epoch': 1,
+            'prune_every': 1,
+            'hessian_iter': 1,
+            'k_horizon': 1,
+            'group_selection_ratio': 0.5,
+        })
     
     print(f"[Config] batch_size={config['batch_size']}", flush=True)
     # --- 로그 파일 자동 저장 설정 시작 ---
@@ -141,7 +158,11 @@ def main():
             self.log.write(message)
         def flush(self): pass
 
-    sys.stdout = Logger() # 이제 모든 print문이 파일로 
+    sys.stdout = Logger() # 이제 모든 print문이 파일로
+    print(
+        f"[Reproducibility] seed={config['reproducibility']['seed']} "
+        f"deterministic={config['reproducibility']['deterministic']}"
+    )
     print(f"📝 Logging started: {log_filename}")
     
     # [System] CLI 인자가 YAML 설정을 덮어쓰도록 명시적으로 우선순위 부여
@@ -174,7 +195,18 @@ def main():
 
 
 
-    loaders = get_dataloaders(config)
+    if args.smoke_test:
+        input_size = config['model'].get('input_size', 32)
+        num_classes = config['model'].get('num_classes', 100)
+        generator = torch.Generator().manual_seed(config['reproducibility']['seed'])
+        images = torch.randn(16, 3, input_size, input_size, generator=generator)
+        labels = torch.randint(0, num_classes, (16,), generator=generator)
+        smoke_dataset = TensorDataset(images, labels)
+        smoke_loader = DataLoader(smoke_dataset, batch_size=8, shuffle=False)
+        loaders = smoke_loader, smoke_loader, smoke_loader
+        print("[Smoke Test] Using 16 synthetic samples; dataset download is skipped.")
+    else:
+        loaders = get_dataloaders(config)
     
     if len(loaders) == 3:
         train_loader, val_loader, test_loader = loaders
@@ -683,7 +715,13 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     total_epochs = args.epochs if args.epochs is not None else model_cfg.get('epochs', config.get('epochs', 300))
     prune_every = args.prune_every if args.prune_every is not None else strat_cfg.get('prune_every', 20)
     start_epoch = args.start_epoch if args.start_epoch is not None else strat_cfg.get('start_epoch', 1)
+    scheduler = build_scheduler(optimizer, model_cfg, total_epochs)
     pdt_engine.total_epochs = total_epochs
+    pruning_epochs = list(range(start_epoch, total_epochs + 1, prune_every))
+    pruning_step_by_epoch = {
+        pruning_epoch: step_index + 1
+        for step_index, pruning_epoch in enumerate(pruning_epochs)
+    }
 
     print(f"\n>>> Strategy: {strategy_type.upper()} | Total Epochs: {total_epochs}")
     print(
@@ -691,6 +729,11 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         f"| Target keep ratio: {1.0 - strat_cfg['pruning_ratio']:.1%}"
     )
     print(f">>> Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
+    print(f">>> Scheduled pruning epochs: {pruning_epochs}")
+    print(
+        f">>> LR scheduler: "
+        f"{scheduler.__class__.__name__ if scheduler is not None else 'disabled'}"
+    )
 
     stop_pruning = False
     history_data = []
@@ -731,19 +774,25 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
             should_prune = (
                 not stop_pruning
-                and epoch >= start_epoch
-                and (epoch - start_epoch) % prune_every == 0
+                and epoch in pruning_step_by_epoch
                 and batch_idx == 0
             )
 
             if should_prune:
                 prune_step_index = batch_idx
+                pruning_step = pruning_step_by_epoch[epoch]
+                pdt_engine.scheduled_pruning_progress = (
+                    pruning_step / len(pruning_epochs)
+                )
                 print(f"\n[DEBUG] >>> PRUNING @ Epoch {epoch}")
+                print(
+                    f"[Pruning Schedule] step={pruning_step}/{len(pruning_epochs)} "
+                    f"progress={pdt_engine.scheduled_pruning_progress:.4f}"
+                )
 
                 # Hessian 계산을 위해 그래프 유지하며 백워드
                 loss.backward(retain_graph=True)
-                if debug_stop_after_first_prune:
-                    pdt_engine.update_ema_and_mask_grad()
+                pdt_engine.update_ema_and_mask_grad()
 
                 nvtx_context = (
                     torch.cuda.nvtx.range("MCPrune/PruningStep")
@@ -865,7 +914,6 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 total_loss += current_loss_val
                 continue
 
-            pdt_engine.update_ema_and_mask_grad()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
             pdt_engine.apply_mask_to_weights(optimizer=optimizer)
@@ -889,7 +937,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             f"Epoch {epoch}/{total_epochs} | "       
             f"Loss: {total_loss/len(train_loader):.4f} | "
             f"Val Acc: {val_acc:.2f}% | "
-            f"Peak VRAM: {peak_vram:.2f} MB"
+            f"Peak VRAM: {peak_vram:.2f} MB | "
+            f"LR: {optimizer.param_groups[0]['lr']:.6g}"
         )
         # 🔥 pruning 전후 20 step 중앙값 계산
         if prune_step_index is not None and \
@@ -935,6 +984,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             'epoch': epoch,
             'train_loss': total_loss / len(train_loader),
             'val_accuracy': val_acc,
+            'learning_rate': optimizer.param_groups[0]['lr'],
             'target_pruning_ratio': strat_cfg['pruning_ratio'],
             **model_metrics,
             **cuda_metrics,
@@ -944,6 +994,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         })
         save_epoch_metrics(history_data, config['run_dir'], config['run_id'])
         save_history_plots(history_data, config['run_dir'], config['run_id'])
+        if scheduler is not None:
+            scheduler.step()
 
     # ============================================================
     # ===================== FINAL SAVE ============================
@@ -959,6 +1011,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         checkpoint_dir, f"{config['run_id']}__checkpoint__final.pth"
     )
     torch.save(model.state_dict(), final_path)
+    if args.smoke_test:
+        print(f"[Smoke Test] Completed. Results: {config['run_dir']}")
+        return
     print(f"\n🏁 Final Model Saved: {final_path}")
 
     # ============================================================

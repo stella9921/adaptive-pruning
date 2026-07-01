@@ -3,9 +3,32 @@ import yaml
 import os
 
 
+class UniqueKeyLoader(yaml.SafeLoader):
+    pass
+
+
+def _construct_unique_mapping(loader, node, deep=False):
+    mapping = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        if key in mapping:
+            raise ValueError(f"Duplicate YAML key: {key}")
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+UniqueKeyLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    _construct_unique_mapping,
+)
+
+
 def _load_yaml(path):
     with open(path, 'r', encoding='utf-8') as f:
-        data = yaml.safe_load(f) or {}
+        try:
+            data = yaml.load(f, Loader=UniqueKeyLoader) or {}
+        except (yaml.YAMLError, ValueError) as error:
+            raise ValueError(f"Invalid YAML config {path}: {error}") from error
     if not isinstance(data, dict):
         raise ValueError(f"Config must contain a YAML mapping: {path}")
     return data
@@ -42,6 +65,52 @@ def _apply_pruning_target(strategy, args, parser):
 
     strategy['pruning_ratio'] = pruning_ratio
 
+
+def _validate_config(config, args):
+    strategy = config['strategy']
+    bounded_ratios = {
+        'group_selection_ratio': (0.0, 1.0),
+        'min_survival_ratio': (0.0, 1.0),
+        'ema_decay': (0.0, 1.0),
+    }
+    for key, (lower, upper) in bounded_ratios.items():
+        if key not in strategy:
+            continue
+        value = float(strategy[key])
+        if not lower <= value <= upper:
+            raise ValueError(f"{key} must be in [{lower}, {upper}], got {value}")
+
+    positive_keys = ('start_epoch', 'prune_every', 'hessian_iter', 'k_horizon')
+    for key in positive_keys:
+        if key in strategy and int(strategy[key]) < 1:
+            raise ValueError(f"{key} must be >= 1, got {strategy[key]}")
+
+    if args.smoke_test:
+        total_epochs = args.epochs if args.epochs is not None else 1
+        start_epoch = args.start_epoch if args.start_epoch is not None else 1
+        prune_every = args.prune_every if args.prune_every is not None else 1
+    else:
+        total_epochs = (
+            args.epochs if args.epochs is not None
+            else config.get('model', {}).get('epochs', config.get('epochs', 1))
+        )
+        start_epoch = (
+            args.start_epoch if args.start_epoch is not None
+            else strategy.get('start_epoch', 1)
+        )
+        prune_every = (
+            args.prune_every if args.prune_every is not None
+            else strategy.get('prune_every', 20)
+        )
+    if total_epochs < 1:
+        raise ValueError(f"epochs must be >= 1, got {total_epochs}")
+    if start_epoch > total_epochs:
+        raise ValueError(
+            f"start_epoch ({start_epoch}) cannot exceed epochs ({total_epochs})"
+        )
+    if prune_every < 1:
+        raise ValueError(f"prune_every must be >= 1, got {prune_every}")
+
 def load_config():
     parser = argparse.ArgumentParser(description='Adaptive Pruning Experiment')
     parser.add_argument('--model', type=str, default='resnet18')
@@ -58,7 +127,10 @@ def load_config():
     parser.add_argument('--min_survival_ratio', type=float, default=None)
     parser.add_argument('--profile_pytorch', action='store_true')
     parser.add_argument('--profile_nvtx', action='store_true')
-    args, _ = parser.parse_known_args()
+    parser.add_argument('--smoke_test', action='store_true')
+    parser.add_argument('--seed', type=int, default=None)
+    parser.add_argument('--deterministic', action='store_true')
+    args = parser.parse_args()
 
     def get_real_path(input_path, base_dir):
         if os.path.exists(input_path):
@@ -95,6 +167,7 @@ def load_config():
     preset_name = os.path.splitext(os.path.basename(strategy_config_path))[0]
     config['strategy']['preset'] = preset_name
     _apply_pruning_target(config['strategy'], args, parser)
+    _validate_config(config, args)
     config.setdefault('config_sources', {})
     config['config_sources'].update({
         'base': base_path,

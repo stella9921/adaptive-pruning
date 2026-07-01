@@ -59,6 +59,13 @@ class PDTPruner(BasePruner):
             return torch.cuda.nvtx.range(name)
         return nullcontext()
 
+    def _get_pruning_progress(self, current_epoch, total_epochs):
+        return float(getattr(
+            self,
+            'scheduled_pruning_progress',
+            current_epoch / total_epochs,
+        ))
+
     def _check_buffers(self):
         for m in self.layers:
             n_f = m.weight.shape[0]
@@ -240,7 +247,7 @@ class PDTPruner(BasePruner):
         #                             if isinstance(m, (nn.Conv2d, nn.Linear))]
 
         actual_total = getattr(self, 'total_epochs', total_epochs)
-        progress = current_epoch / actual_total
+        progress = self._get_pruning_progress(current_epoch, actual_total)
         target_remaining_ratio = 1.0 - (progress * self.pruning_ratio)
         
         print(f"\n[DEBUG] !!! PRUNING TRIGGERED !!! Epoch {current_epoch}/{actual_total}")
@@ -418,11 +425,34 @@ class PDTPruner(BasePruner):
                     total_param_cost * progress * self.pruning_ratio
                 )
                 repair_count = 0
+                restore_count = 0
 
-                if current_pruned_cost < target_pruned_cost:
+                score_per_cost = (
+                    np.asarray(target_unit_scores)
+                    / (np.asarray(target_unit_costs) + 1e-12)
+                )
+                if current_pruned_cost > target_pruned_cost:
+                    for idx in np.argsort(score_per_cost)[::-1]:
+                        if current_pruned_cost <= target_pruned_cost:
+                            break
+                        g_obj, ch_idx = target_unit_metadata[idx]
+                        affected_layers = [
+                            layer for layer in g_obj['layers']
+                            if hasattr(layer, 'mask') and ch_idx < layer.mask.size(0)
+                        ]
+                        unit_cost = 0.0
+                        for layer in affected_layers:
+                            if layer.mask[ch_idx] <= 0.5:
+                                layer.mask.data[ch_idx] = 1.0
+                                remaining_by_layer[id(layer)] += 1
+                                unit_cost += layer.weight.numel() / layer.weight.shape[0]
+                        if unit_cost > 0:
+                            current_pruned_cost -= unit_cost
+                            pruned_count -= 1
+                            restore_count += 1
+                elif current_pruned_cost < target_pruned_cost:
                     repair_order = np.argsort(
-                        np.asarray(target_unit_scores)
-                        / (np.asarray(target_unit_costs) + 1e-12)
+                        score_per_cost
                     )
                     for idx in repair_order:
                         if current_pruned_cost >= target_pruned_cost:
@@ -455,7 +485,8 @@ class PDTPruner(BasePruner):
                         repair_count += 1
 
                 print(
-                    f"[Ratio Repair] additional_units={repair_count} "
+                    f"[Ratio Repair] restored_units={restore_count} "
+                    f"additional_units={repair_count} "
                     f"target_param_cost={target_pruned_cost:.0f} "
                     f"actual_param_cost={current_pruned_cost:.0f}"
                 )
@@ -532,7 +563,7 @@ class PDTPruner(BasePruner):
     def _global_rank_prune(self, scores, metadata, total_epochs,epoch, method_name):
         """라그랑주 대신 모든 경쟁 기법이 공통으로 사용할 Global Ranking 실행부"""
         # 1. 현재 목표 Sparsity에 따라 자를 개수 계산
-        progress = epoch /  total_epochs  
+        progress = self._get_pruning_progress(epoch, total_epochs)
         total_target_sparsity = progress * self.pruning_ratio
         
         num_total = len(scores)
@@ -817,7 +848,7 @@ class ViTPDTPruner(PDTPruner):
             print("[WARNING] No ViT topology groups.")
             return
 
-        progress = current_epoch / total_epochs
+        progress = self._get_pruning_progress(current_epoch, total_epochs)
         target_remaining_ratio = 1.0 - (progress * self.pruning_ratio)
 
         # topology_groups의 대표 레이어 순서 리스트
@@ -1051,7 +1082,7 @@ class HAPPruner(PDTPruner):
             return
 
         # 2. 전체 목표 Sparsity 계산 (스케줄링)
-        progress = current_epoch / total_epochs
+        progress = self._get_pruning_progress(current_epoch, total_epochs)
         total_target_sparsity = min(progress * 2.0, 1.0) * self.pruning_ratio
 
         # 3. Hessian Trace 계산 및 레이어별 민감도 산출
