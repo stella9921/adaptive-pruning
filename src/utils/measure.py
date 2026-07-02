@@ -43,26 +43,62 @@ def _write_csv(path, rows):
 
 
 def measure_model_resources(model):
-    total_params = 0
-    remaining_params = 0.0
+    total_model_params = sum(parameter.numel() for parameter in model.parameters())
+    total_model_bytes = sum(
+        parameter.numel() * parameter.element_size()
+        for parameter in model.parameters()
+    )
+    prunable_weight_params = 0
+    remaining_prunable_weight_params = 0.0
+    pruned_weight_bytes = 0.0
     for layer in model.modules():
         if not isinstance(layer, (nn.Conv2d, nn.Linear)):
             continue
         count = layer.weight.numel()
-        total_params += count
+        prunable_weight_params += count
         keep_ratio = (
             layer.mask.float().mean().item() if hasattr(layer, 'mask') else 1.0
         )
-        remaining_params += count * keep_ratio
-    sparsity = 1.0 - remaining_params / total_params if total_params else 0.0
+        remaining_prunable_weight_params += count * keep_ratio
+        pruned_weight_bytes += count * (1.0 - keep_ratio) * layer.weight.element_size()
+    pruned_params = prunable_weight_params - remaining_prunable_weight_params
+    remaining_model_params = total_model_params - pruned_params
+    sparsity = (
+        1.0 - remaining_prunable_weight_params / prunable_weight_params
+        if prunable_weight_params else 0.0
+    )
     return {
-        'total_params': int(total_params),
-        'remaining_params': int(round(remaining_params)),
+        'total_params': int(total_model_params),
+        'remaining_params': int(round(remaining_model_params)),
+        'prunable_weight_params': int(prunable_weight_params),
+        'remaining_prunable_weight_params': int(round(remaining_prunable_weight_params)),
         'parameter_sparsity': sparsity,
-        'original_size_mb': total_params * 4 / 1024**2,
-        'remaining_size_mb': remaining_params * 4 / 1024**2,
-        'theoretical_speedup': total_params / max(remaining_params, 1.0),
+        'model_parameter_reduction': (
+            1.0 - remaining_model_params / total_model_params
+            if total_model_params else 0.0
+        ),
+        'original_size_mb': total_model_bytes / 1024**2,
+        'remaining_size_mb': (total_model_bytes - pruned_weight_bytes) / 1024**2,
+        'theoretical_speedup': (
+            prunable_weight_params / max(remaining_prunable_weight_params, 1.0)
+        ),
     }
+
+
+def reset_peak_memory(device):
+    if torch.cuda.is_available() and torch.device(device).type == 'cuda':
+        torch.cuda.reset_peak_memory_stats(device)
+
+
+def synchronize_device(device):
+    if torch.cuda.is_available() and torch.device(device).type == 'cuda':
+        torch.cuda.synchronize(device)
+
+
+def peak_memory_mb(device):
+    if torch.cuda.is_available() and torch.device(device).type == 'cuda':
+        return torch.cuda.max_memory_allocated(device) / 1024**2
+    return 0.0
 
 
 def measure_cuda_memory():

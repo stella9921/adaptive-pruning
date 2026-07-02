@@ -130,6 +130,7 @@ def load_config():
     parser.add_argument('--smoke_test', action='store_true')
     parser.add_argument('--seed', type=int, default=None)
     parser.add_argument('--deterministic', action='store_true')
+    parser.add_argument('--resume', type=str, default=None)
     args = parser.parse_args()
 
     def get_real_path(input_path, base_dir):

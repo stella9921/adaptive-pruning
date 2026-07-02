@@ -29,7 +29,11 @@ from src.utils.measure import (
     save_epoch_metrics,
     save_pruning_tables,
     save_run_metadata,
+    peak_memory_mb,
+    reset_peak_memory,
+    synchronize_device,
 )
+from src.utils.checkpoint import load_training_checkpoint, save_training_checkpoint
 from src.utils.visualization import save_history_plots, save_pruning_plots
 from src.utils.reproducibility import set_reproducibility
 from src.utils.training import build_scheduler
@@ -737,6 +741,24 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
     stop_pruning = False
     history_data = []
+    first_epoch = 1
+    best_val_acc = float('-inf')
+    if args.resume:
+        resume_state = load_training_checkpoint(
+            args.resume, model, optimizer, scheduler, device
+        )
+        first_epoch = int(resume_state['epoch']) + 1
+        if first_epoch > total_epochs:
+            raise ValueError(
+                f"resume checkpoint already reached epoch {first_epoch - 1}, "
+                f"but configured epochs={total_epochs}"
+            )
+        history_data = list(resume_state.get('history', []))
+        best_val_acc = float(resume_state.get('best_val_acc', best_val_acc))
+        print(
+            f"[Checkpoint] resumed={args.resume} "
+            f"last_epoch={first_epoch - 1} next_epoch={first_epoch}"
+        )
     debug_stop_after_first_prune = (
         str(config.get('strategy', {}).get('debug_stop_after_first_prune', '')).lower() in ('1', 'true', 'yes')
         or os.getenv('MCPRUNE_STOP_AFTER_FIRST_PRUNE') == '1'
@@ -745,13 +767,13 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # ============================================================
     # ======================= TRAIN LOOP =========================
     # ============================================================
-    for epoch in range(1, total_epochs + 1):
+    for epoch in range(first_epoch, total_epochs + 1):
     # start_f = args.start_epoch if args.start_epoch else 1
     # for epoch in range(start_f, total_epochs + 1):
 
         model.train()
         total_loss = 0.0
-        torch.cuda.reset_peak_memory_stats(device)
+        reset_peak_memory(device)
 
          # 🔥 step-level memory trace 저장용
         step_mem_trace = []
@@ -887,7 +909,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 print(f" 🟡 Speedup: {eff['speedup']:.2f}x")
 
                 ckpt_name = (
-                    f"{config['run_id']}__checkpoint__epoch-{epoch:03d}"
+                    f"{config['run_id']}__pruning-snapshot__epoch-{epoch:03d}"
                     f"__sparsity-{current_sp:.2f}.pth"
                 )
                 torch.save({
@@ -919,8 +941,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             pdt_engine.apply_mask_to_weights(optimizer=optimizer)
 
             # 🔥 step-level peak 기록
-            torch.cuda.synchronize()
-            step_peak = torch.cuda.max_memory_allocated(device) / (1024**2)
+            synchronize_device(device)
+            step_peak = peak_memory_mb(device)
             step_mem_trace.append(step_peak)
 
             # 아까 저장해둔 숫자값을 더해줍니다.
@@ -931,7 +953,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         # Epoch 종료
         # -------------------------
         val_acc = evaluate(model, val_loader, device)
-        peak_vram = torch.cuda.max_memory_allocated(device) / (1024**2)
+        peak_vram = peak_memory_mb(device)
 
         print(
             f"Epoch {epoch}/{total_epochs} | "       
@@ -997,6 +1019,29 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         if scheduler is not None:
             scheduler.step()
 
+        checkpoint_extra = {
+            'best_val_acc': max(best_val_acc, val_acc),
+            'target_pruning_ratio': strat_cfg['pruning_ratio'],
+            'run_id': config['run_id'],
+        }
+        last_path = os.path.join(
+            checkpoint_dir, f"{config['run_id']}__checkpoint__last.pth"
+        )
+        save_training_checkpoint(
+            last_path, model, optimizer, scheduler, epoch, history_data,
+            **checkpoint_extra,
+        )
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            best_path = os.path.join(
+                checkpoint_dir, f"{config['run_id']}__checkpoint__best.pth"
+            )
+            save_training_checkpoint(
+                best_path, model, optimizer, scheduler, epoch, history_data,
+                **checkpoint_extra,
+            )
+            print(f"[Checkpoint] new best val_acc={val_acc:.2f}%: {best_path}")
+
     # ============================================================
     # ===================== FINAL SAVE ============================
     # ============================================================
@@ -1025,8 +1070,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # ============================================================
     print("\n================ FINAL PHYSICAL COMPRESSION ================\n")
 
-    torch.cuda.empty_cache()
-    torch.cuda.synchronize()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    synchronize_device(device)
 
 
 

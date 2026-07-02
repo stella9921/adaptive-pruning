@@ -1,13 +1,33 @@
 import os
+import random
+
+import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader, ConcatDataset
 from torchvision.datasets import ImageFolder
 
+
+def _seed_worker(worker_id):
+    worker_seed = torch.initial_seed() % (2**32)
+    random.seed(worker_seed)
+    np.random.seed(worker_seed)
+
+
+def _loader_options(seed, num_workers, offset=0):
+    generator = torch.Generator().manual_seed(int(seed) + offset)
+    return {
+        'num_workers': num_workers,
+        'pin_memory': torch.cuda.is_available(),
+        'worker_init_fn': _seed_worker,
+        'generator': generator,
+    }
+
 def get_dataloaders(config):
     model_cfg = config.get('model', {})
     dataset_cfg = config.get('dataset', {})
+    seed = config.get('reproducibility', {}).get('seed', config.get('seed', 42))
 
     if isinstance(dataset_cfg, str):
         dataset_name = dataset_cfg
@@ -75,9 +95,9 @@ def get_dataloaders(config):
             print(f"✅ ImageNet-1k loaded: Train({len(train_set)}), Val({len(val_set)})")
 
             train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True,
-                                      num_workers=num_workers, pin_memory=True)
+                                      **_loader_options(seed, num_workers, 1))
             val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False,
-                                    num_workers=num_workers, pin_memory=True)
+                                    **_loader_options(seed, num_workers, 2))
             return train_loader, val_loader
 
         # train 폴더들을 심볼릭 링크로 통합 (label 겹침 방지)
@@ -116,9 +136,9 @@ def get_dataloaders(config):
         print(f"   Val dir: {val_dir}")
 
         train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True,
-                                  num_workers=num_workers, pin_memory=True)
+                                  **_loader_options(seed, num_workers, 1))
         val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False,
-                                num_workers=num_workers, pin_memory=True)
+                                **_loader_options(seed, num_workers, 2))
 
         return train_loader, val_loader
 
@@ -140,16 +160,16 @@ def get_dataloaders(config):
         full_test_set = torchvision.datasets.CIFAR100(
             root=data_path, train=False, download=True, transform=transform_test)
 
-        generator = torch.Generator().manual_seed(42)
+        generator = torch.Generator().manual_seed(int(seed))
         val_set, test_set = torch.utils.data.random_split(
             full_test_set, [5000, 5000], generator=generator)
 
         train_loader = DataLoader(train_set, batch_size=batch_size,
-                                  shuffle=True, num_workers=num_workers)
+                                  shuffle=True, **_loader_options(seed, num_workers, 1))
         val_loader = DataLoader(val_set, batch_size=batch_size,
-                                shuffle=False, num_workers=num_workers)
+                                shuffle=False, **_loader_options(seed, num_workers, 2))
         test_loader = DataLoader(test_set, batch_size=batch_size,
-                                 shuffle=False, num_workers=num_workers)
+                                 shuffle=False, **_loader_options(seed, num_workers, 3))
 
         print(f"✅ CIFAR-100: Train(50,000), Val(5,000), Test(5,000)")
 
