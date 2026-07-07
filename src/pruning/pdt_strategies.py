@@ -28,16 +28,16 @@ class PDTPruner(BasePruner):
         self.k_horizon = strat_cfg.get('k_horizon', 25)
         self.engine = SNOWSEngine(n_iter=strat_cfg.get('hessian_iter', 10))
 
-        # --- 🔥 [긴급 수정 섹션: 여기가 핵심입니다] ---
+        # Topology group initialization
         self.topology_groups = topology_groups
         
-        # 만약 밖에서 topology_groups를 제대로 안 줬다면? 여기서 직접 생성 (Safety Net)
+        # Fallback groups when topology is unavailable
         if self.topology_groups is None or len(self.topology_groups) == 0:
             print("\n[WARNING] topology_groups is empty! Creating fallback groups from all Conv/Linear...")
             fallback_groups = []
             for name, m in model.named_modules():
                 if isinstance(m, (nn.Conv2d, nn.Linear)):
-                    # 레이어 하나하나를 개별 그룹으로 묶어줌
+                    # One layer per fallback group
                     fallback_groups.append([name])
             self.topology_groups = fallback_groups
         # ----------------------------------------------
@@ -225,15 +225,12 @@ class PDTPruner(BasePruner):
 
         
 
-        # ---  [최종 수정] ---
-        # 1. 먼저 self.topology_groups가 있는지 확인
-        # 2. 있다면 active_groups에 할당
-        # 3. 없다면 그제서야 Fallback 실행
+        # Resolve active topology groups
         if hasattr(self, 'topology_groups') and self.topology_groups is not None and len(self.topology_groups) > 0:
             active_groups = self.topology_groups
             # print(f"[DEBUG] Success! Using {len(active_groups)} groups.")
         else:
-            # 이 코드는 ResNet에서 topology_groups 배달사고 났을 때만 실행되어야 함
+            # Fallback for missing ResNet topology
             print("[WARNING] Fallback scan initiated...")
             active_groups = [[name] for name, m in self.model.named_modules() 
                              if isinstance(m, (nn.Conv2d, nn.Linear))]
@@ -241,7 +238,7 @@ class PDTPruner(BasePruner):
 
 
 
-        # [긴급] 그룹 정보 강제 복구
+        # Legacy group fallback
         # if not hasattr(self, 'topology_groups') or self.topology_groups is None:
         #     self.topology_groups = [[name] for name, m in self.model.named_modules() 
         #                             if isinstance(m, (nn.Conv2d, nn.Linear))]
@@ -252,11 +249,11 @@ class PDTPruner(BasePruner):
         
         print(f"\n[DEBUG] !!! PRUNING TRIGGERED !!! Epoch {current_epoch}/{actual_total}")
 
-        # [핵심 수정] 모든 타입의 레이어를 일단 수집
+        # Collect masked layers from each group
         group_info_list = []
         module_name_by_id = {id(m): name for name, m in all_modules.items()}
         for idx, group in enumerate(active_groups):
-            # Conv/Linear 뿐만 아니라 마스크가 있는 모든 레이어를 찾음
+            # Include every masked layer type
             score_layers = []
             for ln in group:
                 layer = find_layer(ln)
@@ -265,7 +262,7 @@ class PDTPruner(BasePruner):
             
             if not score_layers: continue
             
-            # Grad-EMA 평균 (안전하게 처리)
+            # Group mean Grad-EMA
             valid_emas = [m.grad_ema.mean() for m in score_layers if hasattr(m, 'grad_ema')]
             w_g = torch.mean(torch.stack(valid_emas)).item() if valid_emas else 0.0
             
@@ -275,7 +272,7 @@ class PDTPruner(BasePruner):
 
         if not group_info_list:
             print("[ERROR] Still no groups found! Forcing all Conv layers into groups...")
-            # 강제로 모든 Conv를 그룹화
+            # Conv fallback groups
             for name, m in self.model.named_modules():
                 if isinstance(m, (nn.Conv2d, nn.Linear)):
                     group_info_list.append({'id': 999, 'layers': [m], 'w_g': 0.0, 'names': [name]})
@@ -283,7 +280,7 @@ class PDTPruner(BasePruner):
         with self._nvtx_range("MCPrune/GroupSelection"):
             group_info_list = self._select_candidate_groups(group_info_list)
 
-        # --- [이후 Hessian 및 Pruning 로직] ---
+        # Hessian scoring and pruning
         debug_hvp_alignment = os.getenv('MCPRUNE_DEBUG_HVP_ALIGNMENT') == '1'
         if debug_hvp_alignment:
             print("[HVP Alignment] Selected scoring layers by group")
@@ -341,7 +338,7 @@ class PDTPruner(BasePruner):
                 target_unit_costs.append(sum(m.weight.nelement()/m.weight.shape[0] for m in g['layers'] if hasattr(m, 'weight')))
                 target_unit_metadata.append((g, i))
 
-        # [최적화 및 집행]
+        # Resource allocation and mask update
         mem_before = torch.cuda.memory_allocated() / (1024**2)
         curr_sp = self.get_current_sparsity()
         current_alive_ratio = 1.0 - (curr_sp / 100.0)
@@ -357,7 +354,7 @@ class PDTPruner(BasePruner):
                     unit_metadata=target_unit_metadata
                 )
             
-            # FORCE
+            # Ratio repair state
             if np.all(optimal_mask_flags == 1) and target_ratio < 0.999:
                 num_force = int(len(optimal_mask_flags) * (1 - target_ratio))
                 optimal_mask_flags[np.argsort(target_unit_scores)[:num_force]] = 0
@@ -493,7 +490,7 @@ class PDTPruner(BasePruner):
             self.apply_mask_to_weights()
             torch.cuda.empty_cache()
 
-        # [결과 출력 - 무조건 실행]
+        # Pruning report
         mem_after = torch.cuda.memory_allocated() / (1024**2)
         print(f"\n{'='*30} PDT Pruning Report: Epoch {current_epoch} {'='*30}")
         print(f" [*] Pruned this step: {pruned_count} units | VRAM: {mem_before:.1f}MB -> {mem_after:.1f}MB")
@@ -525,32 +522,29 @@ class PDTPruner(BasePruner):
         total_flops = 0
         remaining_flops = 0
         
-        # 1. Parameter & FLOPs 계산 (VGG 기준)
+        # Parameter and FLOPs proxy
         for name, m in self.model.named_modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
-                # 원본 수치
+                # Dense parameter count
                 n_p = m.weight.numel()
                 total_params += n_p
                 
-                # FLOPs 근사 (H * W * C_in * C_out * K * K)
-                # 여기서는 파라미터 감소 비율을 FLOPs 감소 비율의 프록시로 사용
+                # Parameter reduction as a FLOPs proxy
                 if hasattr(m, 'mask'):
                     keep_ratio = m.mask.sum().item() / m.mask.numel()
                     remaining_params += n_p * keep_ratio
-                    # Conv의 경우 입력/출력이 같이 줄어들면 제곱으로 줄어들지만, 
-                    # 마스킹 단계에서는 출력 채널 감소 비율을 기준으로 선형 근사하여 보수적 측정
+                    # Conservative linear estimate during mask-based pruning
                     remaining_flops += n_p * keep_ratio 
                 else:
                     remaining_params += n_p
                     remaining_flops += n_p
 
-        # 2. 지표 산출
+        # Derived metrics
         orig_size_mb = (total_params * 4) / (1024**2)
         curr_size_mb = (remaining_params * 4) / (1024**2)
         sparsity = (1 - remaining_params/total_params) * 100
         
-        # 3. Latency & Energy (학술적 프록시 모델링)
-        # 실제 Latency는 하드웨어 종속적이므로, FLOPs 감소량에 기반한 이론적 가속도를 출력
+        # Theoretical speedup from the FLOPs proxy
         theoretical_speedup = total_params / (remaining_params + 1e-8)
         
         return {
@@ -562,7 +556,7 @@ class PDTPruner(BasePruner):
 
     def _global_rank_prune(self, scores, metadata, total_epochs,epoch, method_name):
         """라그랑주 대신 모든 경쟁 기법이 공통으로 사용할 Global Ranking 실행부"""
-        # 1. 현재 목표 Sparsity에 따라 자를 개수 계산
+        # Target prune count
         progress = self._get_pruning_progress(epoch, total_epochs)
         total_target_sparsity = progress * self.pruning_ratio
         
@@ -595,15 +589,14 @@ class PDTPruner(BasePruner):
         num_to_prune = len(selected_indices)
 
         if num_to_prune > 0:
-            # 2. 점수가 낮은 순서대로 정렬 (Global Ranking)
+            # Global ascending score ranking
             indices = selected_indices
             for idx in indices:
                 group_obj, channel_idx = metadata[idx]
                 for ln in group_obj['names']:
                     layer = self.model.get_submodule(ln.replace('_', '.'))
                     if hasattr(layer, 'mask'):
-                        # [수정 포인트] 자르려는 채널 번호(channel_idx)가 
-                        # 실제 레이어의 마스크 크기보다 작을 때만 실행
+                        # Skip channel indices outside the layer mask
                         if channel_idx < layer.mask.size(0):
                             layer.mask[channel_idx] = 0.0
                         
@@ -615,13 +608,13 @@ class PDTPruner(BasePruner):
             f"actual_param_cost={current_pruned_cost:.0f}"
         )
         
-        # 3.학회용 측정치 출력 (통합 호출)
+        # Summary metrics
         eff = self.get_model_efficiency()
         print(f"\n[Scientific Metrics - Epoch {epoch}]")
-        print(f" 🟢 Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
-        print(f" 🔵 Sparsity (Params/FLOPs): {eff['sparsity']:.2f} %")
-        print(f" 🟡 Theoretical Speedup: {eff['speedup']:.2f}x")
-        print(f" 🟠 Current GPU Mem (Allocated): {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
+        print(f"Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
+        print(f"Sparsity (Params/FLOPs): {eff['sparsity']:.2f} %")
+        print(f"Theoretical Speedup: {eff['speedup']:.2f}x")
+        print(f"Current GPU Mem (Allocated): {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
         print(f"{'='*89}\n")
         torch.cuda.empty_cache()
 
@@ -1068,7 +1061,7 @@ class HAPPruner(PDTPruner):
     def step_pruning(self, loss, current_epoch, total_epochs):
         print(f"\n[DEBUG] === HAP Emergency Pruning: Epoch {current_epoch} ===")
         
-        # 1. 대상 레이어 직접 수집 (Naming Bridge 무시)
+        # Collect prunable layers directly
         target_layers = []
         for name, m in self.model.named_modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
@@ -1078,14 +1071,14 @@ class HAPPruner(PDTPruner):
                 target_layers.append((name, m))
 
         if not target_layers:
-            print("[DEBUG] 🚨 FATAL: No layers found for HAP.")
+            print("[DEBUG] FATAL: No layers found for HAP.")
             return
 
-        # 2. 전체 목표 Sparsity 계산 (스케줄링)
+        # Scheduled target sparsity
         progress = self._get_pruning_progress(current_epoch, total_epochs)
         total_target_sparsity = min(progress * 2.0, 1.0) * self.pruning_ratio
 
-        # 3. Hessian Trace 계산 및 레이어별 민감도 산출
+        # Layer-wise Hessian sensitivity
         target_params = [m.weight for name, m in target_layers]
         hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, self.k_horizon)
 
@@ -1095,11 +1088,11 @@ class HAPPruner(PDTPruner):
         for idx, (name, m) in enumerate(target_layers):
             hv = hv_list[idx]
             with torch.no_grad():
-                # 필터별 에너지 [Out_channels]
+                # Per-output-channel energy
                 h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
                 m.hessian_score.copy_(h_energy)
                 
-                # 레이어 전체의 평균 Trace
+                # Mean layer trace
                 trace = h_energy.mean().item()
                 layer_traces.append(trace)
                 layer_hessian_energies.append(h_energy)
@@ -1110,44 +1103,40 @@ class HAPPruner(PDTPruner):
         # avg_sens = sum(sensitivities) / len(sensitivities)
 
         # actual_pruned_total = 0
-        # [수정] 4. 민감도 기반 Sparsity 배분 (더 공격적으로)
-        # 루트(0.5) 대신 1.0승 혹은 그 이상을 사용하여 레이어 간 차이를 극대화
+        # Sensitivity-based sparsity allocation
         sensitivities = [1.0 / (t + 1e-10) for t in layer_traces]
         avg_sens = sum(sensitivities) / len(sensitivities)
 
         actual_pruned_total = 0
         
-        # [수정] 5. 레이어별 개별 프루닝 실행
+        # Per-layer pruning
         for i, (name, m) in enumerate(target_layers):
-            # 레이어별 민감도 비율에 가중치를 부여 (예: 1.2배)
-            # 이를 통해 가성비 좋은 레이어는 더 과감하게 깎음
+            # Scale pruning by relative sensitivity
             relative_sens = sensitivities[i] / avg_sens
             layer_target_sparsity = total_target_sparsity * relative_sens
             
-            # [핵심 수정] 최소 생존 보장 비율을 대폭 낮춤 (예: 10%만 남겨도 생존)
-            # self.min_survival_ratio가 너무 높다면 여기서 강제로 0.1 등으로 낮춰보세요.
+            # Enforce the configured survival floor
             max_prunable = 1.0 - 0.1  # 최소 10%는 남김
             layer_target_sparsity = min(layer_target_sparsity, max_prunable)
             
             num_channels = m.mask.numel()
-            # 이미 잘린 채널을 제외하고 추가로 자르는 것이 아니라, 
-            # '전체 채널 중 이만큼이 0이어야 한다'는 목표치로 설정
+            # Absolute target over all layer channels
             num_to_be_zero = int(num_channels * layer_target_sparsity)
             
-            # 현재 이미 0인 개수 파악
+            # Current pruned count
             current_zero = int(num_channels - m.mask.sum().item())
             
-            # 추가로 더 잘라야 할 개수 계산
+            # Additional prune count
             num_prune = num_to_be_zero - current_zero
 
             if num_prune > 0:
-                # 살아있는(mask==1) 채널 중에서 Hessian 점수가 낮은 것 선택
+                # Lowest Hessian scores among active channels
                 alive_indices = torch.where(m.mask > 0.5)[0]
                 if len(alive_indices) > 0:
-                    # 살아있는 채널의 Hessian Score만 추출
+                    # Active-channel Hessian scores
                     alive_scores = m.hessian_score[alive_indices]
                     
-                    # 그 중 하위 k개 선택
+                    # Bottom-k selection
                     k = min(num_prune, len(alive_indices))
                     _, sub_indices = torch.topk(alive_scores, k=k, largest=False)
                     prune_indices = alive_indices[sub_indices]
@@ -1173,7 +1162,7 @@ class HAPPruner(PDTPruner):
         #             m.mask[prune_indices] = 0.0
         #             actual_pruned_total += num_prune
 
-        # 6. 물리적 가중치 적용 및 결과 출력
+        # Apply masks and report
         total_param_cost = sum(m.weight.numel() for _, m in target_layers)
         target_pruned_cost = total_param_cost * total_target_sparsity
         current_pruned_cost = sum(
@@ -1230,12 +1219,12 @@ class HAPPruner(PDTPruner):
         print(f"\n{'='*30} HAP Emergency Pruning: Epoch {current_epoch} {'='*30}")
         print(f" [*] Method: HAP | Total Pruned Units: {actual_pruned_total}")
         
-        # 리소스 측정 및 출력
+        # Resource metrics
         eff = self.get_model_efficiency()
         print(f"\n[Scientific Metrics - Epoch {current_epoch}]")
-        print(f" 🟢 Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
-        print(f" 🔵 Sparsity: {eff['sparsity']:.2f} %")
-        print(f" 🟡 Theoretical Speedup: {eff['speedup']:.2f}x")
+        print(f"Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
+        print(f"Sparsity: {eff['sparsity']:.2f} %")
+        print(f"Theoretical Speedup: {eff['speedup']:.2f}x")
         print(f"{'='*89}\n")
         torch.cuda.empty_cache()
 class SNOWSPruner(PDTPruner):
@@ -1247,7 +1236,7 @@ class SNOWSPruner(PDTPruner):
     def step_pruning(self, loss, current_epoch, total_epochs):
         print(f"\n[DEBUG] === SNOWS Emergency Pruning: Epoch {current_epoch} ===")
         
-        # 1. 대상 레이어 수집 (ATO와 동일한 저인망식 방식)
+        # Collect all prunable layers
         target_layers = []
         for name, m in self.model.named_modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
@@ -1257,18 +1246,18 @@ class SNOWSPruner(PDTPruner):
                 target_layers.append((name, m))
 
         if not target_layers:
-            print("[DEBUG] 🚨 FATAL: No Conv2d/Linear layers found for SNOWS.")
+            print("[DEBUG] FATAL: No Conv2d/Linear layers found for SNOWS.")
             return
 
-        # 2. Hessian Trace 계산 (SNOWS 엔진 활용)
+        # Hessian trace from SNOWS
         target_params = [m.weight for name, m in target_layers]
-        # SNOWS는 배치 데이터를 통해 현재 시점의 Hessian 에너지를 추출합니다.
+        # Current-batch Hessian energy
         hv_list = self.engine.get_k_step_hessian_selective(loss, target_params, self.k_horizon)
 
         target_unit_scores = []
         target_unit_metadata = []
 
-        # 3. 채널별 Hessian Energy 점수 매기기
+        # Per-channel Hessian energy
         for idx, (name, m) in enumerate(target_layers):
             hv = hv_list[idx]
             # Hessian Trace (H-Vector Product의 에너지를 채널별로 요약)
@@ -1288,7 +1277,7 @@ class SNOWSPruner(PDTPruner):
 
         print(f"[DEBUG] SNOWS: Found {len(target_unit_scores)} candidates to prune.")
 
-        # 4. 부모의 Global Ranking 호출 및 물리적 적용
+        # Global ranking and mask update
         if len(target_unit_scores) > 0:
             self._global_rank_prune(
                 scores=target_unit_scores, 
@@ -1306,42 +1295,38 @@ class ATOPruner(PDTPruner):
         target_unit_scores = []
         target_unit_metadata = []
 
-        # 1. 모델의 모든 레이어를 그냥 직접 훑습니다 (토폴로지 그룹 무시)
-        # ResNet-18 내부의 모든 Conv/Linear를 다 찾습니다.
+        # Collect all Conv/Linear layers without topology groups
         for name, m in self.model.named_modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
-                # 마스크가 없으면 강제로 만들어줍니다
+                # Initialize missing masks
                 if not hasattr(m, 'mask'):
                     n_f = m.weight.shape[0]
                     m.register_buffer("mask", torch.ones(n_f, device=m.weight.device))
                 
-                # 살아있는 채널 인덱스 확인
+                # Active channel indices
                 alive_indices = torch.where(m.mask > 0.5)[0].cpu().numpy()
                 
-                # 채널별 L1-Norm(Magnitude) 점수 계산
-                # (Out_channels,) 형태로 점수화
+                # Per-channel L1 magnitude
                 with torch.no_grad():
                     m_score = m.weight.data.abs().reshape(m.weight.shape[0], -1).mean(1)
                 
                 if len(alive_indices) > 0:
                     for i in alive_indices:
-                        # 메타데이터에 (레이어 객체, 채널 인덱스)를 직접 넣습니다.
-                        # 그룹 개념 없이 개별 레이어로 처리
+                        # Single-layer channel metadata
                         target_unit_scores.append(m_score[i].item())
                         
-                        # metadata 형식을 _global_rank_prune이 기대하는 {'names': [이름]} 구조로 가짜 그룹화
+                        # Synthetic group metadata for global ranking
                         fake_group = {'names': [name]}
                         target_unit_metadata.append((fake_group, i))
 
         print(f"[DEBUG] Found {len(target_unit_scores)} candidates to prune.")
 
-        # 2. 부모의 랭킹 함수 호출
-        # 여기서 progress = 0.5가 박혀있다면 절반이 날아가야 정상입니다.
+        # Parent global ranking
         if len(target_unit_scores) > 0:
             self._global_rank_prune(target_unit_scores, target_unit_metadata, total_epochs, current_epoch, "ATO")
             self.apply_mask_to_weights()
         else:
-            print("[DEBUG] 🚨 FATAL: Still 0 candidates. Check if the model has Conv2d/Linear layers.")
+            print("[DEBUG] FATAL: Still 0 candidates. Check for Conv2d/Linear layers.")
 # ==============================================================================
 # SuperTickets (ST - Gradient-Weight Product based) 비교 실험용 Pruner
 # ==============================================================================
@@ -1357,37 +1342,36 @@ class STPruner(PDTPruner):
         target_unit_scores = []
         target_unit_metadata = []
 
-        # 1. 모델의 모든 레이어를 직접 훑습니다 (토폴로지 그룹 무시)
+        # Collect layers without topology groups
         for name, m in self.model.named_modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
-                # 마스크 자동 생성 로직 (안전장치)
+                # Initialize missing masks
                 if not hasattr(m, 'mask'):
                     n_f = m.weight.shape[0]
                     m.register_buffer("mask", torch.ones(n_f, device=m.weight.device))
                 
-                # 살아있는 채널 인덱스 확인
+                # Active channel indices
                 alive_indices = torch.where(m.mask > 0.5)[0].cpu().numpy()
                 
-                # [ST 핵심 점수 계산] interaction = |W| * sqrt(G_ema)
-                # G_ema에는 이미 그래디언트의 제곱 평균 정보가 담겨 있습니다.
+                # ST score: |W| * sqrt(G_ema)
                 with torch.no_grad():
                     w_abs = m.weight.data.abs().reshape(m.weight.shape[0], -1).mean(1)
-                    # sqrt(grad_ema)를 통해 그래디언트의 크기(L2-like) 추출
+                    # Gradient magnitude from Grad-EMA
                     g_magnitude = torch.sqrt(m.grad_ema + 1e-8)
                     st_score = w_abs * g_magnitude
                 
                 if len(alive_indices) > 0:
                     for i in alive_indices:
-                        # 채널별 ST 중요도 점수 추가
+                        # Per-channel ST score
                         target_unit_scores.append(st_score[i].item())
                         
-                        # metadata 형식을 _global_rank_prune이 기대하는 구조로 가짜 그룹화
+                        # Synthetic group metadata
                         fake_group = {'names': [name]}
                         target_unit_metadata.append((fake_group, i))
 
         print(f"[DEBUG] ST: Found {len(target_unit_scores)} candidates to prune.")
 
-        # 2. 부모의 Global Ranking 함수 호출 (여기서 progress 기반 컷팅이 일어남)
+        # Progress-based global ranking
         if len(target_unit_scores) > 0:
             self._global_rank_prune(
                 scores=target_unit_scores, 
@@ -1396,10 +1380,10 @@ class STPruner(PDTPruner):
                 total_epochs=total_epochs, 
                 method_name="ST"
             )
-            # 물리적 가중치 제거 적용
+            # Apply masks
             self.apply_mask_to_weights()
         else:
-            print("[DEBUG] 🚨 FATAL: Still 0 candidates for ST.")
+            print("[DEBUG] FATAL: Still 0 candidates for ST.")
 
 # ==============================================================================
 # DFPC (Data-Free Parameter Compensation - Similarity based) 비교 실험용 Pruner
@@ -1416,42 +1400,40 @@ class DFPCPruner(PDTPruner):
         target_unit_scores = []
         target_unit_metadata = []
 
-        # 1. 모델의 모든 레이어를 직접 훑습니다 (토폴로지 그룹 무시)
+        # Collect layers without topology groups
         for name, m in self.model.named_modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
-                # 마스크 자동 생성 로직 (안전장치)
+                # Initialize missing masks
                 if not hasattr(m, 'mask'):
                     n_f = m.weight.shape[0]
                     m.register_buffer("mask", torch.ones(n_f, device=m.weight.device))
                 
-                # 살아있는 채널 인덱스 확인
+                # Active channel indices
                 alive_indices = torch.where(m.mask > 0.5)[0].cpu().numpy()
                 
-                # [DFPC 핵심 점수 계산] 필터 간 고유성 (Geometric Uniqueness)
+                # DFPC score: geometric filter uniqueness
                 with torch.no_grad():
                     # weight shape: [out_channels, in_channels * k * k]
                     w = m.weight.data.reshape(m.weight.shape[0], -1)
                     
-                    # 각 필터 간의 L2 Distance Matrix 계산
-                    # dist_matrix[i, j]는 i번째 필터와 j번째 필터 사이의 거리
+                    # Pairwise filter L2 distances
                     dist_matrix = torch.cdist(w, w, p=2)
                     
-                    # 중요도 점수 = 다른 필터들과의 거리 합 (클수록 고유함)
-                    # [Out_channels] 크기의 벡터 탄생
+                    # Distance sum per output channel
                     geometric_importance = dist_matrix.sum(dim=1)
                 
                 if len(alive_indices) > 0:
                     for i in alive_indices:
-                        # 채널별 DFPC 점수 추가
+                        # Per-channel DFPC score
                         target_unit_scores.append(geometric_importance[i].item())
                         
-                        # metadata 형식을 _global_rank_prune이 기대하는 구조로 가짜 그룹화
+                        # Synthetic group metadata
                         fake_group = {'names': [name]}
                         target_unit_metadata.append((fake_group, i))
 
         print(f"[DEBUG] DFPC: Found {len(target_unit_scores)} candidates to prune.")
 
-        # 2. 부모의 Global Ranking 함수 호출 (여기서 progress = epoch / total_epochs 가 적용됨)
+        # Scheduled global ranking
         if len(target_unit_scores) > 0:
             self._global_rank_prune(
                 scores=target_unit_scores, 
@@ -1460,10 +1442,10 @@ class DFPCPruner(PDTPruner):
                 total_epochs=total_epochs, 
                 method_name="DFPC"
             )
-            # 물리적 가중치 제거 적용
+            # Apply masks
             self.apply_mask_to_weights()
         else:
-            print("[DEBUG] 🚨 FATAL: Still 0 candidates for DFPC.")
+            print("[DEBUG] FATAL: Still 0 candidates for DFPC.")
 # ==============================================================================
 # TPP (Towards Personalized Pruning - Weight-Activation Interaction) 비교 실험용 Pruner
 # ==============================================================================
@@ -1479,35 +1461,35 @@ class TPPPruner(PDTPruner):
         target_unit_scores = []
         target_unit_metadata = []
 
-        # 1. 모델의 모든 레이어를 직접 훑습니다 (Emergency Mode 공통 로직)
+        # Collect layers without topology groups
         for name, m in self.model.named_modules():
             if isinstance(m, (nn.Conv2d, nn.Linear)):
                 if not hasattr(m, 'mask'):
                     n_f = m.weight.shape[0]
                     m.register_buffer("mask", torch.ones(n_f, device=m.weight.device))
                 
-                # 살아있는 채널 인덱스 확인
+                # Active channel indices
                 alive_indices = torch.where(m.mask > 0.5)[0].cpu().numpy()
                 
-                # [TPP 핵심 점수 계산] interaction = |W| * sqrt(G_ema)
+                # TPP score: |W| * sqrt(G_ema)
                 with torch.no_grad():
                     w_abs = m.weight.data.abs().reshape(m.weight.shape[0], -1).mean(1)
-                    # G_ema는 이미 PDTPruner에서 업데이트되고 있음
+                    # Reuse PDT Grad-EMA
                     g_score = torch.sqrt(m.grad_ema + 1e-8)
                     interaction_score = w_abs * g_score
                 
                 if len(alive_indices) > 0:
                     for i in alive_indices:
-                        # 채널별 TPP 점수 추가
+                        # Per-channel TPP score
                         target_unit_scores.append(interaction_score[i].item())
                         
-                        # metadata 형식을 _global_rank_prune이 기대하는 구조로 가짜 그룹화
+                        # Synthetic group metadata
                         fake_group = {'names': [name]}
                         target_unit_metadata.append((fake_group, i))
 
         print(f"[DEBUG] TPP: Found {len(target_unit_scores)} candidates to prune.")
 
-        # 2. 부모의 Global Ranking 함수 호출
+        # Parent global ranking
         if len(target_unit_scores) > 0:
             self._global_rank_prune(
                 scores=target_unit_scores, 
@@ -1516,8 +1498,8 @@ class TPPPruner(PDTPruner):
                 total_epochs=total_epochs, 
                 method_name="TPP"
             )
-            # 물리적 가중치 제거 적용
+            # Apply masks
             self.apply_mask_to_weights()
             
         else:
-            print("[DEBUG] 🚨 FATAL: Still 0 candidates for TPP.")
+            print("[DEBUG] FATAL: Still 0 candidates for TPP.")

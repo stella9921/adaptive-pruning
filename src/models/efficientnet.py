@@ -92,7 +92,7 @@ def prune_efficientnet_blockwise(model, block_keep_indices, device):
         if hasattr(block, '2') and hasattr(block[2], 'fc1'):
             se = block[2]
             # fc1: in_channels -> squeezed_channels (보통 1/4)
-            # 여기서는 입력 채널(keep_idx)이 변했으므로 fc1을 새로 정의해야 함
+            # Rebuild fc1 for the pruned input channels
             old_fc1 = se.fc1
             new_fc1 = nn.Conv2d(len(keep_idx), old_fc1.out_channels, 1)
             se.fc1 = new_fc1

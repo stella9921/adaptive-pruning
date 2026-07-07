@@ -77,7 +77,7 @@ def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     print(prof.key_averages().table(sort_by="cuda_memory_usage", row_limit=10))
     return prof
 
-# [여기에 넣으세요!] 어떤 함수도 시작되기 전, 파일의 생얼 부분입니다.
+# Raw CLI arguments
 print("\n" + "="*50, flush=True)
 print(f"[System] Raw Args -> {sys.argv}", flush=True)
 print("="*50 + "\n", flush=True)
@@ -90,7 +90,7 @@ def main():
         deterministic=(args.deterministic or config.get('deterministic', False)),
     )
     # print(f"DEBUG: Current Batch Size is {config.get('batch_size', args.batch_size)}")
-    # [강제 수정] 명령어로 들어온 batch_size가 무시되지 않도록 직접 박아넣습니다.
+    # CLI batch size override
     if args.batch_size:
         config['batch_size'] = args.batch_size
     if args.smoke_test:
@@ -105,9 +105,9 @@ def main():
         })
     
     print(f"[Config] batch_size={config['batch_size']}", flush=True)
-    # --- 로그 파일 자동 저장 설정 시작 ---
+    # Experiment logging
 
-    # ViT 모델은 224x224 해상도가 필수이므로 설정을 강제 업데이트
+    # ViT input resolution
     # if "vit" in config['model']['name'].lower():
     if is_transformer_model(config['model']['name']):
         config['model']['input_size'] = 224
@@ -122,7 +122,7 @@ def main():
         f"[Reproducibility] seed={config['reproducibility']['seed']} "
         f"deterministic={config['reproducibility']['deterministic']}"
     )
-    print(f"📝 Logging started: {log_filename}")
+    print(f"[Logging] started: {log_filename}")
     
     # [System] CLI 인자가 YAML 설정을 덮어쓰도록 명시적으로 우선순위 부여
     if hasattr(args, 'group_selection_ratio') and args.group_selection_ratio is not None:
@@ -184,10 +184,10 @@ def main():
     if is_vit_model and 'imagenet100' in str(dataset_name):
         in_features = model.head.in_features
         model.head = nn.Linear(in_features, 100).to(device)
-        print(f">>> [System] ViT head replaced: {in_features} → 100")
+        print(f">>> [System] ViT head replaced: {in_features} -> 100")
 
         # Head warmup: backbone freeze하고 head만 먼저 학습
-        print(">>> [System] Head warmup 시작 (5 epochs, head only)...")
+        print(">>> [System] Head warmup started (5 epochs, head only).")
         for param in model.parameters():
             param.requires_grad = False
         for param in model.head.parameters():
@@ -213,7 +213,7 @@ def main():
         # 전체 파라미터 다시 학습 가능하게
         for param in model.parameters():
             param.requires_grad = True
-        print(">>> [System] Head warmup 완료. 전체 fine-tuning 시작.")
+        print(">>> [System] Head warmup complete. Starting full fine-tuning.")
     
     # [System] ImageNet-100 대응 FC 가중치 이식
     if ('imagenet' in str(dataset_name)) and not is_vit_model:
@@ -226,7 +226,7 @@ def main():
             model.fc.weight.copy_(full_model.fc.weight[:100])
             model.fc.bias.copy_(full_model.fc.bias[:100])
         del full_model
-        print("✅ FC Weight Transfer Successful.")
+        print("FC weight transfer successful.")
 
     # [Stage 1] Topology Parsing
     topology_groups = get_model_topology(model)
@@ -239,7 +239,7 @@ def main():
     #     print(">>> [System] PAT Mode: Loading Torchvision Pretrained Weights for Sensitivity Analysis...")
     #     pretrained_vgg = tv_models.vgg16(weights=tv_models.VGG16_Weights.IMAGENET1K_V1)
     #     model.load_state_dict(pretrained_vgg.state_dict(), strict=False)
-    #     print("✅ Pretrained Weights Loaded for PAT only.")
+    #     print("Pretrained weights loaded for PAT only.")
     # else:
     #     print(">>> [System] PDT Mode: Starting from Scratch (No Pretrained Weights).")
 
@@ -351,7 +351,7 @@ def main():
 #                 else:
 #                     eff = pdt_engine.get_model_efficiency()
 #                     print(f"\n[Scientific Metrics - Epoch {epoch}]")
-#                     print(f" 🟢 Model Size: {eff['curr_mb']:.2f} MB | 🔵 Sparsity: {eff['sparsity']:.2f} %")
+#                     print(f"Model Size: {eff['curr_mb']:.2f} MB | Sparsity: {eff['sparsity']:.2f} %")
 
 #                 # 3. 데이터 수집 및 JSON 로그 업데이트
 #                 val_acc = evaluate(model, val_loader, device)
@@ -387,7 +387,7 @@ def main():
 #                     'sparsity': current_sp,
 #                     'stats': epoch_stats
 #                 }, save_path)
-#                 print(f"💾 Checkpoint saved: {save_path}")
+#                 print(f"Checkpoint saved: {save_path}")
                 
 #                 # 5. 프로파일러는 가장 마지막에 실행 (로그 밀림 방지 위해 필요 시에만 주석 해제)
 #                 torch.cuda.empty_cache()
@@ -410,7 +410,7 @@ def main():
 #     # --- [5] 최종 학습 완료 저장 ---
 #     final_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_final.pth")
 #     torch.save(model.state_dict(), final_path)
-#     print(f"🏁 Final Model Saved: {final_path}")
+#     print(f"Final model saved: {final_path}")
 
 #     # --- [6] 물리적 압축 및 메모리 제약 해소 검증 (Stage 5) ---
 #     print("\n" + "="*30 + " FINAL PHYSICAL COMPRESSION " + "="*30)
@@ -437,7 +437,7 @@ def main():
     
 #     compressed_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_FINAL_COMPRESSED.pth")
 #     torch.save(model.state_dict(), compressed_path)
-#     print(f"✅ Physically Compressed Model Saved: {compressed_path}")
+#     print(f"Physically compressed model saved: {compressed_path}")
 #     print("="*89 + "\n")
 # def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader, device, topology_groups, args):
 #     # --- [0] 저장 경로 설정 ---
@@ -563,12 +563,12 @@ def main():
 
 #             ckpt_name = f"{model_cfg['name']}_{strategy_type}_ep{epoch}_sp{current_sp:.1f}.pth"
 #             torch.save({'model_state_dict': model.state_dict(), 'sparsity': current_sp}, os.path.join(checkpoint_dir, ckpt_name))
-#             print(f"💾 Checkpoint saved: {ckpt_name}")
+#             print(f"Checkpoint saved: {ckpt_name}")
 
 #     # --- [5] 최종 학습 완료 저장 ---
 #     final_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_final.pth")
 #     torch.save(model.state_dict(), final_path)
-#     print(f"🏁 Final Model Saved: {final_path}")
+#     print(f"Final model saved: {final_path}")
 
 #     # --- [6] 물리적 압축 및 메모리 제약 해소 검증 (Stage 5) ---
 #     print("\n" + "="*30 + " FINAL PHYSICAL COMPRESSION " + "="*30)
@@ -596,7 +596,7 @@ def main():
     
 #     compressed_path = os.path.join(checkpoint_dir, f"{model_cfg['name']}_{strategy_type}_FINAL_COMPRESSED.pth")
 #     torch.save(model.state_dict(), compressed_path)
-#     print(f"✅ Physically Compressed Model Saved: {compressed_path}")
+#     print(f"Physically compressed model saved: {compressed_path}")
 #     print("="*89 + "\n")
 
 
@@ -605,9 +605,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     import torch_pruning as tp
     import json
 
-    # ← 맨 앞으로 올림
+    # Model family
     is_vit_model = is_transformer_model(config['model']['name'])
-     # ViT Hessian 2차 미분 지원을 위해 flash attention 비활성화
+    # ViT second-order derivative support
     if 'vit' in config['model']['name'].lower() or \
        'deit' in config['model']['name'].lower():
         torch.backends.cuda.enable_flash_sdp(False)
@@ -734,7 +734,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         total_loss = 0.0
         reset_peak_memory(device)
 
-         # 🔥 step-level memory trace 저장용
+        # Step-level memory trace
         step_mem_trace = []
         prune_step_index = None
 
@@ -746,11 +746,11 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()
 
-            # --- [여기서부터 교체 시작] ---
+            # Pruning step
             output = model(x)
             loss = criterion(output, y)
             
-            # 나중에 del loss 할 거니까 미리 숫자만 빼둡니다 (에러 방지)
+            # Detach scalar loss before graph cleanup
             current_loss_val = loss.item()
 
             should_prune = (
@@ -771,7 +771,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                     f"progress={pdt_engine.scheduled_pruning_progress:.4f}"
                 )
 
-                # Hessian 계산을 위해 그래프 유지하며 백워드
+                # Retain graph for Hessian computation
                 loss.backward(retain_graph=True)
                 pdt_engine.update_ema_and_mask_grad()
 
@@ -855,17 +855,17 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                     print("[DEBUG] Stop after first pruning step requested. Exiting PDT experiment early.")
                     return
 
-                # [메모리 해제 핵심] 찌꺼기를 완전히 지웁니다.
+                # Release the pruning graph
                 import gc
                 del loss  # 1. loss 객체 삭제
                 gc.collect() # 2. 가비지 컬렉션
                 torch.cuda.empty_cache() # 3. GPU 메모리 반환
-                print("🧹 Post-Pruning Memory Cleared & Graph Destroyed.")
+                print("Post-pruning memory cleared and graph released.")
 
                 print(f"\n[Scientific Metrics - Epoch {epoch}]")
-                print(f" 🟢 Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
-                print(f" 🔵 Sparsity: {current_sp:.2f} %")
-                print(f" 🟡 Speedup: {eff['speedup']:.2f}x")
+                print(f"Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
+                print(f"Sparsity: {current_sp:.2f} %")
+                print(f"Speedup: {eff['speedup']:.2f}x")
 
                 ckpt_name = (
                     f"{config['run_id']}__pruning-snapshot__epoch-{epoch:03d}"
@@ -879,10 +879,10 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                     'sparsity_gap_percent_point': sparsity_gap,
                     'metrics': eff
                 }, os.path.join(checkpoint_dir, ckpt_name))
-                print(f"💾 Checkpoint saved: {ckpt_name}")
+                print(f"Checkpoint saved: {ckpt_name}")
 
             else:
-                # 프루닝 안 할 때는 그냥 백워드
+                # Standard training step
                 t_step_start = time.time()
                 loss.backward()
                 pdt_engine.update_ema_and_mask_grad()
@@ -899,14 +899,14 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             optimizer.step()
             pdt_engine.apply_mask_to_weights(optimizer=optimizer)
 
-            # 🔥 step-level peak 기록
+            # Step-level peak memory
             synchronize_device(device)
             step_peak = peak_memory_mb(device)
             step_mem_trace.append(step_peak)
 
-            # 아까 저장해둔 숫자값을 더해줍니다.
+            # Accumulate batch loss
             total_loss += current_loss_val 
-            # --- [교체 끝] ---
+            # End training step
 
         # -------------------------
         # Epoch 종료
@@ -921,7 +921,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             f"Peak VRAM: {peak_vram:.2f} MB | "
             f"LR: {optimizer.param_groups[0]['lr']:.6g}"
         )
-        # 🔥 pruning 전후 20 step 중앙값 계산
+        # Median memory around pruning
         if prune_step_index is not None and \
         prune_step_index >= 20 and \
         prune_step_index + 20 < len(step_mem_trace):
@@ -932,14 +932,14 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             prune_peak  = step_mem_trace[prune_step_index]
             post_median = np.median(step_mem_trace[prune_step_index+1:prune_step_index+21])
 
-            print("\n🔥 Pruning Stability Analysis")
+            print("\nPruning Stability Analysis")
             print(f"   Pre Median : {pre_median:.2f} MB")
             print(f"   Prune Peak : {prune_peak:.2f} MB")
             print(f"   Post Median: {post_median:.2f} MB")
 
 
         # -------------------------
-        # 🔥 매 Epoch 체크포인트 저장
+        # Epoch checkpoint
         # -------------------------
         # epoch_ckpt_name = f"{config['model']['name']}_{strategy_type}_ep{epoch}.pth"
 
@@ -954,7 +954,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         #     os.path.join(checkpoint_dir, epoch_ckpt_name)
         # )
 
-        # print(f"💾 Epoch Checkpoint Saved: {epoch_ckpt_name}")
+        # print(f"Epoch checkpoint saved: {epoch_ckpt_name}")
 
         epoch_metrics = collect_epoch_metrics(model, optimizer, x)
         print(
@@ -1038,11 +1038,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     if args.smoke_test:
         print(f"[Smoke Test] Completed. Results: {config['run_dir']}")
         return
-    print(f"\n🏁 Final Model Saved: {final_path}")
-
-    # ============================================================
-    # ================= PHYSICAL COMPRESSION =====================
-    # ============================================================
+    print(f"\nFinal model saved: {final_path}")
 
     # ============================================================
     # ================= PHYSICAL COMPRESSION =====================
@@ -1069,12 +1065,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         DG.build_dependency(model, example_inputs=example_inputs)
 
     if is_vit_model:
-        # ViT: 타입별로 pruning 함수 구분
+        # ViT pruning by group type
         all_modules = dict(model.named_modules())
 
         for g in topology_groups:
             if g['type'] == 'ffn':
-                # fc1: out_channels (행 방향)
+                # Prune fc1 output rows
                 fc1 = all_modules.get(g['names'][0])
                 fc2 = all_modules.get(g['names'][1])
 
@@ -1086,8 +1082,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                         pruning_group.prune()
                         print(f"[Compressed] {g['names'][0]}: {len(idxs)} neurons removed")
 
-                # fc2는 DependencyGraph가 fc1과 묶어서 자동 처리
-                # (fc1 out = fc2 in 의존성을 DG가 인식)
+                # DependencyGraph propagates fc1 output pruning to fc2 inputs
 
             elif g['type'] == 'attn':
                 qkv  = all_modules.get(g['names'][0])
@@ -1097,12 +1092,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                     num_heads = g['num_heads']
                     head_dim  = g['head_dim']
 
-                    # 제거할 head 인덱스 → qkv 행 인덱스로 변환
+                    # Convert head indices to qkv rows
                     dead_heads = torch.where(qkv.mask == 0)[0].tolist()
                     if not dead_heads:
                         continue
 
-                    # Q/K/V 각 슬라이스의 행 인덱스 수집
+                    # Collect Q/K/V rows
                     qkv_idxs = []
                     for h in dead_heads:
                         for offset in range(3):  # Q, K, V
@@ -1116,7 +1111,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                         print(f"[Compressed] {g['names'][0]}: {len(dead_heads)} heads removed")
 
     else:
-        # CNN: 기존 로직 그대로
+        # CNN physical pruning
         for module in model.modules():
             if isinstance(module, torch.nn.Conv2d):
                 if module.groups == module.in_channels == module.out_channels:
@@ -1147,7 +1142,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         f"{config['run_id']}__checkpoint__physically-compressed.pth"
     )
     torch.save(model.state_dict(), compressed_path)
-    print(f"✅ Physically Compressed Model Saved: {compressed_path}")
+    print(f"Physically compressed model saved: {compressed_path}")
     print("=============================================================\n")
 
 
@@ -1163,12 +1158,12 @@ def execute_pat_experiment(model, config, train_loader, val_loader, test_loader,
     if not os.path.exists(base_ckpt_path):
         print(f"\n>>> [PAT Pre-train] Base weights not found. Training for 120 epochs first...")
         optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
-        # CIFAR-100 정석 스케줄러 (Cos-Annealing)
+        # CIFAR-100 cosine schedule
         scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=120)
         criterion = nn.CrossEntropyLoss()
 
         for epoch in range(1, 121):
-            # 기존에 main.py에 정의된 train_one_epoch와 evaluate 함수 활용
+            # Shared training and evaluation functions
             train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
             val_acc = evaluate(model, val_loader, device)
             scheduler.step()
@@ -1176,9 +1171,9 @@ def execute_pat_experiment(model, config, train_loader, val_loader, test_loader,
             if epoch % 10 == 0 or epoch == 1:
                 print(f" [Pre-train] Epoch {epoch}/120 | Loss: {train_loss:.4f} | Acc: {val_acc:.2f}%")
         
-        # 학습 완료된 '똑똑한 모델' 저장
+        # Save the trained baseline
         torch.save(model.state_dict(), base_ckpt_path)
-        print(f"✅ Pre-training complete. Saved to {base_ckpt_path}")
+        print(f"Pre-training complete. Saved to {base_ckpt_path}")
     else:
         print(f">>> [System] Found existing base model at {base_ckpt_path}. Loading for PAT...")
         model.load_state_dict(torch.load(base_ckpt_path, map_location=device))

@@ -81,7 +81,7 @@ class PATPruner(BasePruner):
 
                 ratio = ratios.get(rep_name, 0.0)
                 # 라운드가 반복될수록 누적해서 더 많이 깎아야 하므로 
-                # round_idx를 비율에 곱해줍니다 (스케줄링)
+                # Round-based schedule
                 current_ratio = min((ratio * round_idx) / 100.0, 0.99)
                 
                 # 가중치 추출
@@ -89,14 +89,14 @@ class PATPruner(BasePruner):
                 elif hasattr(block, 'bn1'): w = block.conv1.weight.data
                 else: w = block.weight.data
                 
-                # [핵심 수정] 현재 가중치의 실제 크기를 가져옵니다 (63개면 63개)
+                # Current weight dimension
                 actual_channels = w.size(0)
                 importance = w.view(actual_channels, -1).abs().sum(dim=1).cpu()
                 
                 # 남길 개수 계산
                 num_keep = max(1, int(actual_channels * (1 - current_ratio / round_idx))) 
                 # 위 식은 round_idx에 따라 매 라운드 조금씩 더 쳐내게 설계하거나,
-                # 단순히 현재 채널에서 일정 비율을 유지하게 합니다.
+                # Per-layer channel keep ratio
                 
                 # 현재 살아있는 채널 개수 안에서만 인덱스 추출
                 keep_idx = sorted(importance.argsort(descending=True)[:num_keep].tolist())

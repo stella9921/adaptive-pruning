@@ -10,7 +10,7 @@ class SNOWSEngine:
         if not target_params:
             return []
 
-        # ViT의 flash/mem-efficient attention은 2차 미분 미지원 → math 모드로 fallback
+        # Math SDP supports second-order derivatives
         flash_was_enabled = torch.backends.cuda.flash_sdp_enabled()
         mem_eff_was_enabled = torch.backends.cuda.mem_efficient_sdp_enabled()
         torch.backends.cuda.enable_flash_sdp(False)
@@ -48,7 +48,7 @@ class SNOWSEngine:
             except RuntimeError as e:
                 raise e
 
-        # 원래 설정 복원
+        # Restore SDP settings
         torch.backends.cuda.enable_flash_sdp(flash_was_enabled)
         torch.backends.cuda.enable_mem_efficient_sdp(mem_eff_was_enabled)
 
