@@ -33,7 +33,12 @@ from src.utils.measure import (
     reset_peak_memory,
     synchronize_device,
 )
-from src.utils.checkpoint import load_training_checkpoint, save_training_checkpoint
+from src.utils.checkpoint import (
+    experiment_signature,
+    load_model_checkpoint,
+    load_training_checkpoint,
+    save_training_checkpoint,
+)
 from src.utils.visualization import save_history_plots, save_pruning_plots
 from src.utils.reproducibility import set_reproducibility
 from src.utils.training import build_scheduler
@@ -745,7 +750,8 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     best_val_acc = float('-inf')
     if args.resume:
         resume_state = load_training_checkpoint(
-            args.resume, model, optimizer, scheduler, device
+            args.resume, model, optimizer, scheduler, device,
+            expected_signature=experiment_signature(config),
         )
         first_epoch = int(resume_state['epoch']) + 1
         if first_epoch > total_epochs:
@@ -755,6 +761,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             )
         history_data = list(resume_state.get('history', []))
         best_val_acc = float(resume_state.get('best_val_acc', best_val_acc))
+        loader_state = resume_state.get('train_loader_generator_state')
+        if loader_state is not None and train_loader.generator is not None:
+            train_loader.generator.set_state(loader_state.cpu())
         print(
             f"[Checkpoint] resumed={args.resume} "
             f"last_epoch={first_epoch - 1} next_epoch={first_epoch}"
@@ -998,6 +1007,13 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         # print(f"💾 Epoch Checkpoint Saved: {epoch_ckpt_name}")
 
         model_metrics = measure_model_resources(model)
+        print(
+            "[Parameter Metrics] "
+            f"total={model_metrics['total_params']:,} "
+            f"prunable={model_metrics['prunable_weight_params']:,} "
+            f"prunable_sparsity={model_metrics['parameter_sparsity']:.2%} "
+            f"model_reduction={model_metrics['model_parameter_reduction']:.2%}"
+        )
         cuda_metrics = measure_cuda_memory()
         state_metrics = measure_training_state_memory(model, optimizer)
         inference_metrics = measure_inference(model, x)
@@ -1023,6 +1039,11 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             'best_val_acc': max(best_val_acc, val_acc),
             'target_pruning_ratio': strat_cfg['pruning_ratio'],
             'run_id': config['run_id'],
+            'experiment_signature': experiment_signature(config),
+            'train_loader_generator_state': (
+                train_loader.generator.get_state()
+                if train_loader.generator is not None else None
+            ),
         }
         last_path = os.path.join(
             checkpoint_dir, f"{config['run_id']}__checkpoint__last.pth"
@@ -1046,11 +1067,23 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # ===================== FINAL SAVE ============================
     # ============================================================
 
-    final_test_acc = evaluate(model, test_loader, device)
+    last_test_acc = evaluate(model, test_loader, device)
+    best_path = os.path.join(
+        checkpoint_dir, f"{config['run_id']}__checkpoint__best.pth"
+    )
+    if os.path.exists(best_path):
+        best_state = load_model_checkpoint(best_path, model, device)
+        final_test_acc = evaluate(model, test_loader, device)
+        print(
+            f"[Final Metrics] Last Test Accuracy: {last_test_acc:.2f}% | "
+            f"Best(epoch {best_state['epoch']}) Test Accuracy: {final_test_acc:.2f}%"
+        )
+    else:
+        final_test_acc = last_test_acc
+        print(f"[Final Metrics] Test Accuracy: {final_test_acc:.2f}%")
     if history_data:
         history_data[-1]['test_accuracy'] = final_test_acc
         save_epoch_metrics(history_data, config['run_dir'], config['run_id'])
-    print(f"[Final Metrics] Test Accuracy: {final_test_acc:.2f}%")
 
     final_path = os.path.join(
         checkpoint_dir, f"{config['run_id']}__checkpoint__final.pth"
