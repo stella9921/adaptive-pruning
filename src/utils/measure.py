@@ -136,6 +136,16 @@ def measure_training_state_memory(model, optimizer):
     }
 
 
+def collect_epoch_metrics(model, optimizer, sample):
+    return {
+        **measure_model_resources(model),
+        **measure_cuda_memory(),
+        **measure_training_state_memory(model, optimizer),
+        **measure_inference(model, sample),
+        **measure_flops(model, sample),
+    }
+
+
 def measure_inference(model, sample, warmup=3, iterations=10):
     was_training = model.training
     model.eval()

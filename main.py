@@ -8,10 +8,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import torch_pruning as tp
 import sys
-from datetime import datetime
 import time
 import json
-import re
 from contextlib import nullcontext
 
 # 기존 모듈 임포트
@@ -19,13 +17,9 @@ from src.pruning.topology_manager import get_model_topology
 from src.pruning.optimizer import lagrangian_optimization
 from src.utils.config_loader import load_config
 from src.utils.measure import (
-    measure_cuda_memory,
-    measure_flops,
-    measure_inference,
+    collect_epoch_metrics,
     measure_module_memory,
-    measure_model_resources,
     measure_pruning_structure,
-    measure_training_state_memory,
     save_epoch_metrics,
     save_pruning_tables,
     save_run_metadata,
@@ -33,6 +27,7 @@ from src.utils.measure import (
     reset_peak_memory,
     synchronize_device,
 )
+from src.utils.experiment import prepare_experiment, TeeLogger
 from src.utils.checkpoint import (
     experiment_signature,
     load_model_checkpoint,
@@ -43,7 +38,7 @@ from src.utils.visualization import save_history_plots, save_pruning_plots
 from src.utils.reproducibility import set_reproducibility
 from src.utils.training import build_scheduler
 from src.data.dataloader import get_dataloaders
-from src.models import get_model, get_prune_fn
+from src.models import get_model, get_prune_fn, is_transformer_model
 from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
 from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner,DFPCPruner,TPPPruner,ViTPDTPruner
@@ -114,60 +109,15 @@ def main():
 
     # ViT 모델은 224x224 해상도가 필수이므로 설정을 강제 업데이트
     # if "vit" in config['model']['name'].lower():
-    if any(k in config['model']['name'].lower() for k in ['vit', 'deit', 'transformer']):
+    if is_transformer_model(config['model']['name']):
         config['model']['input_size'] = 224
         print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")    
 
  
-    strategy_preset = config['strategy'].get('preset', 'pdt')
-    dataset_cfg = config.get('dataset', 'dataset')
-    dataset_tag = (
-        dataset_cfg if isinstance(dataset_cfg, str)
-        else dataset_cfg.get('name', 'dataset')
-    )
-    if args.dataset is not None:
-        dataset_tag = args.dataset
-        config['dataset'] = args.dataset
-    slug = lambda value: re.sub(r'[^a-zA-Z0-9._-]+', '-', str(value)).strip('-')
-    ratio_tag = f"{config['strategy']['pruning_ratio'] * 100:05.1f}".replace('.', 'p')
-    run_timestamp = datetime.now().strftime('%Y%m%d-%H%M%S')
-    run_id = "__".join([
-        slug(config['model']['name']),
-        slug(dataset_tag),
-        slug(strategy_preset),
-        f"prune-{ratio_tag}",
-        run_timestamp,
-    ])
-    run_dir = os.path.join(config.get('exp_root', './exp'), 'runs', run_id)
-    log_dir = os.path.join(run_dir, 'logs')
-    config['run_id'] = run_id
-    config['run_dir'] = run_dir
-    config['checkpoint_dir'] = os.path.join(run_dir, 'checkpoints')
-    config['profiling'] = {
-        'pytorch': bool(args.profile_pytorch),
-        'nvtx': bool(args.profile_nvtx),
-    }
-    os.makedirs(log_dir, exist_ok=True)
-    os.makedirs(config['checkpoint_dir'], exist_ok=True)
-    for dirname in ('metrics', 'plots', 'profiles'):
-        os.makedirs(os.path.join(run_dir, dirname), exist_ok=True)
-    log_filename = f"{run_id}__run.log"
-    
-    class Logger(object):
-        def __init__(self):
-            self.terminal = sys.stdout
-            self.log = open(os.path.join(log_dir, log_filename), "a",encoding='utf-8')
-        def write(self, message):
-            try:
-                self.terminal.write(message)
-            except UnicodeEncodeError:
-                encoding = self.terminal.encoding or 'utf-8'
-                safe_message = message.encode(encoding, errors='replace').decode(encoding)
-                self.terminal.write(safe_message)
-            self.log.write(message)
-        def flush(self): pass
+    log_filename = prepare_experiment(config, args)
+    log_path = os.path.join(config['run_dir'], 'logs', log_filename)
 
-    sys.stdout = Logger() # 이제 모든 print문이 파일로
+    sys.stdout = TeeLogger(log_path)
     print(
         f"[Reproducibility] seed={config['reproducibility']['seed']} "
         f"deterministic={config['reproducibility']['deterministic']}"
@@ -184,7 +134,7 @@ def main():
     if hasattr(args, 'lr') and args.lr is not None:
         config['model']['base_lr'] = args.lr
     metadata_path = save_run_metadata(config, sys.argv)
-    print(f"[Experiment] run_id={run_id}")
+    print(f"[Experiment] run_id={config['run_id']}")
     print(f"[Experiment] metadata={metadata_path}")
     if args.profile_pytorch:
         print("[Profiler] PyTorch operation and memory profiling enabled.")
@@ -197,7 +147,7 @@ def main():
     dataset_name = dataset_cfg if isinstance(dataset_cfg, str) else dataset_cfg.get('name', 'cifar100')
 
     # if "vit" in config['model']['name'].lower():
-    if any(k in config['model']['name'].lower() for k in ['vit', 'deit', 'transformer']):
+    if is_transformer_model(config['model']['name']):
         # ViT 모델 구조상 224x224 해상도가 필수
         config['model']['input_size'] = 224
         print(">>> [System] ViT detected. Input size forced to 224 for dataloader.")
@@ -229,8 +179,7 @@ def main():
     # 2. 모델 초기화
     model = get_model(config['model']).to(device)
 
-    is_vit_model = any(k in config['model']['name'].lower()
-                       for k in ['vit', 'deit', 'transformer'])
+    is_vit_model = is_transformer_model(config['model']['name'])
     
     if is_vit_model and 'imagenet100' in str(dataset_name):
         in_features = model.head.in_features
@@ -657,8 +606,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     import json
 
     # ← 맨 앞으로 올림
-    is_vit_model = any(k in config['model']['name'].lower()
-                       for k in ['vit', 'deit', 'transformer'])
+    is_vit_model = is_transformer_model(config['model']['name'])
      # ViT Hessian 2차 미분 지원을 위해 flash attention 비활성화
     if 'vit' in config['model']['name'].lower() or \
        'deit' in config['model']['name'].lower():
@@ -677,7 +625,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     # Pruner 생성
     # -------------------------
     model_name = config['model']['name'].lower()
-    if "vit" in model_name or "deit" in model_name or "transformer" in model_name:
+    if is_transformer_model(model_name):
         pdt_engine = ViTPDTPruner(model, config, args, topology_groups=topology_groups)
         print(f"[System] Initializing ViTPDTPruner for {model_name}")
     else:
@@ -748,6 +696,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     history_data = []
     first_epoch = 1
     best_val_acc = float('-inf')
+    best_checkpoint_path = None
     if args.resume:
         resume_state = load_training_checkpoint(
             args.resume, model, optimizer, scheduler, device,
@@ -761,6 +710,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             )
         history_data = list(resume_state.get('history', []))
         best_val_acc = float(resume_state.get('best_val_acc', best_val_acc))
+        best_checkpoint_path = resume_state.get('best_checkpoint_path')
         loader_state = resume_state.get('train_loader_generator_state')
         if loader_state is not None and train_loader.generator is not None:
             train_loader.generator.set_state(loader_state.cpu())
@@ -1006,37 +956,37 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
         # print(f"💾 Epoch Checkpoint Saved: {epoch_ckpt_name}")
 
-        model_metrics = measure_model_resources(model)
+        epoch_metrics = collect_epoch_metrics(model, optimizer, x)
         print(
             "[Parameter Metrics] "
-            f"total={model_metrics['total_params']:,} "
-            f"prunable={model_metrics['prunable_weight_params']:,} "
-            f"prunable_sparsity={model_metrics['parameter_sparsity']:.2%} "
-            f"model_reduction={model_metrics['model_parameter_reduction']:.2%}"
+            f"total={epoch_metrics['total_params']:,} "
+            f"prunable={epoch_metrics['prunable_weight_params']:,} "
+            f"prunable_sparsity={epoch_metrics['parameter_sparsity']:.2%} "
+            f"model_reduction={epoch_metrics['model_parameter_reduction']:.2%}"
         )
-        cuda_metrics = measure_cuda_memory()
-        state_metrics = measure_training_state_memory(model, optimizer)
-        inference_metrics = measure_inference(model, x)
-        flops_metrics = measure_flops(model, x)
         history_data.append({
             'epoch': epoch,
             'train_loss': total_loss / len(train_loader),
             'val_accuracy': val_acc,
             'learning_rate': optimizer.param_groups[0]['lr'],
             'target_pruning_ratio': strat_cfg['pruning_ratio'],
-            **model_metrics,
-            **cuda_metrics,
-            **state_metrics,
-            **inference_metrics,
-            **flops_metrics,
+            **epoch_metrics,
         })
         save_epoch_metrics(history_data, config['run_dir'], config['run_id'])
         save_history_plots(history_data, config['run_dir'], config['run_id'])
         if scheduler is not None:
             scheduler.step()
 
+        is_new_best = val_acc > best_val_acc
+        if is_new_best:
+            best_val_acc = val_acc
+            best_checkpoint_path = os.path.join(
+                checkpoint_dir, f"{config['run_id']}__checkpoint__best.pth"
+            )
+
         checkpoint_extra = {
-            'best_val_acc': max(best_val_acc, val_acc),
+            'best_val_acc': best_val_acc,
+            'best_checkpoint_path': best_checkpoint_path,
             'target_pruning_ratio': strat_cfg['pruning_ratio'],
             'run_id': config['run_id'],
             'experiment_signature': experiment_signature(config),
@@ -1045,6 +995,15 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 if train_loader.generator is not None else None
             ),
         }
+        if is_new_best:
+            save_training_checkpoint(
+                best_checkpoint_path, model, optimizer, scheduler, epoch, history_data,
+                **checkpoint_extra,
+            )
+            print(
+                f"[Checkpoint] new best val_acc={val_acc:.2f}%: "
+                f"{best_checkpoint_path}"
+            )
         last_path = os.path.join(
             checkpoint_dir, f"{config['run_id']}__checkpoint__last.pth"
         )
@@ -1052,27 +1011,14 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             last_path, model, optimizer, scheduler, epoch, history_data,
             **checkpoint_extra,
         )
-        if val_acc > best_val_acc:
-            best_val_acc = val_acc
-            best_path = os.path.join(
-                checkpoint_dir, f"{config['run_id']}__checkpoint__best.pth"
-            )
-            save_training_checkpoint(
-                best_path, model, optimizer, scheduler, epoch, history_data,
-                **checkpoint_extra,
-            )
-            print(f"[Checkpoint] new best val_acc={val_acc:.2f}%: {best_path}")
 
     # ============================================================
     # ===================== FINAL SAVE ============================
     # ============================================================
 
     last_test_acc = evaluate(model, test_loader, device)
-    best_path = os.path.join(
-        checkpoint_dir, f"{config['run_id']}__checkpoint__best.pth"
-    )
-    if os.path.exists(best_path):
-        best_state = load_model_checkpoint(best_path, model, device)
+    if best_checkpoint_path and os.path.exists(best_checkpoint_path):
+        best_state = load_model_checkpoint(best_checkpoint_path, model, device)
         final_test_acc = evaluate(model, test_loader, device)
         print(
             f"[Final Metrics] Last Test Accuracy: {last_test_acc:.2f}% | "

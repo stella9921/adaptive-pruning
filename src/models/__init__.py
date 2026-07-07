@@ -6,12 +6,17 @@ from .efficientnet import get_efficientnet, prune_efficientnet_blockwise
 import timm 
 
 
+def is_transformer_model(model_name):
+    name = model_name.lower()
+    return any(keyword in name for keyword in ('vit', 'deit', 'transformer'))
+
+
 def get_model(model_cfg):
     name = model_cfg['name'].lower()
     num_classes = model_cfg.get('num_classes', 100)
     
     # ViT / DeiT 계열
-    if 'vit' in name or 'deit' in name or 'transformer' in name:
+    if is_transformer_model(name):
         print(f">>> [Model] Loading Vision Transformer: {name}")
         model = timm.create_model(
             name,
