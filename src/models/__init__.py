@@ -2,7 +2,7 @@ import torch.nn as nn
 from .resnet import get_resnet, prune_resnet_blockwise
 from .vgg import get_vgg16, prune_vgg_blockwise
 from .efficientnet import get_efficientnet, prune_efficientnet_blockwise
-# from .mobilenet import get_mobilenet, prune_mobilenet_blockwise
+from .mobilenet import get_mobilenet, prune_mobilenet_blockwise
 import timm 
 
 
