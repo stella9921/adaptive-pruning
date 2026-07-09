@@ -219,16 +219,19 @@ class PDTPruner(BasePruner):
 
     def step_pruning(self, loss, current_epoch, total_epochs):
         all_modules = dict(self.model.named_modules())
+        encoded_modules = {
+            module_name.replace('.', '_'): module
+            for module_name, module in self.model.named_modules()
+        }
+
         def find_layer(name):
-            if name in all_modules: return all_modules[name]
-            return all_modules.get(name.replace('_', '.'))
+            return all_modules.get(name, encoded_modules.get(name))
 
         
 
         # Resolve active topology groups
         if hasattr(self, 'topology_groups') and self.topology_groups is not None and len(self.topology_groups) > 0:
             active_groups = self.topology_groups
-            # print(f"[DEBUG] Success! Using {len(active_groups)} groups.")
         else:
             # Fallback for missing ResNet topology
             print("[WARNING] Fallback scan initiated...")
@@ -239,10 +242,6 @@ class PDTPruner(BasePruner):
 
 
         # Legacy group fallback
-        # if not hasattr(self, 'topology_groups') or self.topology_groups is None:
-        #     self.topology_groups = [[name] for name, m in self.model.named_modules() 
-        #                             if isinstance(m, (nn.Conv2d, nn.Linear))]
-
         actual_total = getattr(self, 'total_epochs', total_epochs)
         progress = self._get_pruning_progress(current_epoch, actual_total)
         target_remaining_ratio = 1.0 - (progress * self.pruning_ratio)
@@ -554,7 +553,7 @@ class PDTPruner(BasePruner):
             'speedup': theoretical_speedup
         }
 
-    def _global_rank_prune(self, scores, metadata, total_epochs,epoch, method_name):
+    def _global_rank_prune(self, scores, metadata, total_epochs, epoch, method_name):
         """라그랑주 대신 모든 경쟁 기법이 공통으로 사용할 Global Ranking 실행부"""
         # Target prune count
         progress = self._get_pruning_progress(epoch, total_epochs)
@@ -568,23 +567,39 @@ class PDTPruner(BasePruner):
         )
         target_pruned_cost = total_param_cost * total_target_sparsity
         selected_indices = []
+        projected_alive = {
+            name: int(layer.mask.sum().item())
+            for name, layer in self.model.named_modules()
+            if hasattr(layer, 'mask')
+        }
 
         for idx in np.argsort(scores):
             if current_pruned_cost >= target_pruned_cost:
                 break
             group_obj, channel_idx = metadata[idx]
             unit_cost = 0.0
+            candidate_layers = []
             for layer_name in group_obj['names']:
-                layer = self.model.get_submodule(layer_name.replace('_', '.'))
-                if (
+                layer = self.model.get_submodule(layer_name)
+                min_keep = max(
+                    1, int(np.ceil(layer.mask.numel() * self.min_survival_ratio))
+                )
+                can_prune = (
                     hasattr(layer, 'mask')
                     and channel_idx < layer.mask.size(0)
                     and layer.mask[channel_idx] > 0.5
-                ):
-                    unit_cost += layer.weight.numel() / layer.weight.shape[0]
-            if unit_cost > 0:
+                    and projected_alive[layer_name] > min_keep
+                )
+                if not can_prune:
+                    candidate_layers = []
+                    break
+                candidate_layers.append((layer_name, layer))
+                unit_cost += layer.weight.numel() / layer.weight.shape[0]
+            if candidate_layers:
                 selected_indices.append(idx)
                 current_pruned_cost += unit_cost
+                for layer_name, _ in candidate_layers:
+                    projected_alive[layer_name] -= 1
 
         num_to_prune = len(selected_indices)
 
@@ -594,7 +609,7 @@ class PDTPruner(BasePruner):
             for idx in indices:
                 group_obj, channel_idx = metadata[idx]
                 for ln in group_obj['names']:
-                    layer = self.model.get_submodule(ln.replace('_', '.'))
+                    layer = self.model.get_submodule(ln)
                     if hasattr(layer, 'mask'):
                         # Skip channel indices outside the layer mask
                         if channel_idx < layer.mask.size(0):
@@ -614,9 +629,14 @@ class PDTPruner(BasePruner):
         print(f"Model Size: {eff['orig_mb']:.2f} MB -> {eff['curr_mb']:.2f} MB")
         print(f"Sparsity (Params/FLOPs): {eff['sparsity']:.2f} %")
         print(f"Theoretical Speedup: {eff['speedup']:.2f}x")
-        print(f"Current GPU Mem (Allocated): {torch.cuda.memory_allocated() / 1024**2:.2f} MB")
+        allocated_mb = (
+            torch.cuda.memory_allocated() / 1024**2
+            if torch.cuda.is_available() else 0.0
+        )
+        print(f"Current GPU Mem (Allocated): {allocated_mb:.2f} MB")
         print(f"{'='*89}\n")
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
 
 class ViTPDTPruner(PDTPruner):
@@ -1030,7 +1050,6 @@ class ViTPDTPruner(PDTPruner):
         # 리포트
         eff = self.get_model_efficiency()
         print(f"\n{'='*30} ViT PDT k-horizon Pruning Report {'='*30}")
-        # print(f" k_horizon={self.k_horizon} | Pruned: {pruned_count} units")
         print(f" k_horizon={self.k_horizon} | Pruned: {pruned_count} units | Overhead: {t_end - t_start:.2f}s")
         for g in self.topology_groups:
             m = all_modules.get(g['names'][0])
@@ -1039,27 +1058,17 @@ class ViTPDTPruner(PDTPruner):
             t = m.mask.numel()
             a = int(m.mask.sum().item())
             print(f" [{g['type'].upper()}] {g['names'][0]:40s} | {a:4d}/{t:4d} | {(1-a/t)*100:5.1f}% pruned")
-        # print(f"\n Size: {eff['curr_mb']:.2f}MB | Sparsity: {eff['sparsity']:.2f}% | Speedup: {eff['speedup']:.2f}x")
         true_sp = self.get_true_sparsity()
         print(f"\n Size: {eff['curr_mb']:.2f}MB | Sparsity(weight): {true_sp:.2f}% | Speedup: {eff['speedup']:.2f}x")
         print('='*67)
 
 
-# ==============================================================================
-# HAP (Hessian-Aware Pruning) 비교 실험용 Pruner
-# ==============================================================================
-# ==============================================================================
-# HAP (Hessian-Aware Pruning) 정석 구현 버전
-# ==============================================================================
+# HAP-inspired Hessian-energy proxy
+# This is not a paper-faithful HAP implementation
 class HAPPruner(PDTPruner):
-    """
-    HAP 논문 로직 (Emergency Mode):
-    1. 모델 전체 Conv/Linear의 Hessian Trace를 직접 계산.
-    2. Trace의 역수(Sensitivity)에 비례하여 레이어별 Sparsity를 동적 할당.
-    3. 각 레이어 내에서도 Hessian 에너지가 낮은 채널부터 제거.
-    """
+    """Hessian-energy channel pruning proxy; no neural implant stage."""
     def step_pruning(self, loss, current_epoch, total_epochs):
-        print(f"\n[DEBUG] === HAP Emergency Pruning: Epoch {current_epoch} ===")
+        print(f"\n[DEBUG] === HAP Proxy Pruning: Epoch {current_epoch} ===")
         
         # Collect prunable layers directly
         target_layers = []
@@ -1076,7 +1085,7 @@ class HAPPruner(PDTPruner):
 
         # Scheduled target sparsity
         progress = self._get_pruning_progress(current_epoch, total_epochs)
-        total_target_sparsity = min(progress * 2.0, 1.0) * self.pruning_ratio
+        total_target_sparsity = progress * self.pruning_ratio
 
         # Layer-wise Hessian sensitivity
         target_params = [m.weight for name, m in target_layers]
@@ -1097,12 +1106,6 @@ class HAPPruner(PDTPruner):
                 layer_traces.append(trace)
                 layer_hessian_energies.append(h_energy)
 
-        # # 4. [HAP 핵심] 민감도(1/Trace) 기반 Sparsity 배분
-        # # sensitivities = [1.0 / (t + 1e-8) for t in layer_traces]/
-        # sensitivities = [(1.0 / (t + 1e-8))**0.5 for t in layer_traces]
-        # avg_sens = sum(sensitivities) / len(sensitivities)
-
-        # actual_pruned_total = 0
         # Sensitivity-based sparsity allocation
         sensitivities = [1.0 / (t + 1e-10) for t in layer_traces]
         avg_sens = sum(sensitivities) / len(sensitivities)
@@ -1116,7 +1119,7 @@ class HAPPruner(PDTPruner):
             layer_target_sparsity = total_target_sparsity * relative_sens
             
             # Enforce the configured survival floor
-            max_prunable = 1.0 - 0.1  # 최소 10%는 남김
+            max_prunable = 1.0 - self.min_survival_ratio
             layer_target_sparsity = min(layer_target_sparsity, max_prunable)
             
             num_channels = m.mask.numel()
@@ -1144,24 +1147,6 @@ class HAPPruner(PDTPruner):
                     with torch.no_grad():
                         m.mask[prune_indices] = 0.0
                         actual_pruned_total += len(prune_indices)
-        # # 5. 레이어별 개별 프루닝 실행
-        # for i, (name, m) in enumerate(target_layers):
-        #     # 레이어별 할당 Sparsity = (전체 목표) * (상대적 민감도 비율)
-        #     group_sparsity = total_target_sparsity * (sensitivities[i] / avg_sens)
-        #     # 최소 생존 보장 (90% 이상은 안 자름)
-        #     group_sparsity = min(group_sparsity, 1.0 - self.min_survival_ratio)
-            
-        #     num_channels = m.mask.numel()
-        #     num_prune = int(num_channels * group_sparsity)
-
-        #     if num_prune > 0:
-        #         # Hessian 점수가 낮은 순으로 채널 선정
-        #         _, prune_indices = torch.topk(m.hessian_score, k=num_prune, largest=False)
-                
-        #         with torch.no_grad():
-        #             m.mask[prune_indices] = 0.0
-        #             actual_pruned_total += num_prune
-
         # Apply masks and report
         total_param_cost = sum(m.weight.numel() for _, m in target_layers)
         target_pruned_cost = total_param_cost * total_target_sparsity
@@ -1192,6 +1177,10 @@ class HAPPruner(PDTPruner):
                     restored_units += 1
             elif current_pruned_cost < target_pruned_cost:
                 alive_candidates = []
+                alive_by_layer = {
+                    id(layer): int(layer.mask.sum().item())
+                    for _, layer in target_layers
+                }
                 for _, layer in target_layers:
                     unit_cost = layer.weight.numel() / layer.weight.shape[0]
                     for channel_idx in torch.where(layer.mask > 0.5)[0].tolist():
@@ -1203,7 +1192,13 @@ class HAPPruner(PDTPruner):
                 ):
                     if current_pruned_cost >= target_pruned_cost:
                         break
+                    min_keep = max(
+                        1, int(np.ceil(layer.mask.numel() * self.min_survival_ratio))
+                    )
+                    if alive_by_layer[id(layer)] <= min_keep:
+                        continue
                     layer.mask[channel_idx] = 0.0
+                    alive_by_layer[id(layer)] -= 1
                     current_pruned_cost += unit_cost
                     actual_pruned_total += 1
                     added_units += 1
@@ -1216,7 +1211,7 @@ class HAPPruner(PDTPruner):
         )
         self.apply_mask_to_weights()
         
-        print(f"\n{'='*30} HAP Emergency Pruning: Epoch {current_epoch} {'='*30}")
+        print(f"\n{'='*30} HAP Proxy Pruning: Epoch {current_epoch} {'='*30}")
         print(f" [*] Method: HAP | Total Pruned Units: {actual_pruned_total}")
         
         # Resource metrics
@@ -1228,13 +1223,9 @@ class HAPPruner(PDTPruner):
         print(f"{'='*89}\n")
         torch.cuda.empty_cache()
 class SNOWSPruner(PDTPruner):
-    """
-    SNOWS 논문 로직 (Emergency Mode): 
-    중요도 = 순수 Hessian_Trace (H-Vector Product의 2-norm 제곱 평균)
-    토폴로지 그룹 무시하고 모델 전체의 모든 Conv/Linear를 직접 수집하여 프루닝합니다.
-    """
+    """Channel HVP-energy proxy; no SNOWS reconstruction optimization."""
     def step_pruning(self, loss, current_epoch, total_epochs):
-        print(f"\n[DEBUG] === SNOWS Emergency Pruning: Epoch {current_epoch} ===")
+        print(f"\n[DEBUG] === SNOWS Proxy Pruning: Epoch {current_epoch} ===")
         
         # Collect all prunable layers
         target_layers = []
@@ -1289,8 +1280,9 @@ class SNOWSPruner(PDTPruner):
             self.apply_mask_to_weights()
 
 class ATOPruner(PDTPruner):
+    """L1 channel-magnitude proxy; no ATO controller network."""
     def step_pruning(self, loss, current_epoch, total_epochs):
-        print(f"\n[DEBUG] === ATO Emergency Pruning: Epoch {current_epoch} ===")
+        print(f"\n[DEBUG] === ATO Proxy Pruning: Epoch {current_epoch} ===")
         
         target_unit_scores = []
         target_unit_metadata = []
@@ -1327,17 +1319,11 @@ class ATOPruner(PDTPruner):
             self.apply_mask_to_weights()
         else:
             print("[DEBUG] FATAL: Still 0 candidates. Check for Conv2d/Linear layers.")
-# ==============================================================================
-# SuperTickets (ST - Gradient-Weight Product based) 비교 실험용 Pruner
-# ==============================================================================
+# Weight-Grad-EMA proxy
 class STPruner(PDTPruner):
-    """
-    SuperTickets 논문 로직 (Emergency Mode):
-    중요도 = |Weight| * |Gradient|
-    가중치의 크기와 그래디언트의 크기를 곱하여 학습 기여도가 낮은 채널을 제거합니다.
-    """
+    """Weight magnitude times Grad-EMA channel proxy."""
     def step_pruning(self, loss, current_epoch, total_epochs):
-        print(f"\n[DEBUG] === ST Emergency Pruning: Epoch {current_epoch} ===")
+        print(f"\n[DEBUG] === ST Proxy Pruning: Epoch {current_epoch} ===")
         
         target_unit_scores = []
         target_unit_metadata = []
@@ -1385,17 +1371,11 @@ class STPruner(PDTPruner):
         else:
             print("[DEBUG] FATAL: Still 0 candidates for ST.")
 
-# ==============================================================================
-# DFPC (Data-Free Parameter Compensation - Similarity based) 비교 실험용 Pruner
-# ==============================================================================
+# Filter-distance proxy
 class DFPCPruner(PDTPruner):
-    """
-    DFPC 논문 로직 (Emergency Mode):
-    데이터 없이 필터 자체의 기하학적 분포를 분석.
-    필터 간 L2 거리가 가까울수록(중복될수록) 중요도가 낮다고 판단하여 제거합니다.
-    """
+    """Filter-distance proxy; no parameter compensation stage."""
     def step_pruning(self, loss, current_epoch, total_epochs):
-        print(f"\n[DEBUG] === DFPC Emergency Pruning: Epoch {current_epoch} ===")
+        print(f"\n[DEBUG] === DFPC Proxy Pruning: Epoch {current_epoch} ===")
         
         target_unit_scores = []
         target_unit_metadata = []
@@ -1446,17 +1426,11 @@ class DFPCPruner(PDTPruner):
             self.apply_mask_to_weights()
         else:
             print("[DEBUG] FATAL: Still 0 candidates for DFPC.")
-# ==============================================================================
-# TPP (Towards Personalized Pruning - Weight-Activation Interaction) 비교 실험용 Pruner
-# ==============================================================================
+# Weight-Grad-EMA proxy retained for preset compatibility
 class TPPPruner(PDTPruner):
-    """
-    TPP 논문 로직 (Emergency Mode):
-    중요도 = Weight Magnitude * sqrt(Gradient Persistence)
-    토폴로지 그룹 무시하고 모델 전체의 모든 Conv/Linear를 직접 수집하여 프루닝합니다.
-    """
+    """Weight-Grad-EMA proxy currently equivalent to ST."""
     def step_pruning(self, loss, current_epoch, total_epochs):
-        print(f"\n[DEBUG] === TPP Emergency Pruning: Epoch {current_epoch} ===")
+        print(f"\n[DEBUG] === TPP Proxy Pruning: Epoch {current_epoch} ===")
         
         target_unit_scores = []
         target_unit_metadata = []
