@@ -5,6 +5,14 @@ import numpy as np
 import torch
 
 
+def load_trusted_checkpoint(path, map_location=None):
+    """Load checkpoints written by this repository across PyTorch versions."""
+    try:
+        return torch.load(path, map_location=map_location, weights_only=False)
+    except TypeError:
+        return torch.load(path, map_location=map_location)
+
+
 def experiment_signature(config):
     model = config.get('model', {})
     strategy = config.get('strategy', {})
@@ -55,7 +63,7 @@ def save_training_checkpoint(path, model, optimizer, scheduler, epoch, history, 
 def load_training_checkpoint(
     path, model, optimizer, scheduler, device, expected_signature=None
 ):
-    checkpoint = torch.load(path, map_location=device)
+    checkpoint = load_trusted_checkpoint(path, map_location=device)
     required = {'model_state_dict', 'optimizer_state_dict', 'epoch'}
     missing = required.difference(checkpoint)
     if missing:
@@ -78,6 +86,6 @@ def load_training_checkpoint(
 
 
 def load_model_checkpoint(path, model, device):
-    checkpoint = torch.load(path, map_location=device)
+    checkpoint = load_trusted_checkpoint(path, map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
     return checkpoint
