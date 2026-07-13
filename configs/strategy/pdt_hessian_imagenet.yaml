@@ -3,7 +3,7 @@ strategy:
   pruner: "mcprune"
   type: "pdt_hessian"
   ema_decay: 0.99
-  pruning_ratio: 0.3
+  pruning_ratio: 0.4
   start_epoch: 100
   prune_every: 20
   group_selection_ratio: 0.7
