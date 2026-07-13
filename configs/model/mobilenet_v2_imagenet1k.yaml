@@ -1,0 +1,16 @@
+name: "mobilenet_v2"
+num_classes: 1000
+input_size: 224
+pretrained: false
+base_lr: 0.05
+momentum: 0.9
+weight_decay: 0.00004
+epochs: 300
+batch_size: 128
+num_workers: 8
+scheduler: "cosine"
+
+dataset:
+  name: "imagenet1k"
+  data_dir: "/home/stella/data/imagenet-1k"
+  num_workers: 8

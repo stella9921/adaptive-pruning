@@ -1,0 +1,12 @@
+strategy:
+  method: "PDT"
+  pruner: "mcprune"
+  type: "pdt_hessian"
+  ema_decay: 0.99
+  pruning_ratio: 0.3
+  start_epoch: 180
+  prune_every: 20
+  group_selection_ratio: 0.7
+  min_keep_ratio: 0.2
+  lambda_h: 0.1
+  hessian_iter: 20
