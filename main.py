@@ -11,6 +11,7 @@ import sys
 import time
 import json
 from contextlib import nullcontext
+from datetime import datetime
 
 from src.pruning.topology_manager import get_model_topology
 from src.pruning.optimizer import lagrangian_optimization
@@ -42,6 +43,17 @@ from src.pruning.sensitivity import maybe_load_or_compute_sensitivity
 from src.pruning.pat_strategies import PATPruner
 from src.pruning.pdt_strategies import PDTPruner,HAPPruner,SNOWSPruner, ATOPruner, STPruner,DFPCPruner,TPPPruner,ViTPDTPruner
 from src.pruning.registry import annotate_pruner_config
+
+
+def _format_duration(seconds):
+    seconds = max(0, int(round(seconds)))
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours:
+        return f"{hours}h {minutes:02d}m {seconds:02d}s"
+    if minutes:
+        return f"{minutes}m {seconds:02d}s"
+    return f"{seconds}s"
 
 def analyze_topology_and_profiling(model, device, config, tag="Before Pruning"):
     """Analyze topology and optional PyTorch resource profile."""
@@ -374,8 +386,14 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         str(config.get('strategy', {}).get('debug_stop_after_first_prune', '')).lower() in ('1', 'true', 'yes')
         or os.getenv('MCPRUNE_STOP_AFTER_FIRST_PRUNE') == '1'
     )
+    experiment_start_time = time.time()
 
     for epoch in range(first_epoch, total_epochs + 1):
+        epoch_start_time = time.time()
+        print(
+            f"[Time] Epoch {epoch}/{total_epochs} started at "
+            f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        )
         model.train()
         total_loss = 0.0
         reset_peak_memory(device)
@@ -556,6 +574,13 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         # Epoch 종료
         val_acc = evaluate(model, val_loader, device)
         peak_vram = peak_memory_mb(device)
+        epoch_seconds = time.time() - epoch_start_time
+        elapsed_seconds = time.time() - experiment_start_time
+        completed_epochs = epoch - first_epoch + 1
+        remaining_epochs = total_epochs - epoch
+        avg_epoch_seconds = elapsed_seconds / max(1, completed_epochs)
+        eta_seconds = avg_epoch_seconds * remaining_epochs
+        eta_timestamp = datetime.fromtimestamp(time.time() + eta_seconds)
 
         print(
             f"Epoch {epoch}/{total_epochs} | "       
@@ -563,6 +588,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             f"Val Acc: {val_acc:.2f}% | "
             f"Peak VRAM: {peak_vram:.2f} MB | "
             f"LR: {optimizer.param_groups[0]['lr']:.6g}"
+        )
+        print(
+            f"[Time] epoch={_format_duration(epoch_seconds)} | "
+            f"elapsed={_format_duration(elapsed_seconds)} | "
+            f"eta={_format_duration(eta_seconds)} | "
+            f"estimated_finish={eta_timestamp.strftime('%Y-%m-%d %H:%M:%S')}"
         )
         # Median memory around pruning
         if prune_step_index is not None and \
@@ -595,6 +626,9 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             'val_accuracy': val_acc,
             'learning_rate': optimizer.param_groups[0]['lr'],
             'target_pruning_ratio': strat_cfg['pruning_ratio'],
+            'epoch_time_sec': epoch_seconds,
+            'elapsed_time_sec': elapsed_seconds,
+            'eta_sec': eta_seconds,
             **epoch_metrics,
         })
         save_epoch_metrics(history_data, config['run_dir'], config['run_id'])
