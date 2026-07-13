@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.fx as fx
 import operator
+import os
 
 
 def get_model_topology(model):
@@ -40,7 +41,30 @@ def get_model_topology(model):
                 valid_sub_group = sorted(list(set(valid_sub_group)))
                 final_groups.append(valid_sub_group)
         print(f"[*] Total {len(final_groups)} groups identified.\n")
+        if os.getenv('MCPRUNE_DEBUG_TOPOLOGY') == '1':
+            _print_topology_debug(final_groups)
     return final_groups
+
+
+def _print_topology_debug(groups):
+    print("[Topology Debug] Full group list")
+    seen = {}
+    duplicates = {}
+    for idx, group in enumerate(groups, 1):
+        print(f"  group {idx:02d}: {group}")
+        for name in group:
+            seen.setdefault(name, []).append(idx)
+
+    for name, group_ids in seen.items():
+        if len(group_ids) > 1:
+            duplicates[name] = group_ids
+
+    if duplicates:
+        print("[Topology Debug] Duplicate layers detected:")
+        for name, group_ids in duplicates.items():
+            print(f"  - {name}: groups {group_ids}")
+    else:
+        print("[Topology Debug] Duplicate layers: none")
 
 
 # ----------------------------
@@ -121,6 +145,10 @@ def _get_mobilenet_topology(model):
 # Residual (ResNet 등)
 # ----------------------------
 def _get_residual_topology(model):
+    groups = _get_local_residual_block_topology(model)
+    if groups:
+        return groups
+
     try:
         traced = fx.symbolic_trace(model)
         graph = traced.graph
@@ -150,6 +178,45 @@ def _get_residual_topology(model):
     except Exception as e:
         print(f"[*] Residual Analysis Error: {e}")
         return []
+
+
+def _get_local_residual_block_topology(model):
+    groups = []
+
+    for name, module in model.named_modules():
+        cls_name = module.__class__.__name__
+        if cls_name == "BasicBlock":
+            group = []
+            if hasattr(module, "conv1"):
+                group.append(f"{name}.conv1")
+            if hasattr(module, "conv2"):
+                group.append(f"{name}.conv2")
+            if getattr(module, "downsample", None) is not None:
+                group.append(f"{name}.downsample.0")
+            if group:
+                groups.append(group)
+
+        elif cls_name == "Bottleneck":
+            inner_group = []
+            if hasattr(module, "conv1"):
+                inner_group.append(f"{name}.conv1")
+            if hasattr(module, "conv2"):
+                inner_group.append(f"{name}.conv2")
+            if inner_group:
+                groups.append(inner_group)
+
+            output_group = []
+            if hasattr(module, "conv3"):
+                output_group.append(f"{name}.conv3")
+            if getattr(module, "downsample", None) is not None:
+                output_group.append(f"{name}.downsample.0")
+            if output_group:
+                groups.append(output_group)
+
+    if groups:
+        print(f"[*] ResNet local block topology: {len(groups)} non-overlapping groups found.")
+
+    return groups
 
 
 def _find_source_layers(node, traced_model, visited=None):

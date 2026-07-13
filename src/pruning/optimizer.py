@@ -58,6 +58,8 @@
 #     return best_unit_mask
 
 
+import os
+
 import numpy as np
 
 def lagrangian_optimization(unit_scores, unit_costs, budget, unit_metadata=None):
@@ -100,9 +102,33 @@ def lagrangian_optimization(unit_scores, unit_costs, budget, unit_metadata=None)
     # 3. [핵심] 구조적 붕괴 방지 (Per-Group Minimum Survival)
     # 특정 그룹(QKV, MLP 등)이 아예 사라지는 것을 막기 위해 
     # 각 레이어 그룹별로 최소 1개 이상의 유닛은 무조건 살림
+    debug_resource_alloc = os.getenv('MCPRUNE_DEBUG_RESOURCE_ALLOC') == '1'
+    if debug_resource_alloc:
+        metadata_status = "enabled" if unit_metadata is not None else "missing"
+        print(
+            f"[Resource Allocation] metadata={metadata_status} "
+            f"units={len(unit_scores)} budget={float(budget):.2f} "
+            f"initial_keep={int(np.sum(best_unit_mask))}/{len(best_unit_mask)} "
+            f"initial_cost={float(np.sum(unit_costs[best_unit_mask])):.2f}"
+        )
+
     if unit_metadata is not None:
         # 그룹 ID별로 가장 스코어가 높은 녀석은 강제 생존
-        unique_groups = set([m[0]['id'] for m in unit_metadata])
+        unique_groups = sorted(set([m[0]['id'] for m in unit_metadata]))
+        if debug_resource_alloc:
+            print(
+                f"[Resource Allocation] group-aware safety active: "
+                f"{len(unique_groups)} groups"
+            )
+            for g_id in unique_groups:
+                group_indices = [idx for idx, m in enumerate(unit_metadata) if m[0]['id'] == g_id]
+                kept = int(np.sum(best_unit_mask[group_indices]))
+                print(
+                    f"  group {g_id:02d}: units={len(group_indices)} "
+                    f"kept_before_safety={kept}"
+                )
+
+        restored_units = []
         for g_id in unique_groups:
             # 해당 그룹에 속한 유닛들의 인덱스 추출
             group_indices = [idx for idx, m in enumerate(unit_metadata) if m[0]['id'] == g_id]
@@ -110,10 +136,20 @@ def lagrangian_optimization(unit_scores, unit_costs, budget, unit_metadata=None)
                 # 해당 그룹에서 가장 점수가 높은 놈 하나 복구
                 best_idx = group_indices[np.argmax(scores[group_indices])]
                 best_unit_mask[best_idx] = True
+                restored_units.append((g_id, int(unit_metadata[best_idx][1])))
+
+        if debug_resource_alloc:
+            if restored_units:
+                print("[Resource Allocation] restored one unit for empty groups:")
+                for g_id, unit_idx in restored_units:
+                    print(f"  group {g_id:02d}: restored_unit={unit_idx}")
+            else:
+                print("[Resource Allocation] no empty-group restore needed")
 
         # Keep the group-safety restore within the requested resource budget
         # whenever there is more than one surviving unit in a group.
         group_ids = [m[0]['id'] for m in unit_metadata]
+        repair_removed = []
         while np.sum(unit_costs[best_unit_mask]) > budget:
             removable = []
             for idx, keep in enumerate(best_unit_mask):
@@ -129,6 +165,23 @@ def lagrangian_optimization(unit_scores, unit_costs, budget, unit_metadata=None)
 
             remove_idx = min(removable, key=lambda i: efficiencies[i])
             best_unit_mask[remove_idx] = False
+            repair_removed.append((group_ids[remove_idx], int(unit_metadata[remove_idx][1])))
+
+        if debug_resource_alloc:
+            final_cost = float(np.sum(unit_costs[best_unit_mask]))
+            if repair_removed:
+                print("[Resource Allocation] budget repair removed restored/extra units:")
+                for g_id, unit_idx in repair_removed[:20]:
+                    print(f"  group {g_id:02d}: removed_unit={unit_idx}")
+                if len(repair_removed) > 20:
+                    print(f"  ... ({len(repair_removed) - 20} more)")
+            else:
+                print("[Resource Allocation] budget repair not needed")
+            print(
+                f"[Resource Allocation] final_keep={int(np.sum(best_unit_mask))}/"
+                f"{len(best_unit_mask)} final_cost={final_cost:.2f} "
+                f"budget={float(budget):.2f}"
+            )
 
     # 4. 최종 예산 초과 여부 재확인 (강제 복구로 인해 예산이 넘칠 경우 미세 조정)
     # 이 부분은 필요 시 추가 (보통 1-2개 복구로는 크게 안 넘음)
