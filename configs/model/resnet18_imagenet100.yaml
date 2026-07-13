@@ -1,0 +1,16 @@
+name: "resnet18"
+num_classes: 100
+input_size: 224
+pretrained: true
+base_lr: 0.01
+momentum: 0.9
+weight_decay: 0.0001
+epochs: 120
+batch_size: 128
+num_workers: 8
+scheduler: "cosine"
+
+dataset:
+  name: "imagenet100"
+  data_dir: "/home/stella/data/imagenet100"
+  num_workers: 8

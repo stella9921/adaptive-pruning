@@ -211,7 +211,13 @@ def main():
             param.requires_grad = True
         print(">>> [System] Head warmup complete. Starting full fine-tuning.")
     
-    if ('imagenet' in str(dataset_name)) and not is_vit_model:
+    if (
+        'imagenet' in str(dataset_name)
+        and not is_vit_model
+        and hasattr(model, 'fc')
+        and config['model'].get('num_classes') == 100
+        and config['model'].get('pretrained', False)
+    ):
         print(">>> [System] Transferring Pretrained Weights to FC Layer (1000 -> 100)...")
         temp_config = config['model'].copy()
         temp_config['num_classes'] = 1000

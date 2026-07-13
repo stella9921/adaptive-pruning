@@ -1,8 +1,38 @@
 import copy
 import torch
 import torch.nn as nn
-from torchvision.models import resnet18, resnet34, resnet50, resnet101, resnet
-from torchvision.models import ResNet152_Weights, ResNet101_Weights, ResNet50_Weights
+from torchvision.models import (
+    resnet18,
+    resnet34,
+    resnet50,
+    resnet101,
+    resnet152,
+    resnet,
+)
+from torchvision.models import (
+    ResNet18_Weights,
+    ResNet34_Weights,
+    ResNet50_Weights,
+    ResNet101_Weights,
+    ResNet152_Weights,
+)
+
+
+_RESNET_BUILDERS = {
+    "resnet18": resnet18,
+    "resnet34": resnet34,
+    "resnet50": resnet50,
+    "resnet101": resnet101,
+    "resnet152": resnet152,
+}
+
+_RESNET_WEIGHTS = {
+    "resnet18": ResNet18_Weights.DEFAULT,
+    "resnet34": ResNet34_Weights.DEFAULT,
+    "resnet50": ResNet50_Weights.DEFAULT,
+    "resnet101": ResNet101_Weights.DEFAULT,
+    "resnet152": ResNet152_Weights.DEFAULT,
+}
 
 # --- [0] 필터 카운트 (PAT) ---
 # BasicBlock용 (18, 34)
@@ -24,7 +54,7 @@ def get_bottleneck_filter_counts(name):
     return counts
 
 # --- [1] 설계도: 모델 생성 및 마스크 등록 ---
-def get_resnet(name="resnet18", num_classes=100):
+def _get_resnet_legacy(name="resnet18", num_classes=100):
     # 모델 로드
     if name == "resnet18": model = resnet18(weights=None)
     elif name == "resnet34": model = resnet34(weights=None)
@@ -57,6 +87,35 @@ def get_resnet(name="resnet18", num_classes=100):
     return model
 
 # --- [2] 물리적 프루닝 유틸리티 ---
+def get_resnet(name="resnet18", num_classes=100, input_size=32, pretrained=False):
+    if name not in _RESNET_BUILDERS:
+        raise ValueError(f"Unsupported ResNet variant: {name}")
+
+    weights = _RESNET_WEIGHTS[name] if pretrained else None
+    model = _RESNET_BUILDERS[name](weights=weights)
+
+    if int(input_size) < 128:
+        model.conv1 = nn.Conv2d(
+            3, 64, kernel_size=3, stride=1, padding=1, bias=False
+        )
+        model.maxpool = nn.Identity()
+
+    model.fc = nn.Linear(model.fc.in_features, num_classes)
+
+    for module in model.modules():
+        if isinstance(module, nn.Conv2d):
+            module.register_buffer(
+                'mask',
+                torch.ones(module.weight.shape[0], device=module.weight.device)
+            )
+            module.register_buffer(
+                'grad_ema',
+                torch.zeros(module.weight.shape[0], device=module.weight.device)
+            )
+
+    return model
+
+
 def prune_conv_and_bn(conv, bn, keep_idx, in_keep_idx=None):
     """Conv2d와 BatchNorm2d 쌍의 채널을 물리적으로 깎아냄"""
     W = conv.weight.data.clone()

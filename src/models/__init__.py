@@ -27,13 +27,22 @@ def get_model(model_cfg):
         return model
 
     if "resnet" in name:
-        return get_resnet(name, num_classes)
+        return get_resnet(
+            name,
+            num_classes,
+            input_size=model_cfg.get('input_size', 32),
+            pretrained=model_cfg.get('pretrained', False),
+        )
     elif "vgg" in name:
         return get_vgg16(num_classes)
     elif "efficientnet" in name:
         return get_efficientnet(num_classes)
     elif "mobilenet" in name:
-        return get_mobilenet(name, num_classes)
+        return get_mobilenet(
+            name,
+            num_classes,
+            pretrained=model_cfg.get('pretrained', False),
+        )
     else:
         raise ValueError(f"지원하지 않는 모델 이름입니다: {name}")
 

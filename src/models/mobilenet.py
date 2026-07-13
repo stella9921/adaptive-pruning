@@ -1,15 +1,17 @@
 import torch
 import torch.nn as nn
 import torchvision.models as models
+from torchvision.models import MobileNet_V2_Weights
 
 
 # ----------------------------
 # Model Loader
 # ----------------------------
-def get_mobilenet(name="mobilenet_v2", num_classes=100):
+def get_mobilenet(name="mobilenet_v2", num_classes=100, pretrained=False):
 
     if "v2" in name:
-        model = models.mobilenet_v2(weights=None)
+        weights = MobileNet_V2_Weights.DEFAULT if pretrained else None
+        model = models.mobilenet_v2(weights=weights)
     else:
         raise ValueError(f"Unsupported MobileNet variant: {name}")
 
