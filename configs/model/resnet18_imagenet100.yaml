@@ -1,11 +1,11 @@
 name: "resnet18"
 num_classes: 100
 input_size: 224
-pretrained: true
+pretrained: false
 base_lr: 0.01
 momentum: 0.9
 weight_decay: 0.0001
-epochs: 120
+epochs: 200
 batch_size: 128
 num_workers: 8
 scheduler: "cosine"
