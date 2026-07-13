@@ -291,30 +291,46 @@ class PDTPruner(BasePruner):
                 ]
                 print(f"  group {g['id']:02d}: {layer_names}")
 
-        target_param_layers = [
-            (module_name_by_id.get(id(m), "<unnamed>"), m.weight)
-            for g in group_info_list
-            for m in g['layers']
-            if hasattr(m, 'weight')
-        ]
-        target_params = [param for _, param in target_param_layers]
+        target_param_layers = []
+        seen_hvp_layers = set()
+        duplicate_hvp_layers = set()
+        for g in group_info_list:
+            for m in g['layers']:
+                if not hasattr(m, 'weight'):
+                    continue
+                layer_id = id(m)
+                if layer_id in seen_hvp_layers:
+                    duplicate_hvp_layers.add(module_name_by_id.get(layer_id, "<unnamed>"))
+                    continue
+                seen_hvp_layers.add(layer_id)
+                target_param_layers.append(
+                    (module_name_by_id.get(layer_id, "<unnamed>"), m.weight, layer_id)
+                )
+        target_params = [param for _, param, _ in target_param_layers]
         print(f"[Hessian Input] Passing {len(target_params)} layer weights to HVP.")
-        for name, _ in target_param_layers[:15]:
+        for name, _, _ in target_param_layers[:15]:
             print(f"  - {name}")
         if len(target_param_layers) > 15:
             print(f"  - ... ({len(target_param_layers) - 15} more)")
+        if duplicate_hvp_layers:
+            print(
+                "[HVP Alignment] Deduplicated repeated layers: "
+                f"{', '.join(sorted(duplicate_hvp_layers))}"
+            )
         if debug_hvp_alignment:
-            hvp_names = [name for name, _ in target_param_layers]
-            duplicate_hvp_names = sorted({name for name in hvp_names if hvp_names.count(name) > 1})
+            hvp_names = [name for name, _, _ in target_param_layers]
             print(f"[HVP Alignment] HVP input layers: {hvp_names}")
-            print(f"[HVP Alignment] Duplicate HVP input layers: {duplicate_hvp_names or 'none'}")
+            print("[HVP Alignment] Duplicate HVP input layers: none")
         with self._nvtx_range("MCPrune/HVP"):
             hv_list = self.engine.get_k_step_hessian_selective(
                 loss, target_params, self.k_horizon
             )
+        hv_by_layer_id = {
+            layer_id: hv
+            for (_, _, layer_id), hv in zip(target_param_layers, hv_list)
+        }
 
         target_unit_scores, target_unit_costs, target_unit_metadata = [], [], []
-        hv_idx = 0
         for g in group_info_list:
             # 그룹 내 첫 번째 레이어를 기준으로 살아있는 인덱스 확인
             base_layer = g['layers'][0]
@@ -324,7 +340,9 @@ class PDTPruner(BasePruner):
             
             for m in g['layers']:
                 if not hasattr(m, 'weight'): continue
-                hv = hv_list[hv_idx]; hv_idx += 1
+                hv = hv_by_layer_id.get(id(m))
+                if hv is None:
+                    continue
                 h_energy = hv.pow(2).reshape(hv.shape[0], -1).mean(1)
                 if h_energy.max() > h_energy.min():
                     h_energy = (h_energy - h_energy.min()) / (h_energy.max() - h_energy.min() + 1e-8)

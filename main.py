@@ -304,7 +304,16 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     start_epoch = args.start_epoch if args.start_epoch is not None else strat_cfg.get('start_epoch', 1)
     scheduler = build_scheduler(optimizer, model_cfg, total_epochs)
     pdt_engine.total_epochs = total_epochs
-    pruning_epochs = list(range(start_epoch, total_epochs + 1, prune_every))
+    if args.smoke_test:
+        pruning_epochs = list(range(start_epoch, total_epochs + 1, prune_every))
+    else:
+        pruning_epochs = list(range(start_epoch, total_epochs, prune_every))
+    if not pruning_epochs:
+        raise ValueError(
+            "No pruning epochs remain after reserving final recovery epoch: "
+            f"start_epoch={start_epoch}, epochs={total_epochs}, "
+            f"prune_every={prune_every}"
+        )
     pruning_step_by_epoch = {
         pruning_epoch: step_index + 1
         for step_index, pruning_epoch in enumerate(pruning_epochs)
@@ -317,6 +326,13 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     )
     print(f">>> Pruning starts at Epoch {start_epoch}, every {prune_every} epochs.")
     print(f">>> Scheduled pruning epochs: {pruning_epochs}")
+    if args.smoke_test:
+        print(">>> Final recovery window: disabled for smoke test.")
+    else:
+        print(
+            f">>> Final recovery window: epochs {pruning_epochs[-1] + 1}"
+            f"-{total_epochs}"
+        )
     print(
         f">>> LR scheduler: "
         f"{scheduler.__class__.__name__ if scheduler is not None else 'disabled'}"
