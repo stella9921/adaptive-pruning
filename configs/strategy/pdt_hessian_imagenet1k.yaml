@@ -7,6 +7,7 @@ strategy:
   start_epoch: 180
   prune_every: 20
   group_selection_ratio: 0.7
+  validation_interval: 5
   min_keep_ratio: 0.2
   lambda_h: 0.1
   hessian_iter: 20

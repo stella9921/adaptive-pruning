@@ -77,9 +77,7 @@ def _load_hf_imagenet_dataset(arrow_path):
         return hf_dataset['train'], hf_dataset['validation']
 
     train_split = _load_hf_split_from_arrow_files(arrow_path, ('train',))
-    val_split = _load_hf_split_from_arrow_files(
-        arrow_path, ('validation', 'val', 'test')
-    )
+    val_split = _load_hf_split_from_arrow_files(arrow_path, ('validation',))
     return train_split, val_split
 
 

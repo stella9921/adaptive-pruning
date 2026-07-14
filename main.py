@@ -320,6 +320,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
     total_epochs = args.epochs if args.epochs is not None else model_cfg.get('epochs', config.get('epochs', 300))
     prune_every = args.prune_every if args.prune_every is not None else strat_cfg.get('prune_every', 20)
     start_epoch = args.start_epoch if args.start_epoch is not None else strat_cfg.get('start_epoch', 1)
+    validation_interval = (
+        args.validation_interval
+        if getattr(args, 'validation_interval', None) is not None
+        else strat_cfg.get('validation_interval', 1)
+    )
+    validation_interval = max(1, int(validation_interval))
     scheduler = build_scheduler(optimizer, model_cfg, total_epochs)
     pdt_engine.total_epochs = total_epochs
     if args.smoke_test:
@@ -355,6 +361,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         f">>> LR scheduler: "
         f"{scheduler.__class__.__name__ if scheduler is not None else 'disabled'}"
     )
+    print(f">>> Validation interval: every {validation_interval} epoch(s)")
 
     stop_pruning = False
     history_data = []
@@ -572,7 +579,13 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             # End training step
 
         # Epoch 종료
-        val_acc = evaluate(model, val_loader, device)
+        should_validate = (
+            epoch == first_epoch
+            or epoch == total_epochs
+            or epoch in pruning_step_by_epoch
+            or epoch % validation_interval == 0
+        )
+        val_acc = evaluate(model, val_loader, device) if should_validate else None
         peak_vram = peak_memory_mb(device)
         epoch_seconds = time.time() - epoch_start_time
         elapsed_seconds = time.time() - experiment_start_time
@@ -581,14 +594,21 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         avg_epoch_seconds = elapsed_seconds / max(1, completed_epochs)
         eta_seconds = avg_epoch_seconds * remaining_epochs
         eta_timestamp = datetime.fromtimestamp(time.time() + eta_seconds)
+        val_acc_text = f"{val_acc:.2f}%" if val_acc is not None else "skipped"
 
         print(
             f"Epoch {epoch}/{total_epochs} | "       
             f"Loss: {total_loss/len(train_loader):.4f} | "
-            f"Val Acc: {val_acc:.2f}% | "
+            f"Val Acc: {val_acc_text} | "
             f"Peak VRAM: {peak_vram:.2f} MB | "
             f"LR: {optimizer.param_groups[0]['lr']:.6g}"
         )
+        if not should_validate:
+            print(
+                f"[Validation] skipped at epoch {epoch}; "
+                f"next regular validation at epoch "
+                f"{min(total_epochs, ((epoch // validation_interval) + 1) * validation_interval)}"
+            )
         print(
             f"[Time] epoch={_format_duration(epoch_seconds)} | "
             f"elapsed={_format_duration(elapsed_seconds)} | "
@@ -624,6 +644,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
             'epoch': epoch,
             'train_loss': total_loss / len(train_loader),
             'val_accuracy': val_acc,
+            'validation_ran': should_validate,
             'learning_rate': optimizer.param_groups[0]['lr'],
             'target_pruning_ratio': strat_cfg['pruning_ratio'],
             'epoch_time_sec': epoch_seconds,
@@ -636,7 +657,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
         if scheduler is not None:
             scheduler.step()
 
-        is_new_best = val_acc > best_val_acc
+        is_new_best = val_acc is not None and val_acc > best_val_acc
         if is_new_best:
             best_val_acc = val_acc
             best_checkpoint_path = os.path.join(

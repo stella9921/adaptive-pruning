@@ -80,7 +80,10 @@ def _validate_config(config, args):
         if not lower <= value <= upper:
             raise ValueError(f"{key} must be in [{lower}, {upper}], got {value}")
 
-    positive_keys = ('start_epoch', 'prune_every', 'hessian_iter', 'k_horizon')
+    positive_keys = (
+        'start_epoch', 'prune_every', 'hessian_iter', 'k_horizon',
+        'validation_interval',
+    )
     for key in positive_keys:
         if key in strategy and int(strategy[key]) < 1:
             raise ValueError(f"{key} must be >= 1, got {strategy[key]}")
@@ -125,6 +128,7 @@ def load_config():
     parser.add_argument('--group_selection_ratio', type=float, default=None)
     parser.add_argument('--pruning_ratio', type=float, default=None)
     parser.add_argument('--min_survival_ratio', type=float, default=None)
+    parser.add_argument('--validation_interval', type=int, default=None)
     parser.add_argument('--profile_pytorch', action='store_true')
     parser.add_argument('--profile_nvtx', action='store_true')
     parser.add_argument('--smoke_test', action='store_true')
