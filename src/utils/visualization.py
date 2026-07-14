@@ -70,10 +70,16 @@ def save_pruning_plots(snapshot, run_dir, run_id, epoch):
 
 
 def _draw_line_chart(path, title, rows, x_key, y_key):
-    points = [
-        (float(row[x_key]), float(row[y_key]))
-        for row in rows if x_key in row and y_key in row
-    ]
+    points = []
+    for row in rows:
+        if x_key not in row or y_key not in row:
+            continue
+        if row[x_key] is None or row[y_key] is None:
+            continue
+        try:
+            points.append((float(row[x_key]), float(row[y_key])))
+        except (TypeError, ValueError):
+            continue
     if not points:
         return None
     width, height = 1000, 600
