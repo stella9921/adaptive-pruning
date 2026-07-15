@@ -66,6 +66,11 @@ def save_pruning_plots(snapshot, run_dir, run_id, epoch):
             'layer', 'abs_mean', None,
         ),
         (
+            'activation_zero_fraction_before',
+            'Activation Zero Fraction Before Pruning',
+            'layer', 'zero_fraction', None,
+        ),
+        (
             'activation_zero_fraction_after',
             'Activation Zero Fraction After Pruning',
             'layer', 'zero_fraction', None,

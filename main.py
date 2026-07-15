@@ -507,6 +507,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 snapshot['activation_distribution_after'] = activation_after_pruning
                 snapshot['activation_abs_mean_before'] = activation_before_pruning
                 snapshot['activation_abs_mean_after'] = activation_after_pruning
+                snapshot['activation_zero_fraction_before'] = activation_before_pruning
                 snapshot['activation_zero_fraction_after'] = activation_after_pruning
                 snapshot_paths = save_pruning_tables(
                     snapshot, config['run_dir'], config['run_id'], epoch
