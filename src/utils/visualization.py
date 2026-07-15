@@ -16,8 +16,16 @@ def _draw_bars(path, title, rows, label_key, value_key, selected_key=None):
     draw = ImageDraw.Draw(image)
     draw.text((20, 18), title, fill='black')
     values = [float(row[value_key] or 0.0) for row in rows]
-    max_value = max(max(values), 1e-12)
+    min_value = min(values)
+    max_value = max(values)
     bar_width = width - left - right
+    signed = min_value < 0.0
+    if signed:
+        scale = max(abs(min_value), abs(max_value), 1e-12)
+        zero_x = left + bar_width // 2
+        draw.line((zero_x, top - 8, zero_x, height - 18), fill='#888888')
+    else:
+        max_value = max(max_value, 1e-12)
 
     for index, (row, value) in enumerate(zip(rows, values)):
         y = top + index * row_height
@@ -28,9 +36,16 @@ def _draw_bars(path, title, rows, label_key, value_key, selected_key=None):
         color = '#2f80ed'
         if selected_key is not None:
             color = '#eb5757' if row.get(selected_key) else '#bdbdbd'
-        length = int(bar_width * value / max_value)
-        draw.rectangle((left, y + 3, left + length, y + 20), fill=color)
-        if max_value < 0.01:
+        if signed:
+            length = int((bar_width / 2) * abs(value) / scale)
+            if value >= 0:
+                draw.rectangle((zero_x, y + 3, zero_x + length, y + 20), fill=color)
+            else:
+                draw.rectangle((zero_x - length, y + 3, zero_x, y + 20), fill='#f2994a')
+        else:
+            length = int(bar_width * value / max_value)
+            draw.rectangle((left, y + 3, left + length, y + 20), fill=color)
+        if max(abs(min_value), abs(max_value)) < 0.01:
             text = f"{value:.3e}"
         elif value_key.endswith('percent'):
             text = f"{value:.2f}%"
@@ -74,6 +89,26 @@ def save_pruning_plots(snapshot, run_dir, run_id, epoch):
             'activation_zero_fraction_after',
             'Activation Zero Fraction After Pruning',
             'layer', 'zero_fraction', None,
+        ),
+        (
+            'hidden_cosine_similarity',
+            'Hidden Representation Cosine Similarity',
+            'layer', 'cosine_similarity', None,
+        ),
+        (
+            'hidden_cka_similarity',
+            'Hidden Representation CKA Similarity',
+            'layer', 'cka_similarity', None,
+        ),
+        (
+            'hidden_l2_distance',
+            'Hidden Representation L2 Distance',
+            'layer', 'l2_distance', None,
+        ),
+        (
+            'hidden_class_separation_delta',
+            'Hidden Class Separation Delta',
+            'layer', 'class_separation_delta', None,
         ),
     ]
     paths = []

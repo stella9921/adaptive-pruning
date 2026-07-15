@@ -17,7 +17,9 @@ from src.pruning.topology_manager import get_model_topology
 from src.pruning.optimizer import lagrangian_optimization
 from src.utils.config_loader import load_config
 from src.utils.measure import (
+    collect_hidden_representations,
     collect_epoch_metrics,
+    compare_hidden_representations,
     measure_activation_distribution,
     measure_module_memory,
     measure_pruning_structure,
@@ -442,6 +444,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                     f"progress={pdt_engine.scheduled_pruning_progress:.4f}"
                 )
                 activation_before_pruning = measure_activation_distribution(model, x)
+                hidden_before_pruning = collect_hidden_representations(model, x)
 
                 # Retain graph for Hessian computation
                 loss.backward(retain_graph=True)
@@ -497,6 +500,12 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
 
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
                 activation_after_pruning = measure_activation_distribution(model, x)
+                hidden_after_pruning = collect_hidden_representations(model, x)
+                hidden_representation = compare_hidden_representations(
+                    hidden_before_pruning,
+                    hidden_after_pruning,
+                    labels=y,
+                )
                 snapshot = measure_pruning_structure(
                     model,
                     topology_groups,
@@ -509,6 +518,11 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                 snapshot['activation_abs_mean_after'] = activation_after_pruning
                 snapshot['activation_zero_fraction_before'] = activation_before_pruning
                 snapshot['activation_zero_fraction_after'] = activation_after_pruning
+                snapshot['hidden_representation'] = hidden_representation
+                snapshot['hidden_cosine_similarity'] = hidden_representation
+                snapshot['hidden_cka_similarity'] = hidden_representation
+                snapshot['hidden_l2_distance'] = hidden_representation
+                snapshot['hidden_class_separation_delta'] = hidden_representation
                 snapshot_paths = save_pruning_tables(
                     snapshot, config['run_dir'], config['run_id'], epoch
                 )

@@ -7,6 +7,7 @@ from collections import defaultdict
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 def _group_names(group):
@@ -263,6 +264,120 @@ def measure_activation_distribution(model, sample, max_samples=1):
     model.train(was_training)
     for hook in hooks:
         hook.remove()
+    return rows
+
+
+def collect_hidden_representations(model, sample, max_samples=32):
+    features = {}
+    hooks = []
+
+    def flatten_feature(output):
+        if not torch.is_tensor(output):
+            return None
+        feature = output.detach().float()
+        if feature.dim() > 2:
+            feature = feature.mean(dim=tuple(range(2, feature.dim())))
+        elif feature.dim() == 1:
+            feature = feature.unsqueeze(0)
+        else:
+            feature = feature.flatten(start_dim=1)
+        return feature.cpu()
+
+    def register(name, layer):
+        def hook(_, __, output):
+            outputs = output if isinstance(output, (tuple, list)) else (output,)
+            tensors = [flatten_feature(tensor) for tensor in outputs]
+            tensors = [tensor for tensor in tensors if tensor is not None]
+            if tensors:
+                features[name] = torch.cat(tensors, dim=1)
+        hooks.append(layer.register_forward_hook(hook))
+
+    for name, layer in model.named_modules():
+        if isinstance(layer, (nn.Conv2d, nn.Linear)):
+            register(name, layer)
+
+    was_training = model.training
+    model.eval()
+    with torch.no_grad():
+        model(sample[:max_samples])
+    model.train(was_training)
+    for hook in hooks:
+        hook.remove()
+    return features
+
+
+def _linear_cka(x, y):
+    if x.size(0) < 2:
+        return None
+    x = x - x.mean(dim=0, keepdim=True)
+    y = y - y.mean(dim=0, keepdim=True)
+    xy = torch.linalg.matrix_norm(x.T @ y).pow(2)
+    xx = torch.linalg.matrix_norm(x.T @ x)
+    yy = torch.linalg.matrix_norm(y.T @ y)
+    denom = xx * yy
+    if denom.item() <= 0:
+        return None
+    return float((xy / denom).item())
+
+
+def _class_separation(feature, labels):
+    if labels is None or feature.size(0) < 2:
+        return None, None, None, 0, 0
+    labels = labels[:feature.size(0)].detach().cpu()
+    distances = torch.cdist(feature, feature, p=2)
+    upper = torch.triu(torch.ones_like(distances, dtype=torch.bool), diagonal=1)
+    same = (labels[:, None] == labels[None, :]) & upper
+    different = (labels[:, None] != labels[None, :]) & upper
+    same_count = int(same.sum().item())
+    different_count = int(different.sum().item())
+    intra = float(distances[same].mean().item()) if same_count else None
+    inter = float(distances[different].mean().item()) if different_count else None
+    ratio = (
+        inter / max(intra, 1e-12)
+        if intra is not None and inter is not None else None
+    )
+    return intra, inter, ratio, same_count, different_count
+
+
+def compare_hidden_representations(before, after, labels=None):
+    rows = []
+    for name in before:
+        if name not in after:
+            continue
+        before_feature = before[name]
+        after_feature = after[name]
+        if before_feature.shape != after_feature.shape or before_feature.numel() == 0:
+            continue
+
+        cosine = F.cosine_similarity(before_feature, after_feature, dim=1)
+        l2 = torch.linalg.vector_norm(after_feature - before_feature, dim=1)
+        before_intra, before_inter, before_ratio, same_pairs, diff_pairs = (
+            _class_separation(before_feature, labels)
+        )
+        after_intra, after_inter, after_ratio, _, _ = (
+            _class_separation(after_feature, labels)
+        )
+        rows.append({
+            'layer': name,
+            'stage': _stage_name(name),
+            'num_samples': int(before_feature.size(0)),
+            'feature_dim': int(before_feature.size(1)),
+            'cosine_similarity': float(cosine.mean().item()),
+            'l2_distance': float(l2.mean().item()),
+            'cka_similarity': _linear_cka(before_feature, after_feature),
+            'class_pairs_same': same_pairs,
+            'class_pairs_different': diff_pairs,
+            'class_intra_distance_before': before_intra,
+            'class_intra_distance_after': after_intra,
+            'class_inter_distance_before': before_inter,
+            'class_inter_distance_after': after_inter,
+            'class_separation_before': before_ratio,
+            'class_separation_after': after_ratio,
+            'class_separation_delta': (
+                after_ratio - before_ratio
+                if before_ratio is not None and after_ratio is not None else None
+            ),
+        })
     return rows
 
 
