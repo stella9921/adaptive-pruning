@@ -209,6 +209,63 @@ def measure_module_memory(model, sample):
     return rows
 
 
+def measure_activation_distribution(model, sample, max_samples=1):
+    rows = []
+    hooks = []
+
+    def register(name, layer):
+        def hook(_, __, output):
+            outputs = output if isinstance(output, (tuple, list)) else (output,)
+            tensors = [
+                tensor.detach().float().flatten().cpu()
+                for tensor in outputs if torch.is_tensor(tensor)
+            ]
+            if not tensors:
+                return
+            values = torch.cat(tensors)
+            if values.numel() == 0:
+                return
+            abs_values = values.abs()
+            quantiles = torch.quantile(
+                values,
+                torch.tensor([0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99]),
+            )
+            rows.append({
+                'layer': name,
+                'stage': _stage_name(name),
+                'num_values': int(values.numel()),
+                'mean': float(values.mean().item()),
+                'std': float(values.std(unbiased=False).item()),
+                'min': float(values.min().item()),
+                'max': float(values.max().item()),
+                'abs_mean': float(abs_values.mean().item()),
+                'rms': float(torch.sqrt((values ** 2).mean()).item()),
+                'zero_fraction': float((values == 0).float().mean().item()),
+                'positive_fraction': float((values > 0).float().mean().item()),
+                'q01': float(quantiles[0].item()),
+                'q05': float(quantiles[1].item()),
+                'q25': float(quantiles[2].item()),
+                'q50': float(quantiles[3].item()),
+                'q75': float(quantiles[4].item()),
+                'q95': float(quantiles[5].item()),
+                'q99': float(quantiles[6].item()),
+            })
+        hooks.append(layer.register_forward_hook(hook))
+
+    for name, layer in model.named_modules():
+        if isinstance(layer, (nn.Conv2d, nn.Linear)):
+            register(name, layer)
+
+    was_training = model.training
+    model.eval()
+    with torch.no_grad():
+        model(sample[:max_samples])
+    model.train(was_training)
+    for hook in hooks:
+        hook.remove()
+    return rows
+
+
 def measure_flops(model, sample):
     dense_flops = 0.0
     effective_flops = 0.0

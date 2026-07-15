@@ -18,6 +18,7 @@ from src.pruning.optimizer import lagrangian_optimization
 from src.utils.config_loader import load_config
 from src.utils.measure import (
     collect_epoch_metrics,
+    measure_activation_distribution,
     measure_module_memory,
     measure_pruning_structure,
     save_epoch_metrics,
@@ -440,6 +441,7 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                     f"[Pruning Schedule] step={pruning_step}/{len(pruning_epochs)} "
                     f"progress={pdt_engine.scheduled_pruning_progress:.4f}"
                 )
+                activation_before_pruning = measure_activation_distribution(model, x)
 
                 # Retain graph for Hessian computation
                 loss.backward(retain_graph=True)
@@ -494,12 +496,18 @@ def execute_pdt_experiment(model, config, train_loader, val_loader, test_loader,
                         )
 
                 pdt_engine.apply_mask_to_weights(optimizer=optimizer)
+                activation_after_pruning = measure_activation_distribution(model, x)
                 snapshot = measure_pruning_structure(
                     model,
                     topology_groups,
                     getattr(pdt_engine, 'last_group_selection', []),
                 )
                 snapshot['module_memory'] = measure_module_memory(model, x)
+                snapshot['activation_distribution_before'] = activation_before_pruning
+                snapshot['activation_distribution_after'] = activation_after_pruning
+                snapshot['activation_abs_mean_before'] = activation_before_pruning
+                snapshot['activation_abs_mean_after'] = activation_after_pruning
+                snapshot['activation_zero_fraction_after'] = activation_after_pruning
                 snapshot_paths = save_pruning_tables(
                     snapshot, config['run_dir'], config['run_id'], epoch
                 )

@@ -55,6 +55,21 @@ def save_pruning_plots(snapshot, run_dir, run_id, epoch):
             'module_memory', 'Module Activation Volume',
             'layer', 'activation_volume_mb', None,
         ),
+        (
+            'activation_abs_mean_before',
+            'Activation Abs Mean Before Pruning',
+            'layer', 'abs_mean', None,
+        ),
+        (
+            'activation_abs_mean_after',
+            'Activation Abs Mean After Pruning',
+            'layer', 'abs_mean', None,
+        ),
+        (
+            'activation_zero_fraction_after',
+            'Activation Zero Fraction After Pruning',
+            'layer', 'zero_fraction', None,
+        ),
     ]
     paths = []
     for name, title, label_key, value_key, selected_key in specs:
