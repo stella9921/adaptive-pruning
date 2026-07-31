@@ -1,0 +1,280 @@
+from pathlib import Path
+
+
+def replace_once(text: str, old: str, new: str, label: str) -> str:
+    if old not in text:
+        raise SystemExit(f"Could not find pattern for {label}")
+    return text.replace(old, new, 1)
+
+
+def insert_once(text: str, marker: str, insertion: str, label: str) -> str:
+    if insertion in text:
+        return text
+    if marker not in text:
+        raise SystemExit(f"Could not find marker for {label}")
+    return text.replace(marker, marker + insertion, 1)
+
+
+def ensure_default_key(text: str, anchor: str, key_line: str, label: str) -> str:
+    key = key_line.split(":", 1)[0].strip()
+    if key in text:
+        return text
+    return replace_once(text, anchor, anchor + key_line, label)
+
+
+def patch_main(repo: Path) -> None:
+    path = repo / "main.py"
+    text = path.read_text()
+
+    anchor = '    "boundary_compensation_channel_ratio": 1.0,\n'
+    text = ensure_default_key(text, anchor, '    "boundary_compensation_type": "affine",\n', "default compensation type")
+    text = ensure_default_key(text, anchor, '    "boundary_compensation_rank": 64,\n', "default low-rank rank")
+    text = ensure_default_key(text, anchor, '    "boundary_compensation_train_steps": 200,\n', "default low-rank steps")
+    text = ensure_default_key(text, anchor, '    "boundary_compensation_lr": 1.0e-3,\n', "default low-rank lr")
+    text = ensure_default_key(text, anchor, '    "boundary_compensation_gamma": 1.0,\n', "default compensation gamma")
+
+    arg_anchor = '    parser.add_argument("--boundary-compensation-channel-ratio", dest="boundary_compensation_channel_ratio", type=float, default=None)\n'
+    arg_block = (
+        '    parser.add_argument("--boundary-compensation-type", dest="boundary_compensation_type", '
+        'choices=["affine", "low_rank_residual"], default=None)\n'
+        '    parser.add_argument("--boundary-compensation-rank", dest="boundary_compensation_rank", type=int, default=None)\n'
+        '    parser.add_argument("--boundary-compensation-train-steps", dest="boundary_compensation_train_steps", type=int, default=None)\n'
+        '    parser.add_argument("--boundary-compensation-lr", dest="boundary_compensation_lr", type=float, default=None)\n'
+        '    parser.add_argument("--boundary-compensation-gamma", dest="boundary_compensation_gamma", type=float, default=None)\n'
+    )
+    text = insert_once(text, arg_anchor, arg_block, "low-rank compensation args")
+
+    override_marker = '    config = resolve_config(args, DEFAULT_CONFIG)\n'
+    override_block = (
+        '    for _key in [\n'
+        '        "boundary_compensation_type",\n'
+        '        "boundary_compensation_rank",\n'
+        '        "boundary_compensation_train_steps",\n'
+        '        "boundary_compensation_lr",\n'
+        '        "boundary_compensation_gamma",\n'
+        '    ]:\n'
+        '        _value = getattr(args, _key, None)\n'
+        '        if _value is not None:\n'
+        '            config[_key] = _value\n'
+    )
+    text = insert_once(text, override_marker, override_block, "low-rank compensation config overrides")
+
+    call_anchor = '                    eps=float(config["boundary_compensation_eps"]),\n'
+    call_block = (
+        '                    compensation_type=config.get("boundary_compensation_type", "affine"),\n'
+        '                    rank=int(config.get("boundary_compensation_rank", 64)),\n'
+        '                    train_steps=int(config.get("boundary_compensation_train_steps", 200)),\n'
+        '                    lr=float(config.get("boundary_compensation_lr", 1.0e-3)),\n'
+        '                    gamma=float(config.get("boundary_compensation_gamma", 1.0)),\n'
+    )
+    if "compensation_type=config.get(" not in text:
+        text = insert_once(text, call_anchor, call_block, "low-rank estimate kwargs")
+    else:
+        if "gamma=float(config.get(\"boundary_compensation_gamma\"" not in text:
+            text = insert_once(text, call_anchor, '                    gamma=float(config.get("boundary_compensation_gamma", 1.0)),\n', "gamma estimate kwarg")
+
+    path.write_text(text)
+
+
+LOW_RANK_CLASS = r'''
+
+class BoundaryLowRankResidualWrapper(nn.Module):
+    def __init__(self, block, down_weight, up_weight, up_bias=None, gamma=1.0):
+        super().__init__()
+        self.block = block
+        self.gamma = float(gamma)
+        self.down = nn.Linear(down_weight.shape[1], down_weight.shape[0], bias=False)
+        self.up = nn.Linear(up_weight.shape[1], up_weight.shape[0], bias=up_bias is not None)
+        self.down.weight.data.copy_(down_weight.detach().float())
+        self.up.weight.data.copy_(up_weight.detach().float())
+        if up_bias is not None:
+            self.up.bias.data.copy_(up_bias.detach().float())
+
+    def forward(self, hidden_states, *args, **kwargs):
+        residual = self.up(torch.nn.functional.gelu(self.down(hidden_states.float()))).to(dtype=hidden_states.dtype)
+        hidden_states = hidden_states + self.gamma * residual
+        return self.block(hidden_states, *args, **kwargs)
+'''
+
+
+LOW_RANK_HELPER = r'''
+
+def _fit_low_rank_residual(source_hidden, target_hidden, channel_mask, rank=64, train_steps=200, lr=1.0e-3, gamma=1.0):
+    x = source_hidden.detach().float().reshape(-1, source_hidden.shape[-1])
+    y = target_hidden.detach().float().reshape(-1, target_hidden.shape[-1])
+    hidden_size = x.shape[-1]
+    rank = max(1, min(int(rank), hidden_size))
+    train_steps = max(1, int(train_steps))
+    device = x.device
+
+    down = nn.Linear(hidden_size, rank, bias=False, device=device, dtype=torch.float32)
+    up = nn.Linear(rank, hidden_size, bias=True, device=device, dtype=torch.float32)
+    torch.nn.init.normal_(down.weight, mean=0.0, std=0.02)
+    torch.nn.init.zeros_(up.weight)
+    torch.nn.init.zeros_(up.bias)
+
+    mask = channel_mask.detach().to(device=device, dtype=torch.bool)
+    if not bool(mask.any()):
+        mask = torch.ones(hidden_size, device=device, dtype=torch.bool)
+
+    opt = torch.optim.AdamW(list(down.parameters()) + list(up.parameters()), lr=float(lr), weight_decay=0.0)
+    for _ in range(train_steps):
+        opt.zero_grad(set_to_none=True)
+        residual = up(torch.nn.functional.gelu(down(x)))
+        pred = x + float(gamma) * residual
+        loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
+        loss.backward()
+        opt.step()
+
+    with torch.no_grad():
+        residual = up(torch.nn.functional.gelu(down(x)))
+        pred = x + float(gamma) * residual
+        final_loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
+
+    return {
+        "down_weight": down.weight.detach().cpu(),
+        "up_weight": up.weight.detach().cpu(),
+        "up_bias": up.bias.detach().cpu(),
+        "adapter_loss": float(final_loss.item()),
+    }
+'''
+
+
+LOW_RANK_ESTIMATE_BLOCK = r'''
+    if str(compensation_type) == "low_rank_residual":
+        hidden_candidates = [
+            ("source_hidden", "target_hidden"),
+            ("source_states", "target_states"),
+            ("source_acts", "target_acts"),
+            ("pruned_hidden", "dense_hidden"),
+            ("pruned_states", "dense_states"),
+        ]
+        local_vars = locals()
+        for source_name, target_name in hidden_candidates:
+            if source_name in local_vars and target_name in local_vars:
+                adapter = _fit_low_rank_residual(
+                    local_vars[source_name],
+                    local_vars[target_name],
+                    channel_mask,
+                    rank=rank,
+                    train_steps=train_steps,
+                    lr=lr,
+                    gamma=gamma,
+                )
+                result.update(adapter)
+                result["mode"] = "boundary_low_rank_residual"
+                result["compensation_type"] = "low_rank_residual"
+                result["rank"] = int(rank)
+                result["train_steps"] = int(train_steps)
+                result["lr"] = float(lr)
+                break
+        else:
+            raise RuntimeError(
+                "Low-rank residual compensation needs source/target hidden tensors in "
+                "estimate_boundary_affine_compensation. Show lines 58-150 of amcprune/compensation.py "
+                "and add the actual tensor variable names to hidden_candidates."
+            )
+    else:
+        result["compensation_type"] = "affine"
+'''
+
+
+def patch_compensation(repo: Path) -> None:
+    path = repo / "amcprune" / "compensation.py"
+    text = path.read_text()
+
+    if "class BoundaryLowRankResidualWrapper" not in text:
+        marker = "\n\ndef _hidden_from_block_output"
+        text = replace_once(text, marker, LOW_RANK_CLASS + marker, "low-rank wrapper insertion")
+
+    if "def _fit_low_rank_residual" not in text:
+        marker = "\n\ndef apply_boundary_affine_compensation"
+        text = replace_once(text, marker, LOW_RANK_HELPER + marker, "low-rank helper insertion")
+
+    if "compensation_type=\"affine\"" not in text:
+        text = replace_once(
+            text,
+            '    gamma=1.0,\n):\n',
+            '    gamma=1.0,\n'
+            '    compensation_type="affine",\n'
+            '    rank=64,\n'
+            '    train_steps=200,\n'
+            '    lr=1.0e-3,\n'
+            '):\n',
+            "estimate low-rank signature",
+        )
+
+    # Normalize the estimate return dict through a local result variable so we can append adapter metadata.
+    if "result = {" not in text:
+        text = replace_once(text, "    return {\n", "    result = {\n", "estimate result dict")
+        text = replace_once(text, "    }\n\n\ndef _fit_low_rank_residual", "    }\n" + LOW_RANK_ESTIMATE_BLOCK + "\n    return result\n\n\ndef _fit_low_rank_residual", "estimate low-rank result return")
+
+    if '"gamma": float(gamma),' not in text:
+        text = replace_once(
+            text,
+            '        "channel_ratio": ratio,\n',
+            '        "channel_ratio": ratio,\n        "gamma": float(gamma),\n',
+            "estimate gamma field",
+        )
+
+    if "BoundaryLowRankResidualWrapper(blocks[target_new_index]" not in text:
+        old = '    blocks[target_new_index] = BoundaryAffineWrapper(blocks[target_new_index], alpha, beta, gamma=float(compensation.get("gamma", 1.0)))\n'
+        if old not in text:
+            old = '    blocks[target_new_index] = BoundaryAffineWrapper(blocks[target_new_index], alpha, beta)\n'
+        new = (
+            '    if compensation.get("compensation_type") == "low_rank_residual":\n'
+            '        down_weight = compensation["down_weight"].to(device=target_device)\n'
+            '        up_weight = compensation["up_weight"].to(device=target_device)\n'
+            '        up_bias = compensation.get("up_bias")\n'
+            '        if up_bias is not None:\n'
+            '            up_bias = up_bias.to(device=target_device)\n'
+            '        blocks[target_new_index] = BoundaryLowRankResidualWrapper(\n'
+            '            blocks[target_new_index],\n'
+            '            down_weight,\n'
+            '            up_weight,\n'
+            '            up_bias=up_bias,\n'
+            '            gamma=float(compensation.get("gamma", 1.0)),\n'
+            '        )\n'
+            '    else:\n'
+            '        blocks[target_new_index] = BoundaryAffineWrapper(\n'
+            '            blocks[target_new_index],\n'
+            '            alpha,\n'
+            '            beta,\n'
+            '            gamma=float(compensation.get("gamma", 1.0)),\n'
+            '        )\n'
+        )
+        text = replace_once(text, old, new, "apply low-rank wrapper branch")
+
+    if '"compensation_type": compensation.get("compensation_type", "affine"),' not in text:
+        text = replace_once(
+            text,
+            '        "mode": compensation.get("mode", "boundary_affine_channelwise"),\n',
+            '        "mode": compensation.get("mode", "boundary_affine_channelwise"),\n'
+            '        "compensation_type": compensation.get("compensation_type", "affine"),\n',
+            "applied compensation type metadata",
+        )
+    if '"rank": int(compensation.get("rank", 0)),' not in text:
+        text = replace_once(
+            text,
+            '        "gamma": float(compensation.get("gamma", 1.0)),\n',
+            '        "gamma": float(compensation.get("gamma", 1.0)),\n'
+            '        "rank": int(compensation.get("rank", 0)),\n'
+            '        "adapter_loss": float(compensation.get("adapter_loss", 0.0)),\n',
+            "applied low-rank metadata",
+        )
+
+    path.write_text(text)
+
+
+def main() -> None:
+    repo = Path.cwd()
+    if not (repo / "main.py").exists() or not (repo / "amcprune" / "compensation.py").exists():
+        raise SystemExit("Run this script from the AMCPrune_rescomp repo root.")
+    patch_main(repo)
+    patch_compensation(repo)
+    print("Patched low-rank residual boundary compensation.")
+    print("Run: python -m py_compile main.py amcprune/compensation.py")
+
+
+if __name__ == "__main__":
+    main()

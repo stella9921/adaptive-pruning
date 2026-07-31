@@ -31,7 +31,7 @@ s_c =
 \end{equation}
 where $\rho$ is the compensation channel ratio. Unlike normalization-only correction, this selection explicitly decides which hidden channels require boundary repair.
 
-For the selected channels, we estimate a channel-wise affine mapping from calibration pairs:
+For the selected channels, we first estimate a channel-wise affine mapping from calibration pairs:
 \begin{equation}
 \hat{H}_{t,c} =
 \begin{cases}
@@ -39,7 +39,27 @@ For the selected channels, we estimate a channel-wise affine mapping from calibr
 H^{\mathrm{pruned}}_{t,c}, & c\notin\mathcal{S}.
 \end{cases}
 \end{equation}
-The affine parameters $(\alpha_c,\beta_c)$ are inserted only at the pruned boundary before the right boundary block $B_j$. This keeps the compact model replacement-free and adds negligible parameters compared with module-replacement approaches. After compensation, the compact model can be evaluated directly or fine-tuned under the same pruning ratio.
+This affine correction is parameter-efficient, but it cannot model cross-channel interactions introduced by the removed attention and MLP sublayers. We therefore use the affine variant as a diagnostic baseline and introduce a stronger residual boundary compensator:
+\begin{equation}
+\hat{H}
+= H^{\mathrm{pruned}}
++ \gamma U \phi(V H^{\mathrm{pruned}}),
+\qquad
+V\in\mathbb{R}^{r\times C},\quad
+U\in\mathbb{R}^{C\times r},
+\end{equation}
+where $r\ll C$ is the adapter rank, $\phi$ is a GELU nonlinearity, and $\gamma$ controls the residual strength. The adapter is trained only on the calibration boundary pairs by minimizing the reconstruction loss on the selected channels:
+\begin{equation}
+\mathcal{L}_{\mathrm{comp}}
+=
+\frac{1}{T|\mathcal{S}|}
+\sum_{t=1}^{T}\sum_{c\in\mathcal{S}}
+\left\|
+\hat{H}_{t,c}
+- H^{\mathrm{dense}}_{t,c}
+\right\|_2^2 .
+\end{equation}
+The compensation module is inserted only at the pruned boundary before the right boundary block $B_j$. This keeps the compact model structurally close to the depth-pruned model while giving the compensation function enough capacity to recover boundary transfer behavior that channel-wise affine rescaling cannot express.
 
 \paragraph{Ablation design.}
-To isolate the role of channel selection, we compare four compensation variants under the same depth-pruned backbone and channel ratio: (i) random channel selection, (ii) mismatch-only selection using $m_c$, (iii) outlier-only selection using $o_c$, and (iv) mismatch+outlier selection using $s_c$. This ablation tests whether performance gains come from the proposed channel criterion rather than from affine rescaling alone.
+To isolate the role of channel selection and compensation capacity, we compare random, mismatch-only, outlier-only, and mismatch+outlier channel selection under the same depth-pruned backbone and channel ratio. We also compare channel-wise affine compensation with the low-rank residual compensator. This ablation tests whether performance gains come from the proposed channel criterion, the residual compensation capacity, or their interaction.
