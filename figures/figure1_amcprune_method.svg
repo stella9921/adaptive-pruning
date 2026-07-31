@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1900" height="1080" viewBox="0 0 1900 1080">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M1,1 L9,5 L1,9 Z" fill="#202020"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M1,1 L9,5 L1,9 Z" fill="#b71c1c"/>
+    </marker>
+    <style>
+      .title { font-family: "Times New Roman", Times, serif; font-size: 35px; font-weight: 700; fill: #111; }
+      .section { font-family: "Times New Roman", Times, serif; font-size: 24px; font-weight: 700; fill: #111; }
+      .label { font-family: "Times New Roman", Times, serif; font-size: 18px; fill: #111; }
+      .small { font-family: "Times New Roman", Times, serif; font-size: 15px; fill: #222; }
+      .tiny { font-family: "Times New Roman", Times, serif; font-size: 13px; fill: #333; }
+      .math { font-family: "Times New Roman", Times, serif; font-size: 20px; font-style: italic; fill: #111; }
+      .panel { fill: #f6f7f9; stroke: #222; stroke-width: 2; rx: 14; }
+      .subpanel { fill: #ffffff; stroke: #333; stroke-width: 1.8; rx: 12; }
+      .zoom { fill: #f9fbfd; stroke: #1f1f1f; stroke-width: 2.1; rx: 12; }
+      .block { fill: #ffffff; stroke: #222; stroke-width: 2; rx: 8; }
+      .blockKeep { fill: #ffffff; stroke: #222; stroke-width: 2; rx: 8; }
+      .blockPruned { fill: #eeeeee; stroke: #777; stroke-width: 2; stroke-dasharray: 8 5; rx: 8; }
+      .boundary { fill: #fff4df; stroke: #d27b00; stroke-width: 2.3; rx: 8; }
+      .norm { fill: #fff; stroke: #222; stroke-width: 1.5; rx: 5; }
+      .attn { fill: #e7f0fb; stroke: #222; stroke-width: 1.5; rx: 5; }
+      .ffn { fill: #f5e1d2; stroke: #222; stroke-width: 1.5; rx: 5; }
+      .affine { fill: #e6f4e4; stroke: #222; stroke-width: 1.8; rx: 7; }
+      .select { fill: #fff7d6; stroke: #222; stroke-width: 1.8; rx: 7; }
+      .arrow { stroke: #202020; stroke-width: 2.1; fill: none; marker-end: url(#arrow); }
+      .thinArrow { stroke: #202020; stroke-width: 1.5; fill: none; marker-end: url(#arrow); }
+      .redArrow { stroke: #b71c1c; stroke-width: 2.4; fill: none; marker-end: url(#arrowRed); }
+      .dash { stroke: #666; stroke-width: 1.6; fill: none; stroke-dasharray: 6 5; }
+      .redDash { stroke: #b71c1c; stroke-width: 2.5; fill: none; stroke-dasharray: 8 6; }
+      .token { fill: #fafafa; stroke: #222; stroke-width: 0.9; }
+      .denseCh { fill: #d9eafc; stroke: #222; stroke-width: 0.75; }
+      .prunedCh { fill: #f9e0bf; stroke: #222; stroke-width: 0.75; }
+      .selCh { fill: #111; stroke: #111; stroke-width: 0.75; }
+      .keepCh { fill: #fff; stroke: #222; stroke-width: 0.75; }
+      .muted { fill: #f2f2f2; stroke: #777; stroke-width: 1.2; }
+    </style>
+  </defs>
+
+  <rect width="1900" height="1080" fill="#fff"/>
+  <text x="58" y="58" class="title">Figure 1. AMCPrune: Depth Pruning followed by Mismatch/Outlier-Aware Channel Compensation</text>
+
+  <!-- Top pipeline -->
+  <rect x="54" y="88" width="1792" height="430" class="panel"/>
+  <text x="86" y="126" class="section">A. Depth-first compaction on a Llama decoder stack</text>
+  <text x="86" y="154" class="small">A redundant interval is physically removed. The newly exposed transition is then inspected at hidden-channel level.</text>
+
+  <g transform="translate(98,238)">
+    <text x="0" y="-28" class="label">Input tokens</text>
+    <g>
+      <rect x="0" y="0" width="13" height="13" class="token"/><rect x="15" y="0" width="13" height="13" class="token"/><rect x="30" y="0" width="13" height="13" class="token"/><rect x="45" y="0" width="13" height="13" class="token"/><rect x="60" y="0" width="13" height="13" class="token"/>
+      <rect x="0" y="15" width="13" height="13" class="token"/><rect x="15" y="15" width="13" height="13" class="token"/><rect x="30" y="15" width="13" height="13" class="token"/><rect x="45" y="15" width="13" height="13" class="token"/><rect x="60" y="15" width="13" height="13" class="token"/>
+      <rect x="0" y="30" width="13" height="13" class="token"/><rect x="15" y="30" width="13" height="13" class="token"/><rect x="30" y="30" width="13" height="13" class="token"/><rect x="45" y="30" width="13" height="13" class="token"/><rect x="60" y="30" width="13" height="13" class="token"/>
+      <rect x="0" y="45" width="13" height="13" class="token"/><rect x="15" y="45" width="13" height="13" class="token"/><rect x="30" y="45" width="13" height="13" class="token"/><rect x="45" y="45" width="13" height="13" class="token"/><rect x="60" y="45" width="13" height="13" class="token"/>
+    </g>
+    <text x="-2" y="88" class="small">Embedding</text>
+    <text x="4" y="109" class="small">C = 3072</text>
+  </g>
+
+  <g transform="translate(220,192)">
+    <path d="M-42,110 H0" class="arrow"/>
+
+    <rect x="0" y="0" width="132" height="220" class="blockKeep"/>
+    <text x="38" y="27" class="label">B0</text>
+    <rect x="18" y="46" width="34" height="126" class="norm"/>
+    <text x="25" y="126" class="tiny" transform="rotate(-90 25 126)">RMSNorm</text>
+    <rect x="65" y="46" width="48" height="38" class="attn"/>
+    <text x="75" y="70" class="tiny">GQA</text>
+    <rect x="65" y="120" width="48" height="38" class="ffn"/>
+    <text x="75" y="144" class="tiny">FFN</text>
+    <path d="M52,65 H65" class="thinArrow"/><path d="M52,139 H65" class="thinArrow"/>
+
+    <path d="M132,110 H178" class="arrow"/>
+    <rect x="178" y="0" width="132" height="220" class="blockKeep"/>
+    <text x="214" y="27" class="label">...</text>
+
+    <path d="M310,110 H356" class="arrow"/>
+    <rect x="356" y="0" width="132" height="220" class="boundary"/>
+    <text x="390" y="27" class="label">Bi</text>
+    <text x="382" y="70" class="tiny">left</text>
+    <text x="372" y="90" class="tiny">boundary</text>
+
+    <path d="M488,110 H534" class="redArrow"/>
+    <rect x="534" y="-4" width="310" height="228" class="blockPruned"/>
+    <text x="620" y="47" class="label">Pruned interval</text>
+    <text x="580" y="77" class="small">blocks Bi+1 ... Bj-1</text>
+    <text x="584" y="105" class="small">selected by hidden-state cosine</text>
+    <text x="610" y="143" class="math">argmax cos(H_i, H_j)</text>
+    <line x1="548" y1="181" x2="830" y2="181" class="redDash"/>
+
+    <path d="M844,110 H890" class="redArrow"/>
+    <rect x="890" y="0" width="132" height="220" class="boundary"/>
+    <text x="924" y="27" class="label">Bj</text>
+    <text x="916" y="70" class="tiny">right</text>
+    <text x="906" y="90" class="tiny">boundary</text>
+
+    <path d="M1022,110 H1068" class="arrow"/>
+    <rect x="1068" y="0" width="132" height="220" class="blockKeep"/>
+    <text x="1102" y="27" class="label">...</text>
+
+    <path d="M1200,110 H1246" class="arrow"/>
+    <rect x="1246" y="0" width="132" height="220" class="blockKeep"/>
+    <text x="1283" y="27" class="label">B27</text>
+    <path d="M1378,110 H1430" class="arrow"/>
+    <rect x="1430" y="70" width="90" height="80" class="blockKeep"/>
+    <text x="1448" y="116" class="label">LM</text>
+    <text x="1445" y="137" class="label">Head</text>
+
+    <path d="M956,220 C1040,296 1156,338 1305,370" class="dash"/>
+    <text x="1172" y="353" class="small">zoom into new boundary input</text>
+  </g>
+
+  <!-- Inset: Llama block structure -->
+  <rect x="108" y="398" width="535" height="94" class="subpanel"/>
+  <text x="128" y="425" class="label">Llama decoder block internals</text>
+  <text x="128" y="452" class="small">RMSNorm -> GQA (Q heads 24, KV heads 8, head dim 128) -> residual</text>
+  <text x="128" y="477" class="small">RMSNorm -> SwiGLU FFN (3072 -> 8192 -> 3072) -> residual</text>
+
+  <!-- Bottom panels -->
+  <rect x="54" y="552" width="560" height="442" class="zoom"/>
+  <text x="86" y="590" class="section">B. Measure boundary mismatch</text>
+  <text x="86" y="620" class="small">Compare the dense input originally seen by Bj with the pruned input now produced by Bi.</text>
+  <g transform="translate(94,666)">
+    <text x="0" y="-18" class="label">Dense boundary input</text>
+    <text x="0" y="134" class="label">Pruned boundary input</text>
+    <g>
+      <rect x="0" y="0" width="21" height="21" class="denseCh"/><rect x="24" y="0" width="21" height="21" class="denseCh"/><rect x="48" y="0" width="21" height="21" class="denseCh"/><rect x="72" y="0" width="21" height="21" class="denseCh"/><rect x="96" y="0" width="21" height="21" class="denseCh"/><rect x="120" y="0" width="21" height="21" class="denseCh"/><rect x="144" y="0" width="21" height="21" class="denseCh"/><rect x="168" y="0" width="21" height="21" class="denseCh"/>
+      <rect x="0" y="24" width="21" height="21" class="denseCh"/><rect x="24" y="24" width="21" height="21" class="denseCh"/><rect x="48" y="24" width="21" height="21" class="selCh"/><rect x="72" y="24" width="21" height="21" class="denseCh"/><rect x="96" y="24" width="21" height="21" class="denseCh"/><rect x="120" y="24" width="21" height="21" class="selCh"/><rect x="144" y="24" width="21" height="21" class="denseCh"/><rect x="168" y="24" width="21" height="21" class="denseCh"/>
+      <rect x="0" y="48" width="21" height="21" class="denseCh"/><rect x="24" y="48" width="21" height="21" class="denseCh"/><rect x="48" y="48" width="21" height="21" class="denseCh"/><rect x="72" y="48" width="21" height="21" class="denseCh"/><rect x="96" y="48" width="21" height="21" class="selCh"/><rect x="120" y="48" width="21" height="21" class="denseCh"/><rect x="144" y="48" width="21" height="21" class="denseCh"/><rect x="168" y="48" width="21" height="21" class="denseCh"/>
+    </g>
+    <g transform="translate(0,150)">
+      <rect x="0" y="0" width="21" height="21" class="prunedCh"/><rect x="24" y="0" width="21" height="21" class="prunedCh"/><rect x="48" y="0" width="21" height="21" class="prunedCh"/><rect x="72" y="0" width="21" height="21" class="prunedCh"/><rect x="96" y="0" width="21" height="21" class="prunedCh"/><rect x="120" y="0" width="21" height="21" class="prunedCh"/><rect x="144" y="0" width="21" height="21" class="prunedCh"/><rect x="168" y="0" width="21" height="21" class="prunedCh"/>
+      <rect x="0" y="24" width="21" height="21" class="prunedCh"/><rect x="24" y="24" width="21" height="21" class="prunedCh"/><rect x="48" y="24" width="21" height="21" class="selCh"/><rect x="72" y="24" width="21" height="21" class="prunedCh"/><rect x="96" y="24" width="21" height="21" class="prunedCh"/><rect x="120" y="24" width="21" height="21" class="selCh"/><rect x="144" y="24" width="21" height="21" class="prunedCh"/><rect x="168" y="24" width="21" height="21" class="prunedCh"/>
+      <rect x="0" y="48" width="21" height="21" class="prunedCh"/><rect x="24" y="48" width="21" height="21" class="prunedCh"/><rect x="48" y="48" width="21" height="21" class="prunedCh"/><rect x="72" y="48" width="21" height="21" class="prunedCh"/><rect x="96" y="48" width="21" height="21" class="selCh"/><rect x="120" y="48" width="21" height="21" class="prunedCh"/><rect x="144" y="48" width="21" height="21" class="prunedCh"/><rect x="168" y="48" width="21" height="21" class="prunedCh"/>
+    </g>
+    <path d="M225,34 H324" class="arrow"/><path d="M225,184 H324" class="arrow"/>
+    <rect x="334" y="54" width="160" height="136" class="select"/>
+    <text x="354" y="82" class="label">per-channel</text>
+    <text x="358" y="108" class="label">statistics</text>
+    <text x="354" y="143" class="math">m_c : mismatch</text>
+    <text x="354" y="172" class="math">o_c : outlier risk</text>
+  </g>
+
+  <rect x="670" y="552" width="560" height="442" class="zoom"/>
+  <text x="702" y="590" class="section">C. Select channels by mismatch + outlier</text>
+  <text x="702" y="620" class="small">The selection mask is sparse in hidden channels, not in layers or heads.</text>
+  <g transform="translate(714,665)">
+    <text x="0" y="0" class="math">m_c = ||mu_c^dense - mu_c^pruned||_1 + lambda_sigma |sigma_c^dense - sigma_c^pruned|</text>
+    <text x="0" y="48" class="math">o_c = E[ |z_c| * 1(|z_c| &gt; tau) ]</text>
+    <text x="0" y="96" class="math">s_c = Norm(m_c) + lambda_o Norm(o_c)</text>
+    <text x="0" y="144" class="math">S = TopK_c(s_c, rho C)</text>
+    <g transform="translate(22,206)">
+      <text x="0" y="-20" class="label">hidden channels, C = 3072</text>
+      <rect x="0" y="0" width="26" height="34" class="keepCh"/><rect x="30" y="0" width="26" height="34" class="keepCh"/><rect x="60" y="0" width="26" height="34" class="selCh"/><rect x="90" y="0" width="26" height="34" class="keepCh"/><rect x="120" y="0" width="26" height="34" class="keepCh"/><rect x="150" y="0" width="26" height="34" class="selCh"/><rect x="180" y="0" width="26" height="34" class="keepCh"/><rect x="210" y="0" width="26" height="34" class="keepCh"/><rect x="240" y="0" width="26" height="34" class="selCh"/><rect x="270" y="0" width="26" height="34" class="keepCh"/>
+      <text x="0" y="72" class="small">black channels are selected for compensation</text>
+    </g>
+    <rect x="350" y="184" width="145" height="118" class="select"/>
+    <text x="385" y="224" class="label">channel</text>
+    <text x="383" y="250" class="label">mask S</text>
+  </g>
+
+  <rect x="1286" y="552" width="560" height="442" class="zoom"/>
+  <text x="1318" y="590" class="section">D. Lightweight boundary mapping</text>
+  <text x="1318" y="620" class="small">Only the selected hidden dimensions receive a learned affine correction before Bj.</text>
+  <g transform="translate(1322,674)">
+    <rect x="0" y="50" width="82" height="110" class="boundary"/>
+    <text x="23" y="85" class="label">Bi</text>
+    <text x="9" y="114" class="tiny">left</text>
+    <text x="5" y="133" class="tiny">boundary</text>
+    <path d="M82,105 H148" class="arrow"/>
+    <rect x="148" y="20" width="86" height="170" class="muted"/>
+    <text x="179" y="92" class="tiny" transform="rotate(-90 179 92)">h in R^{T x C}</text>
+    <path d="M234,105 H296" class="arrow"/>
+    <rect x="296" y="38" width="140" height="134" class="affine"/>
+    <text x="321" y="72" class="label">Affine</text>
+    <text x="314" y="101" class="label">on c in S</text>
+    <text x="318" y="137" class="math">alpha_c h_c + beta_c</text>
+    <path d="M436,105 H500" class="arrow"/>
+    <rect x="500" y="50" width="82" height="110" class="boundary"/>
+    <text x="523" y="85" class="label">Bj</text>
+    <text x="508" y="114" class="tiny">right</text>
+    <text x="500" y="133" class="tiny">boundary</text>
+    <path d="M541,50 C565,-25 458,-45 382,20" class="dash"/>
+    <text x="362" y="-10" class="small">calibrated from dense/pruned boundary pairs</text>
+    <text x="0" y="247" class="math">h'_c = alpha_c h_c + beta_c, if c in S; otherwise h'_c = h_c</text>
+    <text x="0" y="292" class="small">The compact model is then fine-tuned/evaluated with the same pruning ratio.</text>
+  </g>
+
+  <!-- Legend -->
+  <g transform="translate(72,1032)">
+    <rect x="0" y="-16" width="22" height="22" class="boundary"/><text x="32" y="2" class="small">boundary block</text>
+    <rect x="190" y="-16" width="22" height="22" class="blockPruned"/><text x="222" y="2" class="small">physically removed depth interval</text>
+    <rect x="500" y="-16" width="22" height="22" class="selCh"/><text x="532" y="2" class="small">selected hidden channel</text>
+    <rect x="760" y="-16" width="22" height="22" class="affine"/><text x="792" y="2" class="small">lightweight affine compensation</text>
+  </g>
+</svg>

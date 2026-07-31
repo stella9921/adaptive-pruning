@@ -1,0 +1,45 @@
+\subsection{Mismatch/Outlier-Aware Boundary Compensation}
+\label{sec:method_boundary_comp}
+
+AMCPrune first removes a contiguous redundant depth interval and then repairs the newly exposed boundary with a lightweight channel-selective mapping. Let $B_i$ and $B_j$ denote the left and right boundary blocks selected by the depth-pruning stage, where the intermediate blocks $B_{i+1},\ldots,B_{j-1}$ are physically removed. In the dense model, $B_j$ receives hidden states produced by $B_{j-1}$, while in the pruned model it directly receives the output of $B_i$. This replacement creates a boundary distribution shift even when the removed interval has high hidden-state similarity. We therefore measure the shift at the hidden-channel level and compensate only the most affected channels.
+
+Given calibration inputs, we collect the dense boundary input $H^{\mathrm{dense}}\in\mathbb{R}^{T\times C}$ and the pruned boundary input $H^{\mathrm{pruned}}\in\mathbb{R}^{T\times C}$, where $T$ is the number of calibration tokens and $C$ is the hidden dimension. For each channel $c$, we define the boundary mismatch score
+\begin{equation}
+m_c =
+\left|\mu_c^{\mathrm{dense}}-\mu_c^{\mathrm{pruned}}\right|
++ \lambda_{\sigma}
+\left|\sigma_c^{\mathrm{dense}}-\sigma_c^{\mathrm{pruned}}\right|,
+\end{equation}
+where $\mu_c$ and $\sigma_c$ are the token-wise mean and standard deviation of channel $c$. This term identifies channels whose input statistics change after depth pruning.
+
+Depth pruning can also amplify sensitive activation channels. To account for this, we use a lightweight outlier-risk score
+\begin{equation}
+o_c =
+\mathbb{E}_{t}\left[
+|z_{t,c}^{\mathrm{pruned}}|
+\cdot
+\mathbf{1}\left(|z_{t,c}^{\mathrm{pruned}}|>\tau\right)
+\right],
+\end{equation}
+where $z_{t,c}^{\mathrm{pruned}}$ is the standardized activation of channel $c$ at token $t$, and $\tau$ is an outlier threshold. The final channel-selection score is
+\begin{equation}
+s_c =
+\mathrm{Norm}(m_c)
++ \lambda_o \mathrm{Norm}(o_c),
+\qquad
+\mathcal{S}=\mathrm{TopK}_{c}(s_c,\rho C),
+\end{equation}
+where $\rho$ is the compensation channel ratio. Unlike normalization-only correction, this selection explicitly decides which hidden channels require boundary repair.
+
+For the selected channels, we estimate a channel-wise affine mapping from calibration pairs:
+\begin{equation}
+\hat{H}_{t,c} =
+\begin{cases}
+\alpha_c H^{\mathrm{pruned}}_{t,c} + \beta_c, & c\in\mathcal{S},\\
+H^{\mathrm{pruned}}_{t,c}, & c\notin\mathcal{S}.
+\end{cases}
+\end{equation}
+The affine parameters $(\alpha_c,\beta_c)$ are inserted only at the pruned boundary before the right boundary block $B_j$. This keeps the compact model replacement-free and adds negligible parameters compared with module-replacement approaches. After compensation, the compact model can be evaluated directly or fine-tuned under the same pruning ratio.
+
+\paragraph{Ablation design.}
+To isolate the role of channel selection, we compare four compensation variants under the same depth-pruned backbone and channel ratio: (i) random channel selection, (ii) mismatch-only selection using $m_c$, (iii) outlier-only selection using $o_c$, and (iv) mismatch+outlier selection using $s_c$. This ablation tests whether performance gains come from the proposed channel criterion rather than from affine rescaling alone.
