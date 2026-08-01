@@ -175,6 +175,36 @@ def patch_compensation(repo: Path) -> None:
     if "def _fit_low_rank_residual" not in text:
         marker = "\n\ndef apply_boundary_affine_compensation"
         text = replace_once(text, marker, LOW_RANK_HELPER + marker, "low-rank helper insertion")
+    elif "with torch.enable_grad():" not in text:
+        old_loop = '''    opt = torch.optim.AdamW(list(down.parameters()) + list(up.parameters()), lr=float(lr), weight_decay=0.0)
+    for _ in range(train_steps):
+        opt.zero_grad(set_to_none=True)
+        residual = up(torch.nn.functional.gelu(down(x)))
+        pred = x + float(gamma) * residual
+        loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
+        loss.backward()
+        opt.step()
+
+    with torch.no_grad():
+        residual = up(torch.nn.functional.gelu(down(x)))
+        pred = x + float(gamma) * residual
+        final_loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
+'''
+        new_loop = '''    opt = torch.optim.AdamW(list(down.parameters()) + list(up.parameters()), lr=float(lr), weight_decay=0.0)
+    with torch.enable_grad():
+        for _ in range(train_steps):
+            opt.zero_grad(set_to_none=True)
+            residual = up(torch.nn.functional.gelu(down(x)))
+            pred = x + float(gamma) * residual
+            loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
+            loss.backward()
+            opt.step()
+
+        residual = up(torch.nn.functional.gelu(down(x)))
+        pred = x + float(gamma) * residual
+        final_loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
+'''
+        text = replace_once(text, old_loop, new_loop, "low-rank helper enable_grad update")
 
     if "compensation_type=\"affine\"" not in text:
         text = replace_once(
