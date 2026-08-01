@@ -83,8 +83,9 @@ class BoundaryLowRankResidualWrapper(nn.Module):
         super().__init__()
         self.block = block
         self.gamma = float(gamma)
-        self.down = nn.Linear(down_weight.shape[1], down_weight.shape[0], bias=False)
-        self.up = nn.Linear(up_weight.shape[1], up_weight.shape[0], bias=up_bias is not None)
+        device = down_weight.device
+        self.down = nn.Linear(down_weight.shape[1], down_weight.shape[0], bias=False, device=device)
+        self.up = nn.Linear(up_weight.shape[1], up_weight.shape[0], bias=up_bias is not None, device=device)
         self.down.weight.data.copy_(down_weight.detach().float())
         self.up.weight.data.copy_(up_weight.detach().float())
         if up_bias is not None:
