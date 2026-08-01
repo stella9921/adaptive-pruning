@@ -32,6 +32,7 @@ def patch_main(repo: Path) -> None:
     text = ensure_default_key(text, anchor, '    "boundary_compensation_train_steps": 200,\n', "default low-rank steps")
     text = ensure_default_key(text, anchor, '    "boundary_compensation_lr": 1.0e-3,\n', "default low-rank lr")
     text = ensure_default_key(text, anchor, '    "boundary_compensation_gamma": 1.0,\n', "default compensation gamma")
+    text = ensure_default_key(text, anchor, '    "boundary_outlier_protect_ratio": 0.2,\n', "default outlier protect ratio")
 
     arg_anchor = '    parser.add_argument("--boundary-compensation-channel-ratio", dest="boundary_compensation_channel_ratio", type=float, default=None)\n'
     arg_block = (
@@ -41,8 +42,17 @@ def patch_main(repo: Path) -> None:
         '    parser.add_argument("--boundary-compensation-train-steps", dest="boundary_compensation_train_steps", type=int, default=None)\n'
         '    parser.add_argument("--boundary-compensation-lr", dest="boundary_compensation_lr", type=float, default=None)\n'
         '    parser.add_argument("--boundary-compensation-gamma", dest="boundary_compensation_gamma", type=float, default=None)\n'
+        '    parser.add_argument("--boundary-outlier-protect-ratio", dest="boundary_outlier_protect_ratio", type=float, default=None)\n'
     )
     text = insert_once(text, arg_anchor, arg_block, "low-rank compensation args")
+
+    if "--boundary-outlier-protect-ratio" not in text:
+        text = insert_once(
+            text,
+            '    parser.add_argument("--boundary-compensation-gamma", dest="boundary_compensation_gamma", type=float, default=None)\n',
+            '    parser.add_argument("--boundary-outlier-protect-ratio", dest="boundary_outlier_protect_ratio", type=float, default=None)\n',
+            "outlier protect ratio arg",
+        )
 
     override_marker = '    config = resolve_config(args, DEFAULT_CONFIG)\n'
     override_block = (
@@ -52,6 +62,7 @@ def patch_main(repo: Path) -> None:
         '        "boundary_compensation_train_steps",\n'
         '        "boundary_compensation_lr",\n'
         '        "boundary_compensation_gamma",\n'
+        '        "boundary_outlier_protect_ratio",\n'
         '    ]:\n'
         '        _value = getattr(args, _key, None)\n'
         '        if _value is not None:\n'
@@ -66,12 +77,20 @@ def patch_main(repo: Path) -> None:
         '                    train_steps=int(config.get("boundary_compensation_train_steps", 200)),\n'
         '                    lr=float(config.get("boundary_compensation_lr", 1.0e-3)),\n'
         '                    gamma=float(config.get("boundary_compensation_gamma", 1.0)),\n'
+        '                    outlier_protect_ratio=float(config.get("boundary_outlier_protect_ratio", 0.2)),\n'
     )
     if "compensation_type=config.get(" not in text:
         text = insert_once(text, call_anchor, call_block, "low-rank estimate kwargs")
     else:
         if "gamma=float(config.get(\"boundary_compensation_gamma\"" not in text:
             text = insert_once(text, call_anchor, '                    gamma=float(config.get("boundary_compensation_gamma", 1.0)),\n', "gamma estimate kwarg")
+        if "outlier_protect_ratio=float(config.get(" not in text:
+            text = insert_once(
+                text,
+                '                    gamma=float(config.get("boundary_compensation_gamma", 1.0)),\n',
+                '                    outlier_protect_ratio=float(config.get("boundary_outlier_protect_ratio", 0.2)),\n',
+                "outlier protect ratio estimate kwarg",
+            )
 
     if '"repairable"' not in text:
         choice_updates = [
@@ -243,8 +262,16 @@ def patch_compensation(repo: Path) -> None:
             '    rank=64,\n'
             '    train_steps=200,\n'
             '    lr=1.0e-3,\n'
+            '    outlier_protect_ratio=0.2,\n'
             '):\n',
             "estimate low-rank signature",
+        )
+    elif "outlier_protect_ratio=0.2" not in text:
+        text = insert_once(
+            text,
+            '    lr=1.0e-3,\n',
+            '    outlier_protect_ratio=0.2,\n',
+            "estimate outlier protect ratio signature",
         )
 
     if "source_samples = []" not in text:
@@ -316,7 +343,8 @@ def patch_compensation(repo: Path) -> None:
             selection_name = "balanced_mismatch"
         elif selection_strategy == "protect_outlier_mismatch":
             selected_score = mismatch_score
-            protected_count = min(selected_count, max(1, int(round(mismatch.numel() * float(channel_ratio)))))
+            protect_ratio = min(max(float(outlier_protect_ratio), 0.0), 1.0)
+            protected_count = min(mismatch.numel() - 1, max(1, int(round(mismatch.numel() * protect_ratio))))
             protected_indices = torch.topk(outlier_score, k=protected_count, largest=True).indices
             candidate_mask = torch.ones_like(mismatch, dtype=torch.bool)
             candidate_mask[protected_indices] = False
@@ -330,6 +358,23 @@ def patch_compensation(repo: Path) -> None:
             selection_name = "protect_outlier_mismatch"
 '''
         text = replace_once(text, marker, insertion + marker, "repairable selection strategies")
+
+    old_protect_line = "            protected_count = min(selected_count, max(1, int(round(mismatch.numel() * float(channel_ratio)))))\n"
+    if old_protect_line in text:
+        text = text.replace(
+            old_protect_line,
+            "            protect_ratio = min(max(float(outlier_protect_ratio), 0.0), 1.0)\n"
+            "            protected_count = min(mismatch.numel() - 1, max(1, int(round(mismatch.numel() * protect_ratio))))\n",
+            1,
+        )
+
+    if '"outlier_protect_ratio": float(outlier_protect_ratio),' not in text:
+        text = replace_once(
+            text,
+            '        "outlier_weight": float(outlier_weight),\n',
+            '        "outlier_weight": float(outlier_weight),\n        "outlier_protect_ratio": float(outlier_protect_ratio),\n',
+            "estimate outlier protect ratio metadata",
+        )
 
     if "blocks[target_new_index] = BoundaryLowRankResidualWrapper" not in text:
         old = '    blocks[target_new_index] = BoundaryAffineWrapper(blocks[target_new_index], alpha, beta, gamma=float(compensation.get("gamma", 1.0)))\n'
