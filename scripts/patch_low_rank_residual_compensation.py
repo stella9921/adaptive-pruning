@@ -172,6 +172,15 @@ def patch_compensation(repo: Path) -> None:
     if "class BoundaryLowRankResidualWrapper" not in text:
         marker = "\n\ndef _hidden_from_block_output"
         text = replace_once(text, marker, LOW_RANK_CLASS + marker, "low-rank wrapper insertion")
+    elif "device = down_weight.device" not in text:
+        old_device_block = '''        self.down = nn.Linear(down_weight.shape[1], down_weight.shape[0], bias=False)
+        self.up = nn.Linear(up_weight.shape[1], up_weight.shape[0], bias=up_bias is not None)
+'''
+        new_device_block = '''        device = down_weight.device
+        self.down = nn.Linear(down_weight.shape[1], down_weight.shape[0], bias=False, device=device)
+        self.up = nn.Linear(up_weight.shape[1], up_weight.shape[0], bias=up_bias is not None, device=device)
+'''
+        text = replace_once(text, old_device_block, new_device_block, "low-rank wrapper device update")
 
     if "def _fit_low_rank_residual" not in text:
         marker = "\n\ndef apply_boundary_affine_compensation"
@@ -273,7 +282,7 @@ def patch_compensation(repo: Path) -> None:
             "estimate gamma field",
         )
 
-    if "BoundaryLowRankResidualWrapper(blocks[target_new_index]" not in text:
+    if "blocks[target_new_index] = BoundaryLowRankResidualWrapper" not in text:
         old = '    blocks[target_new_index] = BoundaryAffineWrapper(blocks[target_new_index], alpha, beta, gamma=float(compensation.get("gamma", 1.0)))\n'
         if old not in text:
             old = '    blocks[target_new_index] = BoundaryAffineWrapper(blocks[target_new_index], alpha, beta)\n'
@@ -299,7 +308,12 @@ def patch_compensation(repo: Path) -> None:
             '            gamma=float(compensation.get("gamma", 1.0)),\n'
             '        )\n'
         )
-        text = replace_once(text, old, new, "apply low-rank wrapper branch")
+        if old in text:
+            text = replace_once(text, old, new, "apply low-rank wrapper branch")
+        elif 'if compensation.get("compensation_type") == "low_rank_residual":' in text:
+            pass
+        else:
+            raise SystemExit("Could not find pattern for apply low-rank wrapper branch")
 
     if '"compensation_type": compensation.get("compensation_type", "affine"),' not in text:
         text = replace_once(
