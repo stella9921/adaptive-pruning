@@ -77,11 +77,11 @@ def patch_main(repo: Path) -> None:
         choice_updates = [
             (
                 'choices=["mismatch_outlier", "mismatch", "outlier", "random", "all"]',
-                'choices=["mismatch_outlier", "mismatch", "outlier", "repairable", "balanced", "random", "all"]',
+                'choices=["mismatch_outlier", "mismatch", "outlier", "repairable", "balanced", "protect_outlier_mismatch", "random", "all"]',
             ),
             (
                 'choices=["mismatch_outlier", "mismatch", "mismatch_low", "outlier", "outlier_low", "random", "all"]',
-                'choices=["mismatch_outlier", "mismatch", "mismatch_low", "outlier", "outlier_low", "repairable", "balanced", "random", "all"]',
+                'choices=["mismatch_outlier", "mismatch", "mismatch_low", "outlier", "outlier_low", "repairable", "balanced", "protect_outlier_mismatch", "random", "all"]',
             ),
         ]
         for old, new in choice_updates:
@@ -314,6 +314,20 @@ def patch_compensation(repo: Path) -> None:
             selected_score = mismatch_score - float(outlier_weight) * torch.abs(outlier_score)
             selected_indices = torch.topk(selected_score, k=selected_count, largest=True).indices
             selection_name = "balanced_mismatch"
+        elif selection_strategy == "protect_outlier_mismatch":
+            selected_score = mismatch_score
+            protected_count = min(selected_count, max(1, int(round(mismatch.numel() * float(channel_ratio)))))
+            protected_indices = torch.topk(outlier_score, k=protected_count, largest=True).indices
+            candidate_mask = torch.ones_like(mismatch, dtype=torch.bool)
+            candidate_mask[protected_indices] = False
+            candidate_indices = torch.nonzero(candidate_mask, as_tuple=False).flatten()
+            if candidate_indices.numel() <= selected_count:
+                selected_indices = candidate_indices
+            else:
+                candidate_scores = selected_score[candidate_indices]
+                local_indices = torch.topk(candidate_scores, k=selected_count, largest=True).indices
+                selected_indices = candidate_indices[local_indices]
+            selection_name = "protect_outlier_mismatch"
 '''
         text = replace_once(text, marker, insertion + marker, "repairable selection strategies")
 
