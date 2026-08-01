@@ -122,6 +122,42 @@ def patch_main(repo: Path) -> None:
         else:
             raise SystemExit("Could not find boundary compensation selection choices")
 
+    # Physical pruning used to export only a custom state_dict file, which cannot
+    # be consumed by lm_eval/AutoModel. Keep that diagnostic artifact, but also
+    # emit normal Hugging Face weights and config from the current pruned model.
+    physical_export = '''                if config.get("pruning_mode") in {"unit_physical", "depth_width_physical"}:
+                    import torch
+                    torch.save(
+                        model.state_dict(),
+                        os.path.join(export_dir, "unit_physical_state_dict.pt"),
+                    )
+                else:
+                    model.save_pretrained(export_dir)
+'''
+    hf_physical_export = '''                if config.get("pruning_mode") in {"unit_physical", "depth_width_physical"}:
+                    import torch
+                    torch.save(
+                        model.state_dict(),
+                        os.path.join(export_dir, "unit_physical_state_dict.pt"),
+                    )
+                    model.save_pretrained(export_dir)
+                else:
+                    model.save_pretrained(export_dir)
+'''
+    if physical_export in text:
+        text = text.replace(physical_export, hf_physical_export, 1)
+    elif (
+        'os.path.join(export_dir, "unit_physical_state_dict.pt"),\n'
+        in text
+        and "                    model.save_pretrained(export_dir)\n                else:\n                    model.save_pretrained(export_dir)\n" not in text
+    ):
+        text = insert_once(
+            text,
+            '                        os.path.join(export_dir, "unit_physical_state_dict.pt"),\n                    )\n',
+            '                    model.save_pretrained(export_dir)\n',
+            "HF export after physical state dict",
+        )
+
     path.write_text(text)
 
 
