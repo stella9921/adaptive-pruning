@@ -118,15 +118,15 @@ def _fit_low_rank_residual(source_hidden, target_hidden, channel_mask, rank=64, 
         mask = torch.ones(hidden_size, device=device, dtype=torch.bool)
 
     opt = torch.optim.AdamW(list(down.parameters()) + list(up.parameters()), lr=float(lr), weight_decay=0.0)
-    for _ in range(train_steps):
-        opt.zero_grad(set_to_none=True)
-        residual = up(torch.nn.functional.gelu(down(x)))
-        pred = x + float(gamma) * residual
-        loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
-        loss.backward()
-        opt.step()
+    with torch.enable_grad():
+        for _ in range(train_steps):
+            opt.zero_grad(set_to_none=True)
+            residual = up(torch.nn.functional.gelu(down(x)))
+            pred = x + float(gamma) * residual
+            loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
+            loss.backward()
+            opt.step()
 
-    with torch.no_grad():
         residual = up(torch.nn.functional.gelu(down(x)))
         pred = x + float(gamma) * residual
         final_loss = (pred[:, mask] - y[:, mask]).pow(2).mean()
@@ -142,38 +142,23 @@ def _fit_low_rank_residual(source_hidden, target_hidden, channel_mask, rank=64, 
 
 LOW_RANK_ESTIMATE_BLOCK = r'''
     if str(compensation_type) == "low_rank_residual":
-        hidden_candidates = [
-            ("source_hidden", "target_hidden"),
-            ("source_states", "target_states"),
-            ("source_acts", "target_acts"),
-            ("pruned_hidden", "dense_hidden"),
-            ("pruned_states", "dense_states"),
-        ]
-        local_vars = locals()
-        for source_name, target_name in hidden_candidates:
-            if source_name in local_vars and target_name in local_vars:
-                adapter = _fit_low_rank_residual(
-                    local_vars[source_name],
-                    local_vars[target_name],
-                    channel_mask,
-                    rank=rank,
-                    train_steps=train_steps,
-                    lr=lr,
-                    gamma=gamma,
-                )
-                result.update(adapter)
-                result["mode"] = "boundary_low_rank_residual"
-                result["compensation_type"] = "low_rank_residual"
-                result["rank"] = int(rank)
-                result["train_steps"] = int(train_steps)
-                result["lr"] = float(lr)
-                break
-        else:
-            raise RuntimeError(
-                "Low-rank residual compensation needs source/target hidden tensors in "
-                "estimate_boundary_affine_compensation. Show lines 58-150 of amcprune/compensation.py "
-                "and add the actual tensor variable names to hidden_candidates."
-            )
+        if not source_samples or not target_samples:
+            raise RuntimeError("Low-rank residual compensation needs captured source/target calibration activations.")
+        adapter = _fit_low_rank_residual(
+            torch.cat(source_samples, dim=0),
+            torch.cat(target_samples, dim=0),
+            channel_mask,
+            rank=rank,
+            train_steps=train_steps,
+            lr=lr,
+            gamma=gamma,
+        )
+        result.update(adapter)
+        result["mode"] = "boundary_low_rank_residual"
+        result["compensation_type"] = "low_rank_residual"
+        result["rank"] = int(rank)
+        result["train_steps"] = int(train_steps)
+        result["lr"] = float(lr)
     else:
         result["compensation_type"] = "affine"
 '''
@@ -204,10 +189,50 @@ def patch_compensation(repo: Path) -> None:
             "estimate low-rank signature",
         )
 
-    # Normalize the estimate return dict through a local result variable so we can append adapter metadata.
-    if "result = {" not in text:
-        text = replace_once(text, "    return {\n", "    result = {\n", "estimate result dict")
-        text = replace_once(text, "    }\n\n\ndef _fit_low_rank_residual", "    }\n" + LOW_RANK_ESTIMATE_BLOCK + "\n    return result\n\n\ndef _fit_low_rank_residual", "estimate low-rank result return")
+    if "source_samples = []" not in text:
+        text = replace_once(
+            text,
+            "    captured = {}\n",
+            "    captured = {}\n    source_samples = []\n    target_samples = []\n",
+            "low-rank calibration sample buffers",
+        )
+
+    if "source_samples.append(source.detach())" not in text:
+        text = replace_once(
+            text,
+            "            if source.shape != target.shape:\n                continue\n",
+            "            if source.shape != target.shape:\n                continue\n"
+            "            if str(compensation_type) == \"low_rank_residual\":\n"
+            "                source_samples.append(source.detach())\n"
+            "                target_samples.append(target.detach())\n",
+            "low-rank calibration sample capture",
+        )
+
+    # Normalize the successful estimate return through a local result variable before returning.
+    success_return = '    return {\n        "enabled": True,\n'
+    if success_return in text:
+        text = text.replace(success_return, '    result = {\n        "enabled": True,\n', 1)
+
+    if LOW_RANK_ESTIMATE_BLOCK.strip() not in text:
+        marker = '        "beta_std": float(beta.std(unbiased=False).item()),\n    }\n'
+        text = replace_once(
+            text,
+            marker,
+            marker + LOW_RANK_ESTIMATE_BLOCK + "\n    return result\n",
+            "reachable low-rank estimate branch",
+        )
+
+    # Older broken patches placed the low-rank branch after a return. Remove that unreachable duplicate.
+    broken = (
+        '\n    if str(compensation_type) == "low_rank_residual":\n'
+        '        hidden_candidates = [\n'
+    )
+    if broken in text:
+        start = text.find(broken)
+        end = text.find("\n\ndef _fit_low_rank_residual", start)
+        if end == -1:
+            raise SystemExit("Could not remove unreachable low-rank branch")
+        text = text[:start] + text[end:]
 
     if '"gamma": float(gamma),' not in text:
         text = replace_once(
