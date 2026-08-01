@@ -35,24 +35,36 @@ def patch_main(repo: Path) -> None:
     text = ensure_default_key(text, anchor, '    "boundary_outlier_protect_ratio": 0.2,\n', "default outlier protect ratio")
 
     arg_anchor = '    parser.add_argument("--boundary-compensation-channel-ratio", dest="boundary_compensation_channel_ratio", type=float, default=None)\n'
-    arg_block = (
-        '    parser.add_argument("--boundary-compensation-type", dest="boundary_compensation_type", '
-        'choices=["affine", "low_rank_residual"], default=None)\n'
-        '    parser.add_argument("--boundary-compensation-rank", dest="boundary_compensation_rank", type=int, default=None)\n'
-        '    parser.add_argument("--boundary-compensation-train-steps", dest="boundary_compensation_train_steps", type=int, default=None)\n'
-        '    parser.add_argument("--boundary-compensation-lr", dest="boundary_compensation_lr", type=float, default=None)\n'
-        '    parser.add_argument("--boundary-compensation-gamma", dest="boundary_compensation_gamma", type=float, default=None)\n'
-        '    parser.add_argument("--boundary-outlier-protect-ratio", dest="boundary_outlier_protect_ratio", type=float, default=None)\n'
-    )
-    text = insert_once(text, arg_anchor, arg_block, "low-rank compensation args")
-
-    if "--boundary-outlier-protect-ratio" not in text:
-        text = insert_once(
-            text,
+    arg_lines = [
+        (
+            "--boundary-compensation-type",
+            '    parser.add_argument("--boundary-compensation-type", dest="boundary_compensation_type", '
+            'choices=["affine", "low_rank_residual"], default=None)\n',
+        ),
+        (
+            "--boundary-compensation-rank",
+            '    parser.add_argument("--boundary-compensation-rank", dest="boundary_compensation_rank", type=int, default=None)\n',
+        ),
+        (
+            "--boundary-compensation-train-steps",
+            '    parser.add_argument("--boundary-compensation-train-steps", dest="boundary_compensation_train_steps", type=int, default=None)\n',
+        ),
+        (
+            "--boundary-compensation-lr",
+            '    parser.add_argument("--boundary-compensation-lr", dest="boundary_compensation_lr", type=float, default=None)\n',
+        ),
+        (
+            "--boundary-compensation-gamma",
             '    parser.add_argument("--boundary-compensation-gamma", dest="boundary_compensation_gamma", type=float, default=None)\n',
+        ),
+        (
+            "--boundary-outlier-protect-ratio",
             '    parser.add_argument("--boundary-outlier-protect-ratio", dest="boundary_outlier_protect_ratio", type=float, default=None)\n',
-            "outlier protect ratio arg",
-        )
+        ),
+    ]
+    for option, line in reversed(arg_lines):
+        if option not in text:
+            text = insert_once(text, arg_anchor, line, f"{option} arg")
 
     override_marker = '    config = resolve_config(args, DEFAULT_CONFIG)\n'
     override_block = (
