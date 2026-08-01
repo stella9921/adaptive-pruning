@@ -73,6 +73,24 @@ def patch_main(repo: Path) -> None:
         if "gamma=float(config.get(\"boundary_compensation_gamma\"" not in text:
             text = insert_once(text, call_anchor, '                    gamma=float(config.get("boundary_compensation_gamma", 1.0)),\n', "gamma estimate kwarg")
 
+    if '"repairable"' not in text:
+        choice_updates = [
+            (
+                'choices=["mismatch_outlier", "mismatch", "outlier", "random", "all"]',
+                'choices=["mismatch_outlier", "mismatch", "outlier", "repairable", "balanced", "random", "all"]',
+            ),
+            (
+                'choices=["mismatch_outlier", "mismatch", "mismatch_low", "outlier", "outlier_low", "random", "all"]',
+                'choices=["mismatch_outlier", "mismatch", "mismatch_low", "outlier", "outlier_low", "repairable", "balanced", "random", "all"]',
+            ),
+        ]
+        for old, new in choice_updates:
+            if old in text:
+                text = text.replace(old, new, 1)
+                break
+        else:
+            raise SystemExit("Could not find boundary compensation selection choices")
+
     path.write_text(text)
 
 
@@ -281,6 +299,23 @@ def patch_compensation(repo: Path) -> None:
             '        "channel_ratio": ratio,\n        "gamma": float(gamma),\n',
             "estimate gamma field",
         )
+
+    if 'selection_name = "repairable_mismatch"' not in text:
+        marker = '''        elif selection_strategy == "mismatch_outlier":
+            selected_score = mismatch_outlier_score
+            selected_indices = torch.topk(selected_score, k=selected_count, largest=True).indices
+            selection_name = "mismatch_outlier"
+'''
+        insertion = '''        elif selection_strategy == "repairable":
+            selected_score = mismatch_score - float(outlier_weight) * outlier_score
+            selected_indices = torch.topk(selected_score, k=selected_count, largest=True).indices
+            selection_name = "repairable_mismatch"
+        elif selection_strategy == "balanced":
+            selected_score = mismatch_score - float(outlier_weight) * torch.abs(outlier_score)
+            selected_indices = torch.topk(selected_score, k=selected_count, largest=True).indices
+            selection_name = "balanced_mismatch"
+'''
+        text = replace_once(text, marker, insertion + marker, "repairable selection strategies")
 
     if "blocks[target_new_index] = BoundaryLowRankResidualWrapper" not in text:
         old = '    blocks[target_new_index] = BoundaryAffineWrapper(blocks[target_new_index], alpha, beta, gamma=float(compensation.get("gamma", 1.0)))\n'
