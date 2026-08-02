@@ -123,6 +123,18 @@ def _move_tree(value, device):
     return value
 
 
+def _fresh_tree(value, device):
+    if torch.is_tensor(value):
+        return value.detach().clone().to(device)
+    if isinstance(value, tuple):
+        return tuple(_fresh_tree(item, device) for item in value)
+    if isinstance(value, list):
+        return [_fresh_tree(item, device) for item in value]
+    if isinstance(value, dict):
+        return {key: _fresh_tree(item, device) for key, item in value.items()}
+    return value
+
+
 def _replace_hidden_arg(inputs, kwargs, hidden_states):
     inputs = tuple(inputs or ())
     kwargs = dict(kwargs or {})
@@ -193,8 +205,8 @@ def _fit_mlp_residual_teacher_student(
             source = sample["source"].detach().float()
             teacher_in = sample["target_in"].detach().float()
             teacher_out = sample["target_out"].detach().float()
-            block_inputs = _move_tree(sample.get("target_inputs", ()), device)
-            block_kwargs = _move_tree(sample.get("target_kwargs", {}), device)
+            block_inputs = _fresh_tree(sample.get("target_inputs", ()), device)
+            block_kwargs = _fresh_tree(sample.get("target_kwargs", {}), device)
 
             opt.zero_grad(set_to_none=True)
             residual = fc2(torch.nn.functional.gelu(fc1(source)))
@@ -210,7 +222,7 @@ def _fit_mlp_residual_teacher_student(
 
             loss_kd = torch.zeros((), device=device, dtype=torch.float32)
             loss = rep_weight * loss_rep + function_weight * loss_function + kd_weight * loss_kd
-            loss.backward()
+            loss.backward(retain_graph=bool(function_weight != 0.0))
             opt.step()
 
             final_rep = loss_rep.detach()
