@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 
 
@@ -369,7 +370,16 @@ def patch_compensation(repo: Path) -> None:
         result["compensation_type"] = "affine"
 '''
     if "boundary_mlp_residual_teacher_student" not in text:
-        text = replace_once(text, branch_marker, branch_new, "teacher-student MLP branch")
+        existing_mlp_branch = re.compile(
+            r'    elif str\(compensation_type\) == "mlp_residual":\n'
+            r'(?:        .*\n)+?'
+            r'    else:\n'
+            r'        result\["compensation_type"\] = "affine"\n',
+        )
+        if existing_mlp_branch.search(text):
+            text = existing_mlp_branch.sub(branch_new, text, count=1)
+        else:
+            text = replace_once(text, branch_marker, branch_new, "teacher-student MLP branch")
 
     apply_old = '''    if compensation.get("compensation_type") == "low_rank_residual":
         down_weight = compensation["down_weight"].to(device=target_device)
