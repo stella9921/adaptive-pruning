@@ -76,7 +76,7 @@ def patch_main(repo: Path) -> None:
 MLP_CLASS = r'''
 
 class BoundaryMLPResidualWrapper(nn.Module):
-    def __init__(self, block, fc1_weight, fc1_bias, fc2_weight, fc2_bias, gamma=1.0):
+    def __init__(self, block, fc1_weight, fc1_bias, fc2_weight, fc2_bias, channel_mask=None, gamma=1.0):
         super().__init__()
         self.block = block
         self.gamma = float(gamma)
@@ -89,9 +89,16 @@ class BoundaryMLPResidualWrapper(nn.Module):
         self.fc2.weight.data.copy_(fc2_weight.detach().float())
         if fc2_bias is not None:
             self.fc2.bias.data.copy_(fc2_bias.detach().float())
+        if channel_mask is not None:
+            self.register_buffer("channel_mask", channel_mask.detach().bool().view(1, 1, -1))
+        else:
+            self.channel_mask = None
 
     def forward(self, hidden_states, *args, **kwargs):
-        residual = self.fc2(torch.nn.functional.gelu(self.fc1(hidden_states.float()))).to(dtype=hidden_states.dtype)
+        residual = self.fc2(torch.nn.functional.gelu(self.fc1(hidden_states.float())))
+        if self.channel_mask is not None:
+            residual = residual * self.channel_mask.to(device=residual.device, dtype=residual.dtype)
+        residual = residual.to(dtype=hidden_states.dtype)
         hidden_states = hidden_states + self.gamma * residual
         return self.block(hidden_states, *args, **kwargs)
 '''
@@ -210,6 +217,7 @@ def _fit_mlp_residual_teacher_student(
 
             opt.zero_grad(set_to_none=True)
             residual = fc2(torch.nn.functional.gelu(fc1(source)))
+            residual = residual * mask.to(device=residual.device, dtype=residual.dtype).view(1, 1, -1)
             student_in = source + float(gamma) * residual
             loss_rep = (student_in[..., mask] - teacher_in[..., mask]).pow(2).mean()
 
@@ -245,6 +253,7 @@ def _fit_mlp_residual_teacher_student(
         "fc1_bias": fc1.bias.detach().cpu(),
         "fc2_weight": fc2.weight.detach().cpu(),
         "fc2_bias": fc2.bias.detach().cpu(),
+        "channel_mask": mask.detach().cpu(),
         "adapter_loss": float(final_total.item()),
         "adapter_rep_loss": float(final_rep.item()),
         "adapter_function_loss": float(final_function.item()),
@@ -259,6 +268,38 @@ def patch_compensation(repo: Path) -> None:
 
     if "class BoundaryMLPResidualWrapper" not in text:
         text = replace_once(text, "\n\ndef _hidden_from_block_output", MLP_CLASS + "\n\ndef _hidden_from_block_output", "MLP wrapper insertion")
+    else:
+        text = text.replace(
+            "def __init__(self, block, fc1_weight, fc1_bias, fc2_weight, fc2_bias, gamma=1.0):",
+            "def __init__(self, block, fc1_weight, fc1_bias, fc2_weight, fc2_bias, channel_mask=None, gamma=1.0):",
+        )
+        if 'self.register_buffer("channel_mask"' not in text:
+            text = text.replace(
+                '''        if fc2_bias is not None:
+            self.fc2.bias.data.copy_(fc2_bias.detach().float())
+
+    def forward(self, hidden_states, *args, **kwargs):
+        residual = self.fc2(torch.nn.functional.gelu(self.fc1(hidden_states.float()))).to(dtype=hidden_states.dtype)
+        hidden_states = hidden_states + self.gamma * residual
+        return self.block(hidden_states, *args, **kwargs)
+''',
+                '''        if fc2_bias is not None:
+            self.fc2.bias.data.copy_(fc2_bias.detach().float())
+        if channel_mask is not None:
+            self.register_buffer("channel_mask", channel_mask.detach().bool().view(1, 1, -1))
+        else:
+            self.channel_mask = None
+
+    def forward(self, hidden_states, *args, **kwargs):
+        residual = self.fc2(torch.nn.functional.gelu(self.fc1(hidden_states.float())))
+        if self.channel_mask is not None:
+            residual = residual * self.channel_mask.to(device=residual.device, dtype=residual.dtype)
+        residual = residual.to(dtype=hidden_states.dtype)
+        hidden_states = hidden_states + self.gamma * residual
+        return self.block(hidden_states, *args, **kwargs)
+''',
+                1,
+            )
 
     if "def _fit_mlp_residual_teacher_student" not in text:
         marker = "\n\ndef apply_boundary_affine_compensation"
@@ -342,6 +383,34 @@ def patch_compensation(repo: Path) -> None:
         'if str(compensation_type) == "low_rank_residual":\n                target_samples.append(target.detach())',
         'if str(compensation_type) in {"low_rank_residual", "mlp_residual"}:\n                target_samples.append(target.detach())',
     )
+
+    if "residual = residual * mask.to(device=residual.device" not in text:
+        text = text.replace(
+            '''            opt.zero_grad(set_to_none=True)
+            residual = fc2(torch.nn.functional.gelu(fc1(source)))
+            student_in = source + float(gamma) * residual
+''',
+            '''            opt.zero_grad(set_to_none=True)
+            residual = fc2(torch.nn.functional.gelu(fc1(source)))
+            residual = residual * mask.to(device=residual.device, dtype=residual.dtype).view(1, 1, -1)
+            student_in = source + float(gamma) * residual
+''',
+            1,
+        )
+
+    if '"channel_mask": mask.detach().cpu(),' not in text:
+        text = text.replace(
+            '''        "fc1_bias": fc1.bias.detach().cpu(),
+        "fc2_weight": fc2.weight.detach().cpu(),
+        "fc2_bias": fc2.bias.detach().cpu(),
+''',
+            '''        "fc1_bias": fc1.bias.detach().cpu(),
+        "fc2_weight": fc2.weight.detach().cpu(),
+        "fc2_bias": fc2.bias.detach().cpu(),
+        "channel_mask": mask.detach().cpu(),
+''',
+            1,
+        )
 
     sample_anchor = '''            if source.shape != target.shape:
                 continue
@@ -445,12 +514,26 @@ def patch_compensation(repo: Path) -> None:
             fc1_bias,
             fc2_weight,
             fc2_bias,
+            channel_mask=compensation["channel_mask"].to(device=target_device),
             gamma=float(compensation.get("gamma", 1.0)),
         )
     else:
 '''
-    if "BoundaryMLPResidualWrapper(" not in text:
+    if 'elif compensation.get("compensation_type") == "mlp_residual":' not in text:
         text = replace_once(text, apply_old, apply_new, "apply teacher-student MLP wrapper")
+    elif 'channel_mask=compensation["channel_mask"].to(device=target_device),' not in text:
+        text = text.replace(
+            '''            fc2_weight,
+            fc2_bias,
+            gamma=float(compensation.get("gamma", 1.0)),
+''',
+            '''            fc2_weight,
+            fc2_bias,
+            channel_mask=compensation["channel_mask"].to(device=target_device),
+            gamma=float(compensation.get("gamma", 1.0)),
+''',
+            1,
+        )
 
     if '"adapter_rep_loss":' not in text and '"adapter_loss": float(compensation.get("adapter_loss", 0.0)),' in text:
         text = text.replace(
