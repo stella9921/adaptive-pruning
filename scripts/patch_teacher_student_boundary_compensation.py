@@ -178,6 +178,7 @@ def _fit_mlp_residual_teacher_student(
 
     target_block_was_training = target_block.training
     target_block.eval()
+    block_dtype = next(target_block.parameters()).dtype
     for param in target_block.parameters():
         param.requires_grad_(False)
 
@@ -201,7 +202,7 @@ def _fit_mlp_residual_teacher_student(
             loss_rep = (student_in[..., mask] - teacher_in[..., mask]).pow(2).mean()
 
             if function_weight != 0.0:
-                call_inputs, call_kwargs = _replace_hidden_arg(block_inputs, block_kwargs, student_in.to(dtype=teacher_in.dtype))
+                call_inputs, call_kwargs = _replace_hidden_arg(block_inputs, block_kwargs, student_in.to(dtype=block_dtype))
                 student_out = _hidden_from_block_output(target_block(*call_inputs, **call_kwargs)).float()
                 loss_function = (student_out - teacher_out).pow(2).mean()
             else:
