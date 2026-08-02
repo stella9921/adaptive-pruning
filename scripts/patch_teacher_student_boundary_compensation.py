@@ -214,9 +214,17 @@ def _fit_mlp_residual_teacher_student(
             loss_rep = (student_in[..., mask] - teacher_in[..., mask]).pow(2).mean()
 
             if function_weight != 0.0:
-                call_inputs, call_kwargs = _replace_hidden_arg(block_inputs, block_kwargs, student_in.to(dtype=block_dtype))
+                student_block_in = student_in.detach().to(dtype=block_dtype).requires_grad_(True)
+                call_inputs, call_kwargs = _replace_hidden_arg(block_inputs, block_kwargs, student_block_in)
                 student_out = _hidden_from_block_output(target_block(*call_inputs, **call_kwargs)).float()
-                loss_function = (student_out - teacher_out).pow(2).mean()
+                loss_function_raw = (student_out - teacher_out).pow(2).mean()
+                grad_student = torch.autograd.grad(
+                    loss_function_raw,
+                    student_block_in,
+                    retain_graph=False,
+                    create_graph=False,
+                )[0].detach().float()
+                loss_function = loss_function_raw.detach() + ((student_in - student_in.detach()) * grad_student).sum()
             else:
                 loss_function = torch.zeros((), device=device, dtype=torch.float32)
 
