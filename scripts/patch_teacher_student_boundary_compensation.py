@@ -222,7 +222,7 @@ def _fit_mlp_residual_teacher_student(
 
             loss_kd = torch.zeros((), device=device, dtype=torch.float32)
             loss = rep_weight * loss_rep + function_weight * loss_function + kd_weight * loss_kd
-            loss.backward(retain_graph=bool(function_weight != 0.0))
+            loss.backward()
             opt.step()
 
             final_rep = loss_rep.detach()
