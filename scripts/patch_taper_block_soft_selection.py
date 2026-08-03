@@ -7,8 +7,9 @@ It fixes three experiment blockers/features:
 1. Infer a boundary automatically for pure block pruning, so boundary
    compensation works when ``--pruning-mode block`` removes a contiguous layer
    interval.
-2. Add soft mismatch/outlier-aware channel weighting strategies. These keep all
-   channels in the representation loss, but weight high-risk channels more.
+2. Add mismatch/outlier-protected hard channel selection. This selects channels
+   with large boundary mismatch while down-weighting high activation-outlier
+   channels, matching the TAPER-Selective definition used in the paper.
 3. Keep the patch idempotent enough to re-run on each machine after ``git pull``.
 """
 
@@ -36,7 +37,7 @@ def patch_main(repo: Path) -> None:
     path = repo / "main.py"
     text = path.read_text()
 
-    # Expose soft channel strategies in argparse if choices are present.
+    # Expose TAPER channel strategies in argparse if choices are present.
     choice_patterns = [
         (
             '"mismatch_outlier", "mismatch", "mismatch_low", "outlier", "outlier_low", '
@@ -47,13 +48,19 @@ def patch_main(repo: Path) -> None:
         ),
     ]
     for old_choices in choice_patterns:
-        if old_choices in text and "mismatch_outlier_soft" not in text:
+        if old_choices in text and "mismatch_outlier_protect" not in text:
             new_choices = old_choices.replace(
                 '"random", "all"',
-                '"mismatch_outlier_soft", "mismatch_soft", "outlier_soft", "random", "all"',
+                '"mismatch_outlier_protect", "mismatch_outlier_soft", "mismatch_soft", "outlier_soft", "random", "all"',
             )
             text = text.replace(old_choices, new_choices, 1)
             break
+    if "mismatch_outlier_soft" in text and "mismatch_outlier_protect" not in text:
+        text = text.replace(
+            '"mismatch_outlier_soft"',
+            '"mismatch_outlier_protect", "mismatch_outlier_soft"',
+            1,
+        )
 
     # In pure block-pruning mode, the removed contiguous interval is stored in
     # selected_blocks, while depth_pruned_blocks is only populated by
@@ -230,7 +237,7 @@ def patch_low_rank_weighted_loss(repo: Path) -> None:
     path.write_text(text)
 
 
-def patch_soft_selection(repo: Path) -> None:
+def patch_channel_selection(repo: Path) -> None:
     path = repo / "amcprune" / "compensation.py"
     text = path.read_text()
 
@@ -245,6 +252,19 @@ def patch_soft_selection(repo: Path) -> None:
             "    channel_weight = torch.ones_like(mismatch, dtype=torch.float32)\n",
             "default channel weight",
         )
+
+    protect_branch = '''        elif selection_strategy == "mismatch_outlier_protect":
+            selected_score = mismatch_score - float(outlier_weight) * outlier_score
+            selected_indices = torch.topk(selected_score, k=selected_count, largest=True).indices
+            selection_name = "mismatch_outlier_protect"
+'''
+    mismatch_branch = '''        elif selection_strategy == "mismatch_outlier":
+            selected_score = mismatch_outlier_score
+            selected_indices = torch.topk(selected_score, k=selected_count, largest=True).indices
+            selection_name = "mismatch_outlier"
+'''
+    if protect_branch.strip() not in text and mismatch_branch in text:
+        text = text.replace(mismatch_branch, protect_branch + mismatch_branch, 1)
 
     soft_branch = '''    if selection_strategy in {"mismatch_outlier_soft", "mismatch_soft", "outlier_soft"}:
         if selection_strategy == "mismatch_soft":
@@ -309,9 +329,9 @@ def main() -> None:
     patch_main(repo)
     patch_boundary_in_compensation(repo)
     patch_low_rank_weighted_loss(repo)
-    patch_soft_selection(repo)
+    patch_channel_selection(repo)
 
-    print("Patched TAPER block boundary inference and soft channel weighting.")
+    print("Patched TAPER block boundary inference and protected hard channel selection.")
     print("Run: python -m py_compile main.py amcprune/compensation.py")
 
 
