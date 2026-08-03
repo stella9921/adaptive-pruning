@@ -55,6 +55,29 @@ def patch_main(repo: Path) -> None:
             text = text.replace(old_choices, new_choices, 1)
             break
 
+    # In pure block-pruning mode, the removed contiguous interval is stored in
+    # selected_blocks, while depth_pruned_blocks is only populated by
+    # depth-width modes. Boundary compensation needs the removed interval.
+    if "boundary_depth_pruned_blocks = depth_pruned_blocks" not in text:
+        marker = "        if config.get(\"boundary_compensation\"):\n"
+        insertion = (
+            "            boundary_depth_pruned_blocks = depth_pruned_blocks\n"
+            "            if config.get(\"pruning_mode\") == \"block\" and not boundary_depth_pruned_blocks:\n"
+            "                boundary_depth_pruned_blocks = selected_blocks\n"
+            "            print(f\"[Boundary] using depth_pruned_blocks={boundary_depth_pruned_blocks}\", flush=True)\n"
+        )
+        text = insert_after(
+            text,
+            marker,
+            insertion,
+            "block pruning boundary depth block fallback",
+        )
+
+    text = text.replace(
+        "                    depth_pruned_blocks=depth_pruned_blocks,\n",
+        "                    depth_pruned_blocks=boundary_depth_pruned_blocks,\n",
+    )
+
     path.write_text(text)
 
 
