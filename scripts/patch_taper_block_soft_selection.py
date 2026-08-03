@@ -219,13 +219,24 @@ def patch_soft_selection(repo: Path) -> None:
         )
 
     # Pass channel_weight into low-rank trainers when present.
-    text = text.replace(
-        "            channel_mask,\n            rank=rank,",
-        "            channel_mask,\n            rank=rank,\n            channel_weight=channel_weight,",
+    text = re.sub(
+        r"(            channel_mask,\n            rank=rank,\n)(?!            channel_weight=channel_weight,\n)",
+        r"\1            channel_weight=channel_weight,\n",
+        text,
+        count=1,
     )
-    text = text.replace(
-        "            channel_mask=channel_mask,\n            target_block=blocks[target_index],",
-        "            channel_mask=channel_mask,\n            target_block=blocks[target_index],\n            channel_weight=channel_weight,",
+    text = re.sub(
+        r"(            channel_mask=channel_mask,\n            target_block=blocks\[target_index\],\n)(?!            channel_weight=channel_weight,\n)",
+        r"\1            channel_weight=channel_weight,\n",
+        text,
+        count=1,
+    )
+
+    # Clean up accidental duplicate keyword insertions from older patch versions.
+    text = re.sub(
+        r"(            channel_weight=channel_weight,\n)(?:            channel_weight=channel_weight,\n)+",
+        r"\1",
+        text,
     )
 
     if '"channel_weight_mean":' not in text and '"selection_objective": selection_name,' in text:
