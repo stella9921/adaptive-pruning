@@ -70,7 +70,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--dtype", default="bfloat16", choices=["auto", "float16", "bfloat16", "float32"])
     parser.add_argument("--batch-size", "--batch_size", dest="batch_size", default="1")
-    parser.add_argument("--limit", default=None)
+    parser.add_argument("--limit", type=float, default=None)
     parser.add_argument("--num-fewshot", dest="num_fewshot", type=int, default=None)
     parser.add_argument("--confirm-run-unsafe-code", "--confirm_run_unsafe_code", action="store_true")
     return parser.parse_args()
