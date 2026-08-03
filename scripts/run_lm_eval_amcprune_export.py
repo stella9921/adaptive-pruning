@@ -220,7 +220,7 @@ def main() -> None:
     output.mkdir(parents=True, exist_ok=True)
     out_file = output / "results.json"
     with open(out_file, "w") as f:
-        json.dump(json_safe(results), f, indent=2)
+        json.dump(json_safe(results), f, indent=2, default=str)
     print("saved", out_file)
 
 
