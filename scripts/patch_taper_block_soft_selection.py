@@ -261,7 +261,7 @@ def patch_soft_selection(repo: Path) -> None:
         selection_name = selection_strategy
     elif ratio >= 1.0 or selection_strategy == "all":
 '''
-    if soft_branch.strip() not in text and "elif ratio >= 1.0 or selection_strategy == \"all\":" in text:
+    if soft_branch.strip() not in text and "    if ratio >= 1.0 or selection_strategy == \"all\":\n" in text:
         text = text.replace(
             "    if ratio >= 1.0 or selection_strategy == \"all\":\n",
             soft_branch,

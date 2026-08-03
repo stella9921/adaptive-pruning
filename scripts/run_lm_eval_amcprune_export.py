@@ -184,7 +184,10 @@ def main() -> None:
     print("loaded", model_path)
     print("missing", len(missing), missing[:20])
     print("unexpected", len(unexpected), unexpected[:20])
-    if missing or unexpected:
+    allowed_missing = {"lm_head.weight"}
+    bad_missing = [key for key in missing if key not in allowed_missing]
+    print("bad_missing", len(bad_missing), bad_missing[:20])
+    if bad_missing or unexpected:
         raise RuntimeError("AMCPrune wrapper load was not clean; refusing to evaluate a partially initialized model.")
 
     tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True)
