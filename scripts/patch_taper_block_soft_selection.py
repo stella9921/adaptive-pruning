@@ -78,6 +78,35 @@ def patch_main(repo: Path) -> None:
         "                    depth_pruned_blocks=boundary_depth_pruned_blocks,\n",
     )
 
+    block_remove = '''                physical_pruning = remove_transformer_blocks(
+                    model,
+                    block_path,
+                    selected_blocks,
+                )
+                del blocks
+'''
+    block_remove_with_comp = '''                physical_pruning = remove_transformer_blocks(
+                    model,
+                    block_path,
+                    selected_blocks,
+                )
+                if boundary_compensation is not None and boundary_compensation.get("enabled"):
+                    boundary_compensation_applied = apply_boundary_affine_compensation(
+                        model=model,
+                        block_path=block_path,
+                        kept_original_indices=physical_pruning["kept_original_indices"],
+                        compensation=boundary_compensation,
+                    )
+                    physical_pruning["boundary_compensation"] = boundary_compensation_applied
+                    print(f"[Boundary Compensation] applied={boundary_compensation_applied}", flush=True)
+                del blocks
+'''
+    if (
+        block_remove in text
+        and "kept_original_indices=physical_pruning[\"kept_original_indices\"]" not in text
+    ):
+        text = text.replace(block_remove, block_remove_with_comp, 1)
+
     path.write_text(text)
 
 
@@ -110,6 +139,27 @@ def patch_boundary_in_compensation(repo: Path) -> None:
             boundary_patch + "    source_index, target_index = boundary\n",
             "boundary inference before unpack",
         )
+
+    # Some earlier patch versions built the apply metadata but missed returning
+    # it. The wrapper is still installed, but downstream metadata/export checks
+    # need the return value.
+    missing_return = '''        "beta_mean": float(compensation.get("beta_mean", 0.0)),
+        "beta_std": float(compensation.get("beta_std", 0.0)),
+    }
+
+
+def apply_boundary_affine_compensation_from_metadata(
+'''
+    fixed_return = '''        "beta_mean": float(compensation.get("beta_mean", 0.0)),
+        "beta_std": float(compensation.get("beta_std", 0.0)),
+    }
+    return result
+
+
+def apply_boundary_affine_compensation_from_metadata(
+'''
+    if missing_return in text:
+        text = text.replace(missing_return, fixed_return, 1)
 
     path.write_text(text)
 
